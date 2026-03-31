@@ -1,6 +1,8 @@
 import os
-from flask import Flask, redirect, url_for, send_from_directory
-from flask_jwt_extended import JWTManager
+from flask import Flask, redirect, url_for, send_from_directory, request, jsonify
+from flask_jwt_extended import JWTManager, verify_jwt_in_request, get_jwt_identity
+from flask_jwt_extended.exceptions import NoAuthorizationError, InvalidHeaderError, WrongTokenError, RevokedTokenError, FreshTokenRequired, CSRFError
+from jwt import ExpiredSignatureError
 from flask_cors import CORS
 from config import config_by_name
 from database.models import db
@@ -18,8 +20,41 @@ def create_app(config_name='development'):
 
     # Initialize extensions
     db.init_app(app)
-    JWTManager(app)
+    jwt = JWTManager(app)
     CORS(app)
+
+    # JWT error handlers - redirect to login for web requests
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        # Check if it's an API request (expects JSON)
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({"msg": "Token has expired"}), 401
+        # Web request - redirect to login
+        return redirect(url_for('auth.login_page'))
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({"msg": "Invalid token"}), 401
+        return redirect(url_for('auth.login_page'))
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({"msg": "Authorization required"}), 401
+        return redirect(url_for('auth.login_page'))
+
+    @jwt.needs_fresh_token_loader
+    def token_not_fresh_callback(jwt_header, jwt_payload):
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({"msg": "Fresh token required"}), 401
+        return redirect(url_for('auth.login_page'))
+
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({"msg": "Token has been revoked"}), 401
+        return redirect(url_for('auth.login_page'))
 
     # Register blueprints
     from routes.auth_routes import auth_bp

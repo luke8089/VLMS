@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 25, 2026 at 08:53 PM
+-- Generation Time: Mar 31, 2026 at 10:09 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -44,63 +44,16 @@ CREATE TABLE `answers` (
 --
 
 INSERT INTO `answers` (`id`, `submission_id`, `question_id`, `answer_text`, `selected_option`, `is_correct`, `score`, `ai_feedback`, `answered_at`) VALUES
-(1, 1, 1, NULL, 1, 0, 0, NULL, '2026-03-06 13:49:11'),
-(2, 1, 2, NULL, 1, 0, 0, NULL, '2026-03-06 13:49:13'),
-(3, 1, 3, 'test', NULL, NULL, NULL, NULL, '2026-03-06 13:49:18'),
-(4, 1, 4, 'test', NULL, NULL, NULL, NULL, '2026-03-06 13:49:22'),
-(5, 1, 5, NULL, 1, 1, 2, NULL, '2026-03-06 13:49:22'),
-(6, 2, 6, 'test', NULL, NULL, NULL, NULL, '2026-03-06 18:48:45'),
-(7, 2, 7, 'test', NULL, NULL, NULL, NULL, '2026-03-06 18:48:49'),
-(8, 2, 8, 'test', NULL, NULL, NULL, NULL, '2026-03-06 18:48:54'),
-(9, 2, 9, 'test', NULL, NULL, NULL, NULL, '2026-03-06 18:48:57'),
-(10, 2, 10, 'test', NULL, NULL, NULL, NULL, '2026-03-06 18:49:00'),
-(11, 2, 11, 'test', NULL, NULL, NULL, NULL, '2026-03-06 18:49:11'),
-(12, 3, 14, NULL, 1, 0, 0, NULL, '2026-03-10 06:55:04'),
-(13, 3, 13, NULL, 1, 0, 0, NULL, '2026-03-10 06:55:06'),
-(14, 3, 12, 'test', NULL, NULL, NULL, NULL, '2026-03-10 06:55:11'),
-(15, 3, 15, NULL, 1, 0, 0, NULL, '2026-03-10 06:55:12'),
-(16, 3, 16, 'tets', NULL, NULL, NULL, NULL, '2026-03-10 06:55:23'),
-(17, 3, 17, NULL, 2, 0, 0, NULL, '2026-03-10 06:55:23'),
-(18, 3, 18, NULL, 2, 1, 2, NULL, '2026-03-10 06:55:25'),
-(19, 3, 19, NULL, 2, 0, 0, NULL, '2026-03-10 06:55:27'),
-(20, 3, 20, 'test', NULL, NULL, NULL, NULL, '2026-03-10 06:55:30'),
-(21, 3, 21, 'test', NULL, NULL, NULL, NULL, '2026-03-10 06:55:39'),
-(31, 5, 32, NULL, 1, 0, 0, NULL, '2026-03-11 17:48:40'),
-(32, 5, 33, NULL, 0, 1, 2, NULL, '2026-03-11 17:48:42'),
-(33, 5, 34, 'test ', NULL, NULL, NULL, NULL, '2026-03-11 17:48:48'),
-(34, 5, 35, NULL, 1, 0, 0, NULL, '2026-03-11 17:48:48'),
-(35, 5, 36, NULL, 1, 0, 0, NULL, '2026-03-11 17:48:50'),
-(36, 5, 37, 'test', NULL, NULL, NULL, NULL, '2026-03-11 17:48:55'),
-(37, 5, 38, 'tset', NULL, NULL, NULL, NULL, '2026-03-11 17:48:58'),
-(38, 5, 39, NULL, 1, 1, 2, NULL, '2026-03-11 17:48:58'),
-(39, 5, 40, NULL, 2, 1, 2, NULL, '2026-03-11 17:48:59'),
-(40, 5, 41, NULL, 2, 1, 2, NULL, '2026-03-11 17:49:02'),
-(51, 7, 92, NULL, 1, 0, 0, NULL, '2026-03-24 13:10:13'),
-(52, 7, 93, 'A business is an organized effort to provide value (goods or services) to people while using tools, skills, and innovation to succeed and grow', NULL, NULL, NULL, NULL, '2026-03-24 13:10:36'),
-(53, 7, 94, 'Business is an organized activity that involves the production, buying, and selling of goods and services to satisfy human needs and wants, usually with the aim of making a profit. It brings together resources such as people, capital, and technology to create value.', NULL, NULL, NULL, NULL, '2026-03-24 13:10:39'),
-(54, 7, 95, 'Personal development: Learning helps individuals improve their knowledge, skills, and behavior, making them more capable and confident.\nBetter decision-making: Through learning, people gain information and understanding that help them make informed choices in life.\nAdaptation to change: In a fast-changing world, learning enables people to adjust to new technologies, environments, and situations.\nCareer opportunities: Learning equips individuals with skills needed for jobs and professional growth. It also helps people remain competitive in the job market.\nProblem-solving skills: It improves the ability to think critically and solve problems effectively.\nSocial development: Learning helps individuals understand others, communicate better, and contribute positively to society.', NULL, NULL, NULL, NULL, '2026-03-24 13:10:48'),
-(55, 7, 96, NULL, 0, 1, 3, NULL, '2026-03-24 13:13:39'),
-(56, 7, 97, NULL, 2, 1, 3, NULL, '2026-03-24 13:13:52'),
-(57, 7, 98, NULL, 2, 1, 3, NULL, '2026-03-24 13:14:13'),
-(58, 7, 100, 'Education is the process of acquiring knowledge, skills, values, and attitudes that help individuals develop and function effectively in society. It takes place through teaching, learning, and experience, both in formal settings (like schools) and informal environments.', NULL, NULL, NULL, NULL, '2026-03-24 13:14:33'),
-(59, 7, 101, NULL, 1, 1, 3, NULL, '2026-03-24 13:14:44'),
-(60, 7, 99, NULL, 1, 1, 3, NULL, '2026-03-24 13:15:01'),
-(78, 10, 164, NULL, 1, 0, 0, NULL, '2026-03-25 08:33:21'),
-(79, 10, 165, 'test', NULL, NULL, NULL, NULL, '2026-03-25 08:33:25'),
-(80, 10, 166, NULL, 1, 0, 0, NULL, '2026-03-25 08:33:27'),
-(81, 10, 167, NULL, 1, 0, 0, NULL, '2026-03-25 08:33:29'),
-(82, 10, 168, NULL, 1, 1, 3, NULL, '2026-03-25 08:33:31'),
-(83, 10, 169, NULL, 2, 0, 0, NULL, '2026-03-25 08:33:33'),
-(84, 10, 170, NULL, 2, 0, 0, NULL, '2026-03-25 08:33:34'),
-(85, 10, 171, 'red', NULL, NULL, NULL, NULL, '2026-03-25 08:33:38'),
-(86, 10, 172, 'fv 127.0.0.1:5000 say', NULL, NULL, NULL, NULL, '2026-03-25 08:33:45'),
-(87, 10, 173, 'sr', NULL, NULL, NULL, NULL, '2026-03-25 08:33:48'),
-(88, 11, 201, NULL, 1, 0, 0, NULL, '2026-03-25 08:40:54'),
-(89, 11, 202, '2', NULL, NULL, NULL, NULL, '2026-03-25 08:41:06'),
-(90, 11, 203, 'sdsds', NULL, NULL, NULL, NULL, '2026-03-25 08:43:07'),
-(91, 11, 204, NULL, 1, 0, 0, NULL, '2026-03-25 08:43:09'),
-(92, 11, 205, NULL, 1, 0, 0, NULL, '2026-03-25 08:43:12'),
-(93, 11, 206, NULL, 1, 0, 0, NULL, '2026-03-25 08:43:15');
+(154, 25, 265, NULL, 1, 1, 3, NULL, '2026-03-30 22:27:14'),
+(155, 25, 266, NULL, 2, 1, 3, NULL, '2026-03-30 22:27:16'),
+(156, 25, 267, NULL, 1, 1, 3, NULL, '2026-03-30 22:27:19'),
+(157, 25, 268, NULL, 2, 0, 0, NULL, '2026-03-30 22:27:21'),
+(158, 25, 269, NULL, 0, 1, 3, NULL, '2026-03-30 22:27:26'),
+(159, 25, 270, 'fihm', NULL, 0, NULL, NULL, '2026-03-30 22:27:31'),
+(160, 25, 271, NULL, 1, 0, 0, NULL, '2026-03-30 22:27:33'),
+(161, 25, 272, NULL, 1, 0, 0, NULL, '2026-03-30 22:27:38'),
+(162, 25, 273, 'dtux', NULL, 0, NULL, NULL, '2026-03-30 22:27:47'),
+(163, 25, 274, NULL, 1, 0, 0, NULL, '2026-03-30 22:27:50');
 
 -- --------------------------------------------------------
 
@@ -128,7 +81,9 @@ INSERT INTO `courses` (`id`, `code`, `title`, `description`, `lecturer_id`, `cat
 (1, 'BIT2210', 'Introduction to Programming ', 'learning basic programming and syntax', 3, 'Computer science ', 1, '2026-03-06 11:11:45', '2026-03-06 12:18:25'),
 (2, 'BSCCS3425', 'Probability and statistics', 'its math', 3, 'Computer science ', 1, '2026-03-06 18:32:50', '2026-03-06 18:32:50'),
 (3, 'BMA1234', 'Linear Mathematics', 'maths', 3, 'Information Technology', 1, '2026-03-10 06:50:48', '2026-03-10 06:50:48'),
-(4, 'BMA2345', 'Calculas', 'tset', 3, 'Information Technology', 1, '2026-03-11 17:37:45', '2026-03-11 17:37:45');
+(4, 'BMA2345', 'Calculas', 'tset', 3, 'Information Technology', 1, '2026-03-11 17:37:45', '2026-03-11 17:37:45'),
+(5, 'BIT3219', 'object oriented programmming', 'this is a programming unit', 3, 'computer science', 1, '2026-03-26 11:26:08', '2026-03-26 11:26:08'),
+(6, 'CSC103', 'Introduction to biology', 'this is pure a lab practical class', 3, 'Biology', 1, '2026-03-31 04:37:27', '2026-03-31 04:37:27');
 
 -- --------------------------------------------------------
 
@@ -164,7 +119,15 @@ INSERT INTO `enrollments` (`id`, `student_id`, `course_id`, `enrolled_at`, `prog
 (12, 10, 4, '2026-03-18 12:14:44', 0, 'active'),
 (13, 10, 1, '2026-03-18 12:16:19', 0, 'active'),
 (14, 10, 3, '2026-03-18 12:16:34', 0, 'active'),
-(15, 10, 2, '2026-03-18 12:16:35', 0, 'active');
+(15, 10, 2, '2026-03-18 12:16:35', 0, 'active'),
+(16, 12, 1, '2026-03-26 11:21:43', 0, 'active'),
+(17, 12, 3, '2026-03-26 11:21:57', 0, 'active'),
+(18, 12, 5, '2026-03-26 11:35:27', 0, 'active'),
+(19, 13, 1, '2026-03-30 21:35:40', 0, 'active'),
+(20, 13, 5, '2026-03-30 21:35:40', 0, 'active'),
+(21, 12, 4, '2026-03-30 22:30:14', 0, 'active'),
+(22, 12, 2, '2026-03-30 22:30:19', 0, 'active'),
+(23, 14, 6, '2026-03-31 04:48:45', 0, 'active');
 
 -- --------------------------------------------------------
 
@@ -197,16 +160,53 @@ CREATE TABLE `exams` (
 --
 
 INSERT INTO `exams` (`id`, `course_id`, `title`, `description`, `exam_type`, `duration_minutes`, `total_marks`, `passing_marks`, `start_time`, `end_time`, `is_proctored`, `is_published`, `shuffle_questions`, `allow_review`, `risk_threshold`, `created_at`, `grades_released`) VALUES
-(4, 1, 'Cat 1', 'Auto-generated from course materials. 5 questions pending review.', 'quiz', 30, 16, 30, '2026-03-06 16:40:00', '2026-03-06 17:10:00', 1, 1, 1, 0, 100, '2026-03-06 13:38:29', 1),
-(5, 2, 'Cat 1', 'Auto-generated from course materials. 6 questions pending review.', 'quiz', 30, 45, 30, '2026-03-06 21:38:00', '2026-03-06 22:08:00', 1, 1, 1, 0, 100, '2026-03-06 18:37:37', 0),
-(6, 3, 'CAT 1', 'Auto-generated from course materials. 10 questions pending review.', 'quiz', 30, 32, 20, '2026-03-10 09:53:00', '2026-03-10 10:23:00', 1, 1, 1, 0, 100, '2026-03-10 06:52:19', 0),
-(8, 4, 'Cat 1', 'Auto-generated from course materials. 10 questions pending review.', 'quiz', 30, 29, 20, '2026-03-11 20:41:00', '2026-03-11 21:11:00', 1, 1, 1, 0, 100, '2026-03-11 17:39:48', 1),
-(14, 2, 'Cat 2', '[assessment:cat2] Auto-generated from course materials. 10 questions pending review.', 'midterm', 60, 30, 15, '2026-03-24 16:09:00', '2026-03-24 17:09:00', 1, 1, 1, 0, 100, '2026-03-24 12:49:54', 0),
-(15, 2, 'Research Assignment ', '[assessment:assignment] Auto-generated from course materials. 10 questions pending review.', 'assignment', 60, 30, 15, '2026-03-24 18:13:00', '2026-03-24 19:13:00', 1, 1, 1, 0, 100, '2026-03-24 14:12:22', 0),
-(17, 2, 'Final Exam', '[assessment:main_exam] Auto-generated from course materials. 12 questions pending review.', 'final', 60, 70, 35, '2026-04-08 08:15:00', '2026-04-08 09:15:00', 1, 1, 1, 0, 100, '2026-03-24 14:15:59', 0),
-(21, 3, 'Cat 2', '[assessment:cat2] Auto-generated from course materials. 10 questions pending review.', 'midterm', 120, 30, 15, '2026-03-25 10:12:00', '2026-03-25 12:12:00', 1, 1, 1, 0, 100, '2026-03-25 07:08:57', 0),
-(25, 4, 'Cat 2', '[assessment:cat2] Auto-generated from course materials. 10 questions pending review.', 'midterm', 6, 30, 15, '2026-03-25 11:40:00', '2026-03-25 11:46:00', 1, 1, 1, 0, 100, '2026-03-25 08:37:57', 0),
-(26, 1, 'Cat 2', '[assessment:cat2] Auto-generated from course materials. 10 questions pending review.', 'midterm', 6, 30, 15, '2026-03-25 11:49:00', '2026-03-25 11:55:00', 1, 1, 1, 0, 100, '2026-03-25 08:48:17', 1);
+(34, 3, 'Cat 1', '[assessment:cat1] Auto-generated from course materials. 10 questions pending review.', 'quiz', 60, 30, 15, '2026-03-31 01:27:00', '2026-03-31 02:27:00', 1, 1, 1, 0, 100, '2026-03-30 22:26:22', 1),
+(35, 6, 'Cat 1', '[assessment:cat1] Auto-generated from course materials. 10 questions pending review.', 'quiz', 60, 30, 15, '2026-03-31 10:39:00', '2026-03-31 11:39:00', 1, 1, 1, 0, 100, '2026-03-31 07:38:11', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `face_admin_actions`
+--
+
+CREATE TABLE `face_admin_actions` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `action_type` enum('register_face','reset_face','verify_face','view_logs') NOT NULL,
+  `reason` text DEFAULT NULL,
+  `old_encoding` longblob DEFAULT NULL,
+  `new_encoding` longblob DEFAULT NULL,
+  `performed_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `face_verification_logs`
+--
+
+CREATE TABLE `face_verification_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `exam_id` int(11) DEFAULT NULL,
+  `submission_id` int(11) DEFAULT NULL,
+  `verification_type` enum('registration','pre_exam','liveness_check') NOT NULL,
+  `status` enum('success','failed','pending') NOT NULL,
+  `confidence_score` float DEFAULT NULL,
+  `liveness_score` float DEFAULT NULL,
+  `failure_reason` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(500) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `face_verification_logs`
+--
+
+INSERT INTO `face_verification_logs` (`id`, `user_id`, `exam_id`, `submission_id`, `verification_type`, `status`, `confidence_score`, `liveness_score`, `failure_reason`, `ip_address`, `user_agent`, `created_at`) VALUES
+(3, 14, NULL, NULL, 'pre_exam', 'failed', 0.20336, 0.833333, 'Low confidence: 0.20', NULL, NULL, '2026-03-31 08:05:09');
 
 -- --------------------------------------------------------
 
@@ -233,8 +233,11 @@ CREATE TABLE `learning_progress` (
 --
 
 INSERT INTO `learning_progress` (`id`, `student_id`, `material_id`, `progress_percent`, `time_spent_seconds`, `last_accessed`, `completed`, `has_opened`, `first_opened_at`, `last_page`, `total_pages`) VALUES
-(6, 2, 11, 100, 15, '2026-03-24 19:17:40', 1, 1, '2026-03-24 12:05:05', 1, 1),
-(7, 2, 10, 100, 0, '2026-03-24 19:16:35', 1, 1, '2026-03-24 19:16:35', 1, 1);
+(6, 2, 11, 100, 60, '2026-03-30 21:51:46', 1, 1, '2026-03-24 12:05:05', 1, 1),
+(7, 2, 10, 100, 0, '2026-03-24 19:16:35', 1, 1, '2026-03-24 19:16:35', 1, 1),
+(8, 12, 12, 100, 675, '2026-03-26 12:26:34', 1, 1, '2026-03-26 11:36:39', 1, 1),
+(9, 12, 9, 100, 15, '2026-03-26 15:24:12', 1, 1, '2026-03-26 15:23:56', 1, 1),
+(10, 14, 14, 100, 300, '2026-03-31 07:36:36', 1, 1, '2026-03-31 07:13:52', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -261,7 +264,8 @@ INSERT INTO `lectures` (`id`, `course_id`, `title`, `content`, `order_index`, `d
 (1, 1, 'Doc Arthur', '', 0, NULL, 1, '2026-03-06 11:16:58'),
 (2, 2, 'Lec Shar', '', 0, NULL, 0, '2026-03-06 18:33:14'),
 (3, 3, 'Mutheu', '', 0, NULL, 1, '2026-03-10 06:53:20'),
-(4, 4, 'Thuo', '', 0, NULL, 1, '2026-03-11 17:38:05');
+(4, 4, 'Thuo', '', 0, NULL, 1, '2026-03-11 17:38:05'),
+(5, 6, 'lecturer Gladys', '', 0, NULL, 1, '2026-03-31 07:11:39');
 
 -- --------------------------------------------------------
 
@@ -309,7 +313,9 @@ INSERT INTO `materials` (`id`, `course_id`, `lecture_id`, `title`, `file_type`, 
 (8, 2, NULL, 'Artificial intelligence .pdf', 'pdf', 'courses/2/Artificial_intelligence_f196f6b3.pdf', 0, 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business. Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.\n\nIn education, AI-driven adaptive learning platforms personalize learning experiences for students worldwide, offering tailored content that enhances understanding and retention. Virtual tutors and AI-powered assistants make knowledge more accessible, particularly in regions with limited educational resources.\n\nThe business world is also experiencing a major shift due to AI innovation, with companies leveraging it for customer service through chatbots, predictive analytics, and automation of repetitive tasks. This allows employees to focus on creative and strategic work.\n\nHowever, the rise of AI raises important ethical and societal questions, including concerns about data privacy, bias in algorithms, and employment impacts. Governments, organizations, and individuals must collaborate to ensure that AI development is guided by fairness, transparency, and accountability, minimizing risks while fully harnessing its benefits.', NULL, '2026-03-24 11:52:14'),
 (9, 1, NULL, 'Artificial intelligence .pdf', 'pdf', 'courses/1/Artificial_intelligence_fb2bb328.pdf', 0, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld. From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable. This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems. In the field of education, AI is personalizing learning experiences for students across the globe. As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds. The business world is also experiencing a major shift due to AI innovation. This allows employees to focus on mor e creative and strategic \nwork. Despite its many advantages, the rise of AI also raises important ethical and societal questions. Concerns about data privacy, bias in algorithms, and the impact on employment must be \ncarefully addressed. In doing so, society can fully harness the benefits of AI while minimizing its \nrisks.', NULL, '2026-03-24 11:53:13'),
 (10, 3, NULL, 'Artificial intelligence .pdf', 'pdf', 'courses/3/Artificial_intelligence_e338fb57.pdf', 0, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld. From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable. Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions. This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.  \nIn the field of education, AI is personalizing learning experiences for students across the globe. \nAdaptive learning platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention. Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where educational resources are \nlimited. As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.  \nThe business world is also experiencing a major shift due to AI innovation. Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \nautomation of repetitive tasks. This allows employees to focus on mor e creative and strategic \nwork. At the same time, AI is driving the development of new industries and job roles, \nemphasizing the importance of digital skills and continuous learning in the modern workforce.  \nDespite its many advantages, the rise of AI also raises important ethical and societal questions. \nConcerns about data privacy, bias in algorithms, and the impact on employment must be \ncarefully addressed. As AI continues to evolve, it is crucial for govern ments, organizations, and \nindividuals to work together to ensure that its development is guided by fairness, transparency, \nand accountability. In doing so, society can fully harness the benefits of AI while minimizing', NULL, '2026-03-24 11:53:44'),
-(11, 4, NULL, 'Artificial intelligence .pdf', 'pdf', 'courses/4/Artificial_intelligence_a9097e84.pdf', 0, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld. From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable. Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions. This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.  \nIn the field of education, AI is personalizing learning experiences for students across the globe. \nAdaptive learning platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention. Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where educational resources are \nlimited. As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.  \nThe business world is also experiencing a major shift due to AI innovation. Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \nautomation of repetitive tasks. This allows employees to focus on mor e creative and strategic \nwork. At the same time, AI is driving the development of new industries and job roles, \nemphasizing the importance of digital skills and continuous learning in the modern workforce.  \nDespite its many advantages, the rise of AI also raises important ethical and societal questions. \nConcerns about data privacy, bias in algorithms, and the impact on employment must be \ncarefully addressed. As AI continues to evolve, it is crucial for govern ments, organizations, and \nindividuals to work together to ensure that its development is guided by fairness, transparency, \nand accountability. In doing so, society can fully harness the benefits of AI while minimizing', NULL, '2026-03-24 11:54:19');
+(11, 4, NULL, 'Artificial intelligence .pdf', 'pdf', 'courses/4/Artificial_intelligence_a9097e84.pdf', 0, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld. From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable. Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions. This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.  \nIn the field of education, AI is personalizing learning experiences for students across the globe. \nAdaptive learning platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention. Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where educational resources are \nlimited. As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.  \nThe business world is also experiencing a major shift due to AI innovation. Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \nautomation of repetitive tasks. This allows employees to focus on mor e creative and strategic \nwork. At the same time, AI is driving the development of new industries and job roles, \nemphasizing the importance of digital skills and continuous learning in the modern workforce.  \nDespite its many advantages, the rise of AI also raises important ethical and societal questions. \nConcerns about data privacy, bias in algorithms, and the impact on employment must be \ncarefully addressed. As AI continues to evolve, it is crucial for govern ments, organizations, and \nindividuals to work together to ensure that its development is guided by fairness, transparency, \nand accountability. In doing so, society can fully harness the benefits of AI while minimizing', NULL, '2026-03-24 11:54:19'),
+(12, 5, NULL, 'Artificial_intelligence_a9097e84.pdf', 'pdf', 'courses/5/Artificial_intelligence_a9097e84_8ed21b57.pdf', 0, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld. From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable. This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems. In the field of education, AI is personalizing learning experiences for students across the globe. As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds. The business world is also experiencing a major shift due to AI innovation. This allows employees to focus on mor e creative and strategic \nwork. Despite its many advantages, the rise of AI also raises important ethical and societal questions. Concerns about data privacy, bias in algorithms, and the impact on employment must be \ncarefully addressed. In doing so, society can fully harness the benefits of AI while minimizing its \nrisks.', NULL, '2026-03-26 11:29:10'),
+(14, 6, NULL, 'Artificial intelligence .pdf', 'pdf', 'courses/6/Artificial_intelligence_6c291ac6.pdf', 0, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld. From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable. This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems. In the field of education, AI is personalizing learning experiences for students across the globe. As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds. The business world is also experiencing a major shift due to AI innovation. This allows employees to focus on mor e creative and strategic \nwork. Despite its many advantages, the rise of AI also raises important ethical and societal questions. Concerns about data privacy, bias in algorithms, and the impact on employment must be \ncarefully addressed. In doing so, society can fully harness the benefits of AI while minimizing its \nrisks.', NULL, '2026-03-31 07:13:20');
 
 -- --------------------------------------------------------
 
@@ -335,99 +341,44 @@ CREATE TABLE `questions` (
 --
 
 INSERT INTO `questions` (`id`, `exam_id`, `question_text`, `question_type`, `options`, `correct_answer`, `marks`, `difficulty`, `order_index`, `explanation`) VALUES
-(1, 4, 'Fill in the blank: By using  NLP  techniques,  the system  can interpret  \nunstructured  textual  data within CVs and convert it into structured _____ that can be efficiently \nanalyzed and ranked.', 'mcq', '[\"organizations\", \"recruitment\", \"information\", \"process\"]', '2', 2, 'understand', 0, 'By using  NLP  techniques,  the system  can interpret  \nunstructured  textual  data within CVs and convert it into structured information that can be efficiently \nanalyzed and ranked.'),
-(2, 4, 'Fill in the blank: Human resource professionals often spend significant time manually \n_____ CVs to identify candidates who match job requirements.', 'mcq', '[\"screening\", \"process\", \"recruitment\", \"organizations\"]', '0', 2, 'understand', 1, 'Human resource professionals often spend significant time manually \nscreening CVs to identify candidates who match job requirements.'),
-(3, 4, 'Explain screening in your own words.', 'short_answer', 'null', 'Human resource professionals often spend significant time manually \nscreening CVs to identify candidates who match job requirements.', 5, 'understand', 2, 'Reference: Human resource professionals often spend significant time manually \nscreening CVs to identify candidates who match job requirements.'),
-(4, 4, 'Explain recruitment in your own words.', 'short_answer', 'null', 'MOUNT  KENYA  UNIVERSITY  \n \nSCHOOL  OF COMPUTING  AND  INFORMATICS  DEPARTMENT  OF INFORMATION \nTECHNOLOGY  \n \nNATURAL LANGUAGE PROCESSING  \nBIT4133  \n \nAI Recruitment  CV Analyzer  System  Using  Natural  Language  Processing  \n(ATS SYSTEM)  \n \n \n \n \nNAME: EDWIN MEITEIKINI  \nREG; BSCCS/2024/44160  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nBACHELOR OF SCIENCE IN COMPUTER SCIENCE  \nJANUARY 202  \n \n\n1.', 5, 'understand', 3, 'Reference: MOUNT  KENYA  UNIVERSITY  \n \nSCHOOL  OF COMPUTING  AND  INFORMATICS  DEPARTMENT  OF INFORMATION \nTECHNOLOGY  \n \nNATURAL LANGUAGE PROCESSING  \nBIT4133  \n \nAI Recruitment  CV Analyzer  System  Using  Natural  Language  Processing  \n(ATS SYSTEM)  \n \n \n \n \nNAME: EDWIN MEITEIKINI  \nREG; BSCCS/2024/44160  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nBACHELOR OF SCIENCE IN COMPUTER SCIENCE  \nJANUARY 202  \n \n\n1.'),
-(5, 4, 'Fill in the blank: As the volume  of job applications  \ncontinues  to increase  due to online  _____ platforms, recruiters may overlook qualified \ncandidates or make decisions based on incomplete analysis.', 'mcq', '[\"information\", \"recruitment\", \"process\", \"organizations\"]', '1', 2, 'understand', 4, 'As the volume  of job applications  \ncontinues  to increase  due to online  recruitment platforms, recruiters may overlook qualified \ncandidates or make decisions based on incomplete analysis.'),
-(6, 5, 'Explain process in your own words.', 'short_answer', 'null', 'MOUNT  KENYA  UNIVERSITY  \n \nSCHOOL  OF COMPUTING  AND  INFORMATICS  DEPARTMENT  OF INFORMATION \nTECHNOLOGY  \n \nNATURAL LANGUAGE PROCESSING  \nBIT4133  \n \nAI Recruitment  CV Analyzer  System  Using  Natural  Language  Processing  \n(ATS SYSTEM)  \n \n \n \n \nNAME: EDWIN MEITEIKINI  \nREG; BSCCS/2024/44160  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nBACHELOR OF SCIENCE IN COMPUTER SCIENCE  \nJANUARY 202  \n \n\n1.', 5, 'understand', 0, 'Reference: MOUNT  KENYA  UNIVERSITY  \n \nSCHOOL  OF COMPUTING  AND  INFORMATICS  DEPARTMENT  OF INFORMATION \nTECHNOLOGY  \n \nNATURAL LANGUAGE PROCESSING  \nBIT4133  \n \nAI Recruitment  CV Analyzer  System  Using  Natural  Language  Processing  \n(ATS SYSTEM)  \n \n \n \n \nNAME: EDWIN MEITEIKINI  \nREG; BSCCS/2024/44160  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nBACHELOR OF SCIENCE IN COMPUTER SCIENCE  \nJANUARY 202  \n \n\n1.'),
-(7, 5, 'Describe recruitment and organizations.', 'essay', 'null', NULL, 20, 'understand', 1, 'Evaluate based on depth, clarity, and evidence.'),
-(8, 5, 'Explain recruitment in your own words.', 'short_answer', 'null', 'MOUNT  KENYA  UNIVERSITY  \n \nSCHOOL  OF COMPUTING  AND  INFORMATICS  DEPARTMENT  OF INFORMATION \nTECHNOLOGY  \n \nNATURAL LANGUAGE PROCESSING  \nBIT4133  \n \nAI Recruitment  CV Analyzer  System  Using  Natural  Language  Processing  \n(ATS SYSTEM)  \n \n \n \n \nNAME: EDWIN MEITEIKINI  \nREG; BSCCS/2024/44160  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nBACHELOR OF SCIENCE IN COMPUTER SCIENCE  \nJANUARY 202  \n \n\n1.', 5, 'understand', 2, 'Reference: MOUNT  KENYA  UNIVERSITY  \n \nSCHOOL  OF COMPUTING  AND  INFORMATICS  DEPARTMENT  OF INFORMATION \nTECHNOLOGY  \n \nNATURAL LANGUAGE PROCESSING  \nBIT4133  \n \nAI Recruitment  CV Analyzer  System  Using  Natural  Language  Processing  \n(ATS SYSTEM)  \n \n \n \n \nNAME: EDWIN MEITEIKINI  \nREG; BSCCS/2024/44160  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nBACHELOR OF SCIENCE IN COMPUTER SCIENCE  \nJANUARY 202  \n \n\n1.'),
-(9, 5, 'What is the significance of information?', 'short_answer', 'null', 'MOUNT  KENYA  UNIVERSITY  \n \nSCHOOL  OF COMPUTING  AND  INFORMATICS  DEPARTMENT  OF INFORMATION \nTECHNOLOGY  \n \nNATURAL LANGUAGE PROCESSING  \nBIT4133  \n \nAI Recruitment  CV Analyzer  System  Using  Natural  Language  Processing  \n(ATS SYSTEM)  \n \n \n \n \nNAME: EDWIN MEITEIKINI  \nREG; BSCCS/2024/44160  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nBACHELOR OF SCIENCE IN COMPUTER SCIENCE  \nJANUARY 202  \n \n\n1.', 5, 'understand', 3, 'Reference: MOUNT  KENYA  UNIVERSITY  \n \nSCHOOL  OF COMPUTING  AND  INFORMATICS  DEPARTMENT  OF INFORMATION \nTECHNOLOGY  \n \nNATURAL LANGUAGE PROCESSING  \nBIT4133  \n \nAI Recruitment  CV Analyzer  System  Using  Natural  Language  Processing  \n(ATS SYSTEM)  \n \n \n \n \nNAME: EDWIN MEITEIKINI  \nREG; BSCCS/2024/44160  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nBACHELOR OF SCIENCE IN COMPUTER SCIENCE  \nJANUARY 202  \n \n\n1.'),
-(10, 5, 'Describe organizations.', 'short_answer', 'null', 'Problem  Description  \nRecruitment processes in many organizations involve reviewing a large number of  job applications \nand curriculum vitae (CVs).', 5, 'understand', 4, 'Reference: Problem  Description  \nRecruitment processes in many organizations involve reviewing a large number of  job applications \nand curriculum vitae (CVs).'),
-(11, 5, 'What is the significance of screening?', 'short_answer', 'null', 'Human resource professionals often spend significant time manually \nscreening CVs to identify candidates who match job requirements.', 5, 'understand', 5, 'Reference: Human resource professionals often spend significant time manually \nscreening CVs to identify candidates who match job requirements.'),
-(12, 6, 'What is the significance of REST?', 'short_answer', 'null', 'Question 2  \nInvestigate the evolution from xml -based database to restful Jason based APIs \nevaluate an ecommerce scalability then design an integration model for \nMount Kenya online ordering system  \nEarly enterprise systems used XML databases (e.g.', 5, 'understand', 0, 'Reference: Question 2  \nInvestigate the evolution from xml -based database to restful Jason based APIs \nevaluate an ecommerce scalability then design an integration model for \nMount Kenya online ordering system  \nEarly enterprise systems used XML databases (e.g.'),
-(13, 6, 'Fill in the blank: separate _____ for customers, orders, products, etc.) ensures updates \noccur in one place, preventing anomalies.', 'mcq', '[\"JSON\", \"data\", \"tables\", \"denormalized\"]', '2', 2, 'understand', 1, 'separate tables for customers, orders, products, etc.) ensures updates \noccur in one place, preventing anomalies.'),
-(14, 6, 'Fill in the blank: In contrast, denormalization intentionally \nduplicates _____ across tables (or merges tables) to speed up reads at the cost of storage and \npotential inconsistencies.', 'mcq', '[\"JSON\", \"REST\", \"data\", \"denormalized\"]', '2', 2, 'understand', 2, 'In contrast, denormalization intentionally \nduplicates data across tables (or merges tables) to speed up reads at the cost of storage and \npotential inconsistencies.'),
-(15, 6, 'Fill in the blank: For example, a Netflix design splits a giant user -\nactiv ity table into Users, Movies, and ViewingHistory _____, saving space and ensuring \nconsistency (e.g.', 'mcq', '[\"tables\", \"JSON\", \"denormalized\", \"data\"]', '0', 2, 'understand', 3, 'For example, a Netflix design splits a giant user -\nactiv ity table into Users, Movies, and ViewingHistory tables, saving space and ensuring \nconsistency (e.g.'),
-(16, 6, 'Summarize the concept of tables.', 'short_answer', 'null', 'DATABASE SYSTEMS 2  \nBIT3107  \nTeam  \nName               Reg No  \n1 \n2 \n3 \n4 \n5 \n6 \n7 \n8 \n9 \n10 \n11 \n12 \n \nQuestion 1  \nConduct an empirical  investigation into the tradeoffs between full normalization and \nstrategic denormalization in high volume transaction systems, use real examples measure \nperformance storage efficiency and a normally risk and propose an optimization \nframework  \nDatabase normalization is the process of organizing tables to reduce redundancy and avoid \nanomalies ( update , insert , delete problems )  \nDatabase normalization (usually up to 3NF or BCNF) and strategic denormalization are opposite \napproaches to organizing data.', 5, 'understand', 4, 'Reference: DATABASE SYSTEMS 2  \nBIT3107  \nTeam  \nName               Reg No  \n1 \n2 \n3 \n4 \n5 \n6 \n7 \n8 \n9 \n10 \n11 \n12 \n \nQuestion 1  \nConduct an empirical  investigation into the tradeoffs between full normalization and \nstrategic denormalization in high volume transaction systems, use real examples measure \nperformance storage efficiency and a normally risk and propose an optimization \nframework  \nDatabase normalization is the process of organizing tables to reduce redundancy and avoid \nanomalies ( update , insert , delete problems )  \nDatabase normalization (usually up to 3NF or BCNF) and strategic denormalization are opposite \napproaches to organizing data.'),
-(17, 6, 'Fill in the blank: DATABASE SYSTEMS 2  \nBIT3107  \nTeam  \nName               Reg No  \n1 \n2 \n3 \n4 \n5 \n6 \n7 \n8 \n9 \n10 \n11 \n12 \n \nQuestion 1  \nConduct an empirical  investigation into the tradeoffs between full normalization and \nstrategic denormalization in high volume transaction systems, use real examples measure \nperformance storage efficiency and a normally risk and propose an optimization \nframework  \nDatabase normalization is the process of organizing tables to reduce redundancy and avoid \nanomalies ( update , insert , delete problems )  \nDatabase normalization (usually up to 3NF or BCNF) and strategic denormalization are opposite \napproaches to organizing _____.', 'mcq', '[\"denormalized\", \"data\", \"JSON\", \"REST\"]', '1', 2, 'understand', 5, 'DATABASE SYSTEMS 2  \nBIT3107  \nTeam  \nName               Reg No  \n1 \n2 \n3 \n4 \n5 \n6 \n7 \n8 \n9 \n10 \n11 \n12 \n \nQuestion 1  \nConduct an empirical  investigation into the tradeoffs between full normalization and \nstrategic denormalization in high volume transaction systems, use real examples measure \nperformance storage efficiency and a normally risk and propose an optimization \nframework  \nDatabase normalization is the process of organizing tables to reduce redundancy and avoid \nanomalies ( update , insert , delete problems )  \nDatabase normalization (usually up to 3NF or BCNF) and strategic denormalization are opposite \napproaches to organizing data.'),
-(18, 6, 'Fill in the blank: Normalization breaks _____ into multiple tables linked by keys.', 'mcq', '[\"denormalized\", \"REST\", \"data\", \"JSON\"]', '2', 2, 'understand', 6, 'Normalization breaks data into multiple tables linked by keys.'),
-(19, 6, 'Fill in the blank: Textbooks note that normalization was \nintroduced by Codd to “minimize redundancy and improve _____ integrity”  \nNOTE;  3NF (Third Normal Form)  is where a relation  table is alre ady in second Normal Form \nand non -prime attribute  is transitively dependent on the primary key  \nBoyce -codd Normal Form ( BCNF) - is a relation where for every functional dependency (X -Y) X \nmust be a super key  \n \nDenormalization : Merges related data to eliminate JOINs, improving read/query performance.', 'mcq', '[\"data\", \"JSON\", \"REST\", \"denormalized\"]', '0', 2, 'understand', 7, 'Textbooks note that normalization was \nintroduced by Codd to “minimize redundancy and improve data integrity”  \nNOTE;  3NF (Third Normal Form)  is where a relation  table is alre ady in second Normal Form \nand non -prime attribute  is transitively dependent on the primary key  \nBoyce -codd Normal Form ( BCNF) - is a relation where for every functional dependency (X -Y) X \nmust be a super key  \n \nDenormalization : Merges related data to eliminate JOINs, improving read/query performance.'),
-(20, 6, 'Describe denormalized.', 'short_answer', 'null', 'In practice, fully normalized schemas are id eal for write -heavy OLTP \n(since smaller tables mean faster updates), whereas denormalized schemas favor read -heavy \nworkloads (trading extra space for fewer JOINs)  \n \nIn high -volume systems such as financial platforms, e -commerce systems, and social networks , \nthe choice between normalization and denormalization involves complex trade -offs between:  \n1.', 5, 'understand', 8, 'Reference: In practice, fully normalized schemas are id eal for write -heavy OLTP \n(since smaller tables mean faster updates), whereas denormalized schemas favor read -heavy \nworkloads (trading extra space for fewer JOINs)  \n \nIn high -volume systems such as financial platforms, e -commerce systems, and social networks , \nthe choice between normalization and denormalization involves complex trade -offs between:  \n1.'),
-(21, 6, 'Describe data.', 'short_answer', 'null', 'DATABASE SYSTEMS 2  \nBIT3107  \nTeam  \nName               Reg No  \n1 \n2 \n3 \n4 \n5 \n6 \n7 \n8 \n9 \n10 \n11 \n12 \n \nQuestion 1  \nConduct an empirical  investigation into the tradeoffs between full normalization and \nstrategic denormalization in high volume transaction systems, use real examples measure \nperformance storage efficiency and a normally risk and propose an optimization \nframework  \nDatabase normalization is the process of organizing tables to reduce redundancy and avoid \nanomalies ( update , insert , delete problems )  \nDatabase normalization (usually up to 3NF or BCNF) and strategic denormalization are opposite \napproaches to organizing data.', 5, 'understand', 9, 'Reference: DATABASE SYSTEMS 2  \nBIT3107  \nTeam  \nName               Reg No  \n1 \n2 \n3 \n4 \n5 \n6 \n7 \n8 \n9 \n10 \n11 \n12 \n \nQuestion 1  \nConduct an empirical  investigation into the tradeoffs between full normalization and \nstrategic denormalization in high volume transaction systems, use real examples measure \nperformance storage efficiency and a normally risk and propose an optimization \nframework  \nDatabase normalization is the process of organizing tables to reduce redundancy and avoid \nanomalies ( update , insert , delete problems )  \nDatabase normalization (usually up to 3NF or BCNF) and strategic denormalization are opposite \napproaches to organizing data.'),
-(32, 8, 'Fill in the blank: Problem Descriptio n Recruitment processes in many organizations involve reviewing a large number of job _____ and curriculum vitae (CVs).', 'mcq', '[\"screening\", \"information\", \"candidates\", \"applications\"]', '3', 2, 'understand', 0, 'Problem Descriptio n Recruitment processes in many organizations involve reviewing a large number of job applications and curriculum vitae (CVs).'),
-(33, 8, 'Fill in the blank: As the volume of job _____ continues to increase due to online recruitment platforms, recruiters may overlook qualified candidates or make decisions based o n incomplete analysis.', 'mcq', '[\"applications\", \"information\", \"candidates\", \"screening\"]', '0', 2, 'understand', 1, 'As the volume of job applications continues to increase due to online recruitment platforms, recruiters may overlook qualified candidates or make decisions based o n incomplete analysis.'),
-(34, 8, 'What is the significance of applications?', 'short_answer', 'null', 'Problem Descriptio n Recruitment processes in many organizations involve reviewing a large number of job applications and curriculum vitae (CVs).', 5, 'understand', 2, 'Reference: Problem Descriptio n Recruitment processes in many organizations involve reviewing a large number of job applications and curriculum vitae (CVs).'),
-(35, 8, 'Fill in the blank: MOUNT KENYA UNIVERSITY SCHOOL OF COMPUTING AND INFORMATICS DEPARTMENT OF INFORMATION TECHNOLOGY NATURAL LANGUAGE PROCESSING BIT 4133 AI Recruitment CV Analyzer System Using Natural Language Processing (ATS SYSTEM) NAME: EDWIN MEITEIKINI ADM NO: BSCCS/2024/44160 BACHELOR OF SCIENCE IN COMPUTER SCIENCE JANUARY 2026 1.', 'mcq', '[\"candidates\", \"applications\", \"information\", \"screening\"]', '2', 2, 'understand', 3, 'MOUNT KENYA UNIVERSITY SCHOOL OF COMPUTING AND INFORMATICS DEPARTMENT OF INFORMATION TECHNOLOGY NATURAL LANGUAGE PROCESSING BIT 4133 AI Recruitment CV Analyzer System Using Natural Language Processing (ATS SYSTEM) NAME: EDWIN MEITEIKINI ADM NO: BSCCS/2024/44160 BACHELOR OF SCIENCE IN COMPUTER SCIENCE JANUARY 2026 1.'),
-(36, 8, 'Fill in the blank: Recruiters are required to review hundreds or even thousands of _____ for a single job opening, which often leads to delays in hiring and potential loss of highly qualified candidates.', 'mcq', '[\"candidates\", \"screening\", \"information\", \"applications\"]', '3', 2, 'understand', 4, 'Recruiters are required to review hundreds or even thousands of applications for a single job opening, which often leads to delays in hiring and potential loss of highly qualified candidates.'),
-(37, 8, 'Explain candidates in your own words.', 'short_answer', 'null', 'Human resource professionals often spend significant time manually screening CVs to identify candidates who match job requirements.', 5, 'understand', 5, 'Reference: Human resource professionals often spend significant time manually screening CVs to identify candidates who match job requirements.'),
-(38, 8, 'What is the significance of information?', 'short_answer', 'null', 'MOUNT KENYA UNIVERSITY SCHOOL OF COMPUTING AND INFORMATICS DEPARTMENT OF INFORMATION TECHNOLOGY NATURAL LANGUAGE PROCESSING BIT 4133 AI Recruitment CV Analyzer System Using Natural Language Processing (ATS SYSTEM) NAME: EDWIN MEITEIKINI ADM NO: BSCCS/2024/44160 BACHELOR OF SCIENCE IN COMPUTER SCIENCE JANUARY 2026 1.', 5, 'understand', 6, 'Reference: MOUNT KENYA UNIVERSITY SCHOOL OF COMPUTING AND INFORMATICS DEPARTMENT OF INFORMATION TECHNOLOGY NATURAL LANGUAGE PROCESSING BIT 4133 AI Recruitment CV Analyzer System Using Natural Language Processing (ATS SYSTEM) NAME: EDWIN MEITEIKINI ADM NO: BSCCS/2024/44160 BACHELOR OF SCIENCE IN COMPUTER SCIENCE JANUARY 2026 1.'),
-(39, 8, 'Fill in the blank: By using NLP techniques, the system can interpret unstructured textual data within CVs and convert it into structured _____ that can be efficiently analyzed and ranke d.', 'mcq', '[\"applications\", \"information\", \"candidates\", \"screening\"]', '1', 2, 'understand', 7, 'By using NLP techniques, the system can interpret unstructured textual data within CVs and convert it into structured information that can be efficiently analyzed and ranke d.'),
-(40, 8, 'Fill in the blank: Human resource professionals often spend significant time manually _____ CVs to identify candidates who match job requirements.', 'mcq', '[\"candidates\", \"information\", \"screening\", \"applications\"]', '2', 2, 'understand', 8, 'Human resource professionals often spend significant time manually screening CVs to identify candidates who match job requirements.'),
-(41, 8, 'Fill in the blank: The system can then compare this _____ with job descriptions to determine candidate suitability.', 'mcq', '[\"candidates\", \"screening\", \"information\", \"applications\"]', '2', 2, 'understand', 9, 'The system can then compare this information with job descriptions to determine candidate suitability.'),
-(92, 14, 'Fill in the blank: Artificial intelligence (AI) has transformed various aspects of life, _____ healthcare, education, and business.', 'mcq', '[\"education\", \"business\", \"including\", \"learning\"]', '2', 3, 'understand', 0, 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(93, 14, 'Summarize the concept of business.', 'short_answer', 'null', 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.', 3, 'understand', 1, 'Reference: Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(94, 14, 'Describe including.', 'short_answer', 'null', 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.', 3, 'understand', 2, 'Reference: Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(95, 14, 'What is the significance of learning?', 'short_answer', 'null', 'Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.', 3, 'understand', 3, 'Reference: Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.'),
-(96, 14, 'Fill in the blank: Key concepts include machine _____ algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.', 'mcq', '[\"learning\", \"including\", \"education\", \"business\"]', '0', 3, 'understand', 4, 'Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.'),
-(97, 14, 'Fill in the blank: Virtual tutors and AI-powered assistants make knowledge more accessible, particularly in regions with limited _____al resources.', 'mcq', '[\"including\", \"learning\", \"education\", \"business\"]', '2', 3, 'understand', 5, 'Virtual tutors and AI-powered assistants make knowledge more accessible, particularly in regions with limited educational resources.'),
-(98, 14, 'Fill in the blank: However, the rise of AI raises important ethical and societal questions, _____ concerns about data privacy, bias in algorithms, and employment impacts.', 'mcq', '[\"business\", \"education\", \"including\", \"learning\"]', '2', 3, 'understand', 6, 'However, the rise of AI raises important ethical and societal questions, including concerns about data privacy, bias in algorithms, and employment impacts.'),
-(99, 14, 'Fill in the blank: The _____ world is also experiencing a major shift due to AI innovation, with companies leveraging it for customer service through chatbots, predictive analytics, and automation of repetitive tasks.', 'mcq', '[\"education\", \"business\", \"including\", \"learning\"]', '1', 3, 'understand', 7, 'The business world is also experiencing a major shift due to AI innovation, with companies leveraging it for customer service through chatbots, predictive analytics, and automation of repetitive tasks.'),
-(100, 14, 'Summarize the concept of education.', 'short_answer', 'null', 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.', 3, 'understand', 8, 'Reference: Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(101, 14, 'Fill in the blank: In education, AI-driven adaptive _____ platforms personalize learning experiences for students worldwide, offering tailored content that enhances understanding and retention.', 'mcq', '[\"education\", \"learning\", \"including\", \"business\"]', '1', 3, 'understand', 9, 'In education, AI-driven adaptive learning platforms personalize learning experiences for students worldwide, offering tailored content that enhances understanding and retention.'),
-(102, 15, 'What is the significance of algorithms?', 'short_answer', 'null', 'Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.', 3, 'understand', 0, 'Reference: Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.'),
-(103, 15, 'Fill in the blank: In education, AI-driven adaptive _____ platforms personalize learning experiences for students worldwide, offering tailored content that enhances understanding and retention.', 'mcq', '[\"business\", \"education\", \"learning\", \"including\"]', '2', 3, 'understand', 1, 'In education, AI-driven adaptive learning platforms personalize learning experiences for students worldwide, offering tailored content that enhances understanding and retention.'),
-(104, 15, 'Describe learning.', 'short_answer', 'null', 'Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.', 3, 'understand', 2, 'Reference: Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.'),
-(105, 15, 'Fill in the blank: Key concepts include machine _____ algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.', 'mcq', '[\"education\", \"learning\", \"including\", \"business\"]', '1', 3, 'understand', 3, 'Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.'),
-(106, 15, 'Fill in the blank: Artificial intelligence (AI) has transformed various aspects of life, _____ healthcare, education, and business.', 'mcq', '[\"business\", \"education\", \"learning\", \"including\"]', '3', 3, 'understand', 4, 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(107, 15, 'Fill in the blank: Virtual tutors and AI-powered assistants make knowledge more accessible, particularly in regions with limited _____al resources.', 'mcq', '[\"learning\", \"including\", \"business\", \"education\"]', '3', 3, 'understand', 5, 'Virtual tutors and AI-powered assistants make knowledge more accessible, particularly in regions with limited educational resources.'),
-(108, 15, 'Summarize the concept of including.', 'short_answer', 'null', 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.', 3, 'understand', 6, 'Reference: Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(109, 15, 'Summarize the concept of education.', 'short_answer', 'null', 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.', 3, 'understand', 7, 'Reference: Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(110, 15, 'Fill in the blank: However, the rise of AI raises important ethical and societal questions, _____ concerns about data privacy, bias in algorithms, and employment impacts.', 'mcq', '[\"business\", \"learning\", \"education\", \"including\"]', '3', 3, 'understand', 8, 'However, the rise of AI raises important ethical and societal questions, including concerns about data privacy, bias in algorithms, and employment impacts.'),
-(111, 15, 'Fill in the blank: The _____ world is also experiencing a major shift due to AI innovation, with companies leveraging it for customer service through chatbots, predictive analytics, and automation of repetitive tasks.', 'mcq', '[\"including\", \"business\", \"learning\", \"education\"]', '1', 3, 'understand', 9, 'The business world is also experiencing a major shift due to AI innovation, with companies leveraging it for customer service through chatbots, predictive analytics, and automation of repetitive tasks.'),
-(122, 17, 'Fill in the blank: Artificial intelligence (AI) has transformed various aspects of life, _____ healthcare, education, and business.', 'mcq', '[\"learning\", \"including\", \"business\", \"education\"]', '1', 6, 'understand', 0, 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(123, 17, 'Explain including in your own words.', 'short_answer', 'null', 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.', 6, 'understand', 1, 'Reference: Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(124, 17, 'Explain learning and including in your own words.', 'essay', 'null', NULL, 6, 'understand', 2, 'Evaluate based on depth, clarity, and evidence.'),
-(125, 17, 'Fill in the blank: However, the rise of AI raises important ethical and societal questions, _____ concerns about data privacy, bias in algorithms, and employment impacts.', 'mcq', '[\"business\", \"learning\", \"including\", \"education\"]', '2', 6, 'understand', 3, 'However, the rise of AI raises important ethical and societal questions, including concerns about data privacy, bias in algorithms, and employment impacts.'),
-(126, 17, 'Explain education in your own words.', 'short_answer', 'null', 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.', 6, 'understand', 4, 'Reference: Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(127, 17, 'Fill in the blank: In education, AI-driven adaptive _____ platforms personalize learning experiences for students worldwide, offering tailored content that enhances understanding and retention.', 'mcq', '[\"learning\", \"education\", \"including\", \"business\"]', '0', 6, 'understand', 5, 'In education, AI-driven adaptive learning platforms personalize learning experiences for students worldwide, offering tailored content that enhances understanding and retention.'),
-(128, 17, 'Summarize the concept of learning.', 'short_answer', 'null', 'Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.', 6, 'understand', 6, 'Reference: Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.'),
-(129, 17, 'Fill in the blank: Key concepts include machine _____ algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.', 'mcq', '[\"business\", \"learning\", \"education\", \"including\"]', '1', 6, 'understand', 7, 'Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.'),
-(130, 17, 'Describe business.', 'short_answer', 'null', 'Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.', 6, 'understand', 8, 'Reference: Artificial intelligence (AI) has transformed various aspects of life, including healthcare, education, and business.'),
-(131, 17, 'Fill in the blank: The _____ world is also experiencing a major shift due to AI innovation, with companies leveraging it for customer service through chatbots, predictive analytics, and automation of repetitive tasks.', 'mcq', '[\"learning\", \"education\", \"business\", \"including\"]', '2', 6, 'understand', 9, 'The business world is also experiencing a major shift due to AI innovation, with companies leveraging it for customer service through chatbots, predictive analytics, and automation of repetitive tasks.'),
-(132, 17, 'Fill in the blank: Virtual tutors and AI-powered assistants make knowledge more accessible, particularly in regions with limited _____al resources.', 'mcq', '[\"including\", \"business\", \"education\", \"learning\"]', '2', 5, 'understand', 10, 'Virtual tutors and AI-powered assistants make knowledge more accessible, particularly in regions with limited educational resources.'),
-(133, 17, 'What is the significance of algorithms?', 'short_answer', 'null', 'Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.', 5, 'understand', 11, 'Reference: Key concepts include machine learning algorithms that analyze vast amounts of data in seconds to improve efficiency, accuracy, and accessibility.'),
-(164, 21, 'Fill in the blank: Machine learnin g _____ can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 'mcq', '[\"education\", \"learning\", \"algorithms\", \"world\"]', '2', 3, 'understand', 0, 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
-(165, 21, 'What is the significance of algorithms?', 'short_answer', 'null', 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 3, 'understand', 1, 'Reference: Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
-(166, 21, 'Fill in the blank: The business _____ is also experiencing a major shift due to AI innovation.', 'mcq', '[\"algorithms\", \"learning\", \"education\", \"world\"]', '3', 3, 'understand', 2, 'The business world is also experiencing a major shift due to AI innovation.'),
-(167, 21, 'Fill in the blank: This wave of _____ is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 'mcq', '[\"innovation\", \"education\", \"world\", \"learning\"]', '0', 3, 'understand', 3, 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
-(168, 21, 'Fill in the blank: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \n_____.', 'mcq', '[\"education\", \"world\", \"algorithms\", \"learning\"]', '1', 3, 'understand', 4, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(169, 21, 'Fill in the blank: As a result, _____ is becoming more inclusive, flexible, and responsive to individual \nneeds.', 'mcq', '[\"learning\", \"algorithms\", \"world\", \"education\"]', '0', 3, 'understand', 5, 'As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.'),
-(170, 21, 'Fill in the blank: Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \n_____ of repetitive tasks.', 'mcq', '[\"world\", \"automation\", \"education\", \"learning\"]', '1', 3, 'understand', 6, 'Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \nautomation of repetitive tasks.'),
-(171, 21, 'What is the significance of education?', 'short_answer', 'null', 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 3, 'understand', 7, 'Reference: From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
-(172, 21, 'Describe data.', 'short_answer', 'null', 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 3, 'understand', 8, 'Reference: Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
-(173, 21, 'Explain world in your own words.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 9, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(201, 25, 'Fill in the blank: Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \n_____ of repetitive tasks.', 'mcq', '[\"world\", \"education\", \"automation\", \"learning\"]', '2', 3, 'understand', 0, 'Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \nautomation of repetitive tasks.'),
-(202, 25, 'What is the significance of world?', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 1, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(203, 25, 'Explain learning in your own words.', 'short_answer', 'null', 'In the field of education, AI is personalizing learning experiences for students across the globe.', 3, 'understand', 2, 'Reference: In the field of education, AI is personalizing learning experiences for students across the globe.'),
-(204, 25, 'Fill in the blank: Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where _____al resources are \nlimited.', 'mcq', '[\"world\", \"learning\", \"algorithms\", \"education\"]', '3', 3, 'understand', 3, 'Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where educational resources are \nlimited.'),
-(205, 25, 'Fill in the blank: This wave of _____ is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 'mcq', '[\"education\", \"learning\", \"innovation\", \"world\"]', '2', 3, 'understand', 4, 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
-(206, 25, 'Fill in the blank: In the field of education, AI is personalizing _____ experiences for students across the globe.', 'mcq', '[\"education\", \"algorithms\", \"world\", \"learning\"]', '3', 3, 'understand', 5, 'In the field of education, AI is personalizing learning experiences for students across the globe.'),
-(207, 25, 'Fill in the blank: The business _____ is also experiencing a major shift due to AI innovation.', 'mcq', '[\"world\", \"algorithms\", \"education\", \"learning\"]', '0', 3, 'understand', 6, 'The business world is also experiencing a major shift due to AI innovation.'),
-(208, 25, 'Summarize the concept of data.', 'short_answer', 'null', 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 3, 'understand', 7, 'Reference: Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
-(209, 25, 'Fill in the blank: Machine learnin g _____ can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 'mcq', '[\"algorithms\", \"education\", \"learning\", \"world\"]', '0', 3, 'understand', 8, 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
-(210, 25, 'Fill in the blank: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \n_____.', 'mcq', '[\"world\", \"learning\", \"education\", \"algorithms\"]', '0', 3, 'understand', 9, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(211, 26, 'Fill in the blank: The business _____ is also experiencing a major shift due to AI innovation.', 'mcq', '[\"innovation\", \"world\", \"education\", \"learning\"]', '1', 3, 'understand', 0, 'The business world is also experiencing a major shift due to AI innovation.'),
-(212, 26, 'Summarize the concept of education.', 'short_answer', 'null', 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 3, 'understand', 1, 'Reference: From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
-(213, 26, 'Summarize the concept of learning.', 'short_answer', 'null', 'In the field of education, AI is personalizing learning experiences for students across the globe.', 3, 'understand', 2, 'Reference: In the field of education, AI is personalizing learning experiences for students across the globe.'),
-(214, 26, 'Summarize the concept of world.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 3, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(215, 26, 'Fill in the blank: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \n_____.', 'mcq', '[\"world\", \"education\", \"learning\", \"innovation\"]', '0', 3, 'understand', 4, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(216, 26, 'Fill in the blank: As a result, _____ is becoming more inclusive, flexible, and responsive to individual \nneeds.', 'mcq', '[\"learning\", \"innovation\", \"education\", \"world\"]', '0', 3, 'understand', 5, 'As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.'),
-(217, 26, 'Fill in the blank: From healthcare to _____, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 'mcq', '[\"learning\", \"world\", \"education\", \"innovation\"]', '2', 3, 'understand', 6, 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
-(218, 26, 'Fill in the blank: In the field of _____, AI is personalizing learning experiences for students across the globe.', 'mcq', '[\"education\", \"world\", \"innovation\", \"learning\"]', '0', 3, 'understand', 7, 'In the field of education, AI is personalizing learning experiences for students across the globe.'),
-(219, 26, 'Describe innovation.', 'short_answer', 'null', 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 3, 'understand', 8, 'Reference: This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
-(220, 26, 'Fill in the blank: This wave of _____ is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 'mcq', '[\"innovation\", \"learning\", \"world\", \"education\"]', '0', 3, 'understand', 9, 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.');
+(265, 34, 'Fill in the blank: Adaptive _____ platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention.', 'mcq', '[\"education\", \"learning\", \"algorithms\", \"world\"]', '1', 3, 'understand', 0, 'Adaptive learning platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention.'),
+(266, 34, 'Fill in the blank: The business _____ is also experiencing a major shift due to AI innovation.', 'mcq', '[\"education\", \"algorithms\", \"world\", \"learning\"]', '2', 3, 'understand', 1, 'The business world is also experiencing a major shift due to AI innovation.'),
+(267, 34, 'Fill in the blank: Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where _____al resources are \nlimited.', 'mcq', '[\"education\", \"world\", \"learning\", \"algorithms\"]', '0', 3, 'understand', 2, 'Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where educational resources are \nlimited.'),
+(268, 34, 'Fill in the blank: From healthcare to _____, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 'mcq', '[\"learning\", \"algorithms\", \"world\", \"education\"]', '3', 3, 'understand', 3, 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
+(269, 34, 'Fill in the blank: As a result, _____ is becoming more inclusive, flexible, and responsive to individual \nneeds.', 'mcq', '[\"learning\", \"world\", \"algorithms\", \"education\"]', '0', 3, 'understand', 4, 'As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.'),
+(270, 34, 'Describe learning.', 'short_answer', 'null', 'In the field of education, AI is personalizing learning experiences for students across the globe.', 3, 'understand', 5, 'Reference: In the field of education, AI is personalizing learning experiences for students across the globe.'),
+(271, 34, 'Fill in the blank: Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \n_____ of repetitive tasks.', 'mcq', '[\"education\", \"learning\", \"world\", \"automation\"]', '3', 3, 'understand', 6, 'Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \nautomation of repetitive tasks.'),
+(272, 34, 'Fill in the blank: This wave of _____ is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 'mcq', '[\"education\", \"world\", \"learning\", \"innovation\"]', '3', 3, 'understand', 7, 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
+(273, 34, 'Explain world in your own words.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 8, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
+(274, 34, 'Fill in the blank: In the field of education, AI is personalizing _____ experiences for students across the globe.', 'mcq', '[\"world\", \"algorithms\", \"education\", \"learning\"]', '3', 3, 'understand', 9, 'In the field of education, AI is personalizing learning experiences for students across the globe.'),
+(275, 35, 'Explain education in your own words.', 'short_answer', 'null', 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 3, 'understand', 0, 'Reference: From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
+(276, 35, 'Describe world.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 1, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
+(277, 35, 'Fill in the blank: The business _____ is also experiencing a major shift due to AI innovation.', 'mcq', '[\"innovation\", \"learning\", \"world\", \"education\"]', '2', 3, 'understand', 2, 'The business world is also experiencing a major shift due to AI innovation.'),
+(278, 35, 'Fill in the blank: This wave of _____ is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 'mcq', '[\"education\", \"world\", \"innovation\", \"learning\"]', '2', 3, 'understand', 3, 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
+(279, 35, 'Fill in the blank: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \n_____.', 'mcq', '[\"innovation\", \"learning\", \"world\", \"education\"]', '2', 3, 'understand', 4, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
+(280, 35, 'Explain Artificial in your own words.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 5, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
+(281, 35, 'Explain innovation in your own words.', 'short_answer', 'null', 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 3, 'understand', 6, 'Reference: This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
+(282, 35, 'Fill in the blank: From healthcare to _____, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 'mcq', '[\"innovation\", \"education\", \"world\", \"learning\"]', '1', 3, 'understand', 7, 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
+(283, 35, 'Fill in the blank: As a result, _____ is becoming more inclusive, flexible, and responsive to individual \nneeds.', 'mcq', '[\"world\", \"innovation\", \"education\", \"learning\"]', '3', 3, 'understand', 8, 'As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.'),
+(284, 35, 'Describe learning.', 'short_answer', 'null', 'In the field of education, AI is personalizing learning experiences for students across the globe.', 3, 'understand', 9, 'Reference: In the field of education, AI is personalizing learning experiences for students across the globe.');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `student_face_status`
+-- (See below for the actual view)
+--
+CREATE TABLE `student_face_status` (
+`student_id` int(11)
+,`email` varchar(120)
+,`first_name` varchar(50)
+,`last_name` varchar(50)
+,`department` varchar(100)
+,`face_status` varchar(14)
+,`total_exams` bigint(21)
+,`verified_exams` decimal(22,0)
+,`last_verification_date` datetime
+);
 
 -- --------------------------------------------------------
 
@@ -446,22 +397,18 @@ CREATE TABLE `submissions` (
   `is_flagged` tinyint(1) DEFAULT NULL,
   `risk_score` int(11) DEFAULT NULL,
   `status` enum('in_progress','submitted','graded') DEFAULT NULL,
-  `face_verified` tinyint(1) DEFAULT NULL
+  `face_verified` tinyint(1) DEFAULT NULL,
+  `approval_status` enum('pending','approved','cancelled') DEFAULT 'pending',
+  `face_verified_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `submissions`
 --
 
-INSERT INTO `submissions` (`id`, `exam_id`, `student_id`, `started_at`, `submitted_at`, `total_score`, `is_graded`, `is_flagged`, `risk_score`, `status`, `face_verified`) VALUES
-(1, 4, 2, '2026-03-06 13:48:49', '2026-03-06 13:49:33', 2, 0, 0, 10, 'submitted', 1),
-(2, 5, 6, '2026-03-06 18:47:32', '2026-03-06 18:49:33', 0, 0, 0, 90, 'submitted', 1),
-(3, 6, 2, '2026-03-10 06:54:07', '2026-03-10 06:55:42', 2, 0, 0, 25, 'submitted', 1),
-(5, 8, 2, '2026-03-11 17:41:54', '2026-03-11 17:49:41', 8, 0, 0, 60, 'submitted', 1),
-(7, 14, 2, '2026-03-24 13:09:52', '2026-03-24 13:15:04', 15, 0, 1, 495, 'submitted', 1),
-(10, 21, 2, '2026-03-25 08:33:11', '2026-03-25 08:33:48', 10, 1, 0, 65, 'graded', 1),
-(11, 25, 2, '2026-03-25 08:40:37', '2026-03-25 08:45:59', 10, 1, 1, 475, 'graded', 1),
-(12, 26, 2, '2026-03-25 08:49:27', '2026-03-25 08:55:12', 10, 1, 1, 360, 'graded', 1);
+INSERT INTO `submissions` (`id`, `exam_id`, `student_id`, `started_at`, `submitted_at`, `total_score`, `is_graded`, `is_flagged`, `risk_score`, `status`, `face_verified`, `approval_status`, `face_verified_at`) VALUES
+(25, 34, 12, '2026-03-30 22:27:02', '2026-03-30 22:27:50', 12, 1, 0, 35, 'graded', 1, 'approved', NULL),
+(26, 35, 14, '2026-03-31 07:39:09', NULL, NULL, 0, 0, 20, 'in_progress', 1, 'pending', NULL);
 
 -- --------------------------------------------------------
 
@@ -476,6 +423,7 @@ CREATE TABLE `users` (
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `role` enum('admin','lecturer','student') NOT NULL,
+  `department` varchar(100) DEFAULT NULL,
   `profile_image` varchar(255) DEFAULT NULL,
   `face_encoding` blob DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT NULL,
@@ -492,15 +440,19 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password_hash`, `first_name`, `last_name`, `role`, `profile_image`, `face_encoding`, `is_active`, `created_at`, `updated_at`, `phone_number`, `bio`, `reset_token`, `reset_token_expires`, `share_contact`) VALUES
-(2, 'user@gmail.com', '$2b$12$LaHTXM/ifCNNtJL5yEeIK.E8FAT.BO2qGLOV0jNItK1MAs.KOfyN2', 'user', 'user', 'student', 'profiles/_26f3864c.jpg', 0x8004958c040000000000008c156e756d70792e636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b007494628942000400000000000000000000000000000000000000000000000000000000000000000000db562a3bdb56aa3b2c4e193c41f5653c6d37ea3c2c4e193d3ae2013d24474a3da080bd3ddb13853d5716e83d331ed83d49b90f3eff91df3d1d770b3e03310f3ed7ee0a3e5bb5173e6df4443e2fb6383e5716683e50cc733ecc05673eaf574b3eaf9a703e9d5b433e2065753ef1ba513ee2e3433ea4a5373ea4a5373e7863333e20df2a3e9d181e3eba83143ec1cd083e1952113edb99cf3dff91df3d33dbb23d1570bc3d3a68cc3dea70dd3da8cab13df177ac3d75fb933d0756893d8b1c963dd4c9903de2e3433df1fd763d5f1d373da0803d3db6a13f3dbea80e3daf14263db6a13f3d5003043d4882ff3ceaea123d99f3233d3a68cc3c6624063d8a5fbb3c8a5fbb3c8a5fbb3c9979ee3c9979ee3c5003043d8a5fbb3cea70dd3cdb56aa3c0e26c83cf1fd763c0799ae3c41f5653ca8878c3cdb562a3c48827f3c5003843cd4c9903c7c45883ce2e3433cd4c9103c99796e3cd4c9103c41f5653cd4c9103c83d2213c41f5653cdb562a3cdb562a3cf1fd763c7c45083c2c4e193cea705d3c3a68cc3bea70dd3bdb562a3cd4c9103cd4c9103c3a684c3cdb562a3c33db323ce2e3433c8a5fbb3b3a68cc3bdb562a3c4882ff3b8a5fbb3b33db323c3a68cc3adb56aa3bdb56aa3b7c45883b7c45883bdb56aa3b7c45883b2c4e993b3a684c3b3a684c3b7c45883bdb562a3b3a684c3b99796e3b7c45883b3a684c3b99796e3b8a5fbb3b99796e3b99796e3bdb56aa3bdb56aa3bdb56aa3bdb56aa3b7c45883b3a68cc3b99796e3b8a5fbb3b7c45883b3a684c3b9979ee3b99796e3b99796e3b3a684c3b3a684c3b9979ee3b3a684c3b2c4e993b99796e3b3a68cc3b7c45883b7c45083b3a68cc3b3a684c3b99796e3b2c4e993b3a684c3b7c45083cdb56aa3b8a5fbb3bdb56aa3bea70dd3b9979ee3b33db323c8a5fbb3b9979ee3b2c4e993b3a68cc3b8a5fbb3b83d2213c3a68cc3b2c4e193c7c45883b9979ee3b7c45083c4882ff3b9979ee3b48827f3c48827f3c2c4e193cea705d3c9979ee3bdb562a3c99796e3cea70dd3b2c4e193cf1fd763c9979ee3b8a5f3b3c92ec543c7c45083cd4c9903cdb562a3c41f5653cd4c9103ce2e3433cd4c9103cd4c9903ce2e3433cf1fd763c99796e3c41f5653c83d2213c33dbb23cf1fd763c83d2a13c0799ae3c83d2a13cdb562a3cea705d3cd4c9903cf1fd763ca8878c3cd4c9903cdb56aa3caf14a63c99796e3cf1fd763c41f5653c2c4e993cf1fd763ca8878c3c99796e3c5003843c83d2a13cf1fd763c7c45883c33db323c83d2a13cf1fd763c48827f3c92ec543cdb562a3cea705d3ce2e3433cd4c9103cf1fd763c2c4e193c4882ff3b9979ee3bdb562a3c2c4e993b2c4e993bdb562a3b3a684c3bdb562a3b3a684c3b947494622e, 1, '2026-03-06 10:55:03', '2026-03-24 11:19:30', '0746075436', 'i love books', NULL, NULL, 0),
-(3, 'lec@gmail.com', '$2b$12$o6J7..Zl4B0p57BWzHoiZ.Nh72VD04jF5WfJ/qEwFdYy0eXMW15Hi', 'Dr Lec', 'Rich', 'lecturer', 'profiles/_a6d187e9.jpg', NULL, 1, '2026-03-06 11:10:31', '2026-03-25 07:07:19', '0700000000', 'i love teaching', NULL, NULL, 1),
-(5, 'admin@gmail.com', '$2b$12$f92QtBuhZmNPTYm8SPWVGesAvRzyYPb7221wqkEuuJ9zTKp1p5oj2', 'admin', 'admin', 'admin', NULL, NULL, 1, '2026-03-06 12:16:12', '2026-03-06 12:16:12', NULL, NULL, NULL, NULL, 0),
-(6, 'jane123@gmail.com', '$2b$12$vWbZld8Tv8v56/uE4bFGxenUs/qzxwdhRc9h5UjbGyK6.PtxA1Sfi', 'jane ', 'doe', 'student', 'profiles/qr-code_53137d96.png', NULL, 1, '2026-03-06 18:25:58', '2026-03-06 18:53:52', '0799009660', 'i am a nursing student', NULL, NULL, 1),
-(7, 'edwinmeiteikini@gmail.com', '$2b$12$4EJ1cCXc1Min23ICXQzykeDs57BfZq2BDKnL.G5zOl0uLmNvQI0c.', 'Edwin', 'Meiteikini', 'student', 'profiles/download_1_23a85ef9.jpg', 0x8004958d040000000000008c166e756d70792e5f636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b0074946289420004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007366ac3a73662c3ad64c013ba5d9963b73662c3b0ca0213c3d138c3c43e3dc3c1270f23cdba4443d7746623d0d18af3dda2cb73da9b9cc3d103cde3d11f8e43d3d57053e0bca103e11f8e43d0b28143e71180e3e0a6c0d3e7176113e0c5c283ea651243ea66b2e3ea5f3203e0c5c283edace333e0e32393e0f664d3e0d76323ea651243e0a6c0d3e0be41a3e3f03273e0b86173e71180e3e3d130c3e3e8b193e1270f23ddbe8bd3d43e3dc3da841bf3da7c9b13d7366ac3ddc1cd23da8fdc53d7322b33d7322b33dd9f8a23dda2cb73dd880953d0dd4b53da785b83dd83c9c3d3d57853dd83c9c3dda70b03d0a6c8d3d71ba8a3d0a6c8d3d71ba8a3d445b6a3dde0c6d3d43e35c3d76ce543da9b94c3daba9673ddba4443d13e87f3d426b4f3d41f3413da7c9313d41f3413d43e35c3d7556473ddba4443ddba4443d1080573d3e8b193d407b343d0e903c3d0d182f3d0ab0063dd7c40e3d70fe033d1270f23c7176113d3f03a73c7556c73cd64c013d41f3c13cda2cb73c0ca0a13c0ca0a13c7556c73cd64c813cda2cb73c7176913c3d138c3c0ab0863ca9b94c3cd83c9c3cd83c9c3c41f3c13cd83c9c3c7556c73c45d3f73ca7c9b13c0ab0863c45d3773c0ab0863cd64c813ca9b94c3cda2c373c3f03a73c0e90bc3ca9b9cc3cd83c9c3c0ca0a13c73662c3ca9b94c3c0ab0863c7746623c7366ac3cdc1cd23cd64c013d0e90bc3c7556c73c1080d73c41f3c13ca7c9b13ca651243d41f3c13c1080d73c3d130c3d7176113ddf847a3d7746623d0b28943d7232983da785b83da785b83d426bcf3dd9b4a93d71ba8a3d71ba8a3d79367d3d79367d3d0f084a3daba9673d3ecf923d1270723daa315a3d70fe833da9b94c3dda2c373d0f084a3d70fe033d70fe033d7176113ddc1cd23cd83c1c3d7176113da461093daba9e73cde0ced3c0ab0063d0ca0a13c7556c73c0e90bc3c43e3dc3c1270f23c7556c73c41f3c13c0e90bc3ca5d9163d41f3c13c7556c73caba9e73cd83c9c3cd64c813c1080573c0ca0213c3d130c3c7746623c41f3c13bde0ced3b1080573c73662c3c1080d73b73662c3ca5d9163cde0ced3b1080573b41f3c13bd64c813b7366ac3a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000947494622e, 1, '2026-03-11 17:26:40', '2026-03-11 17:35:04', '+254746075436', 'i like computer science', NULL, NULL, 0),
-(8, 'hakeem@gmail.com', '$2b$12$B0NTCGY1kWf1dAjmLqse5.G8ioLCwpjC5zFnEkybfZlQUDIih.nN.', 'hakeem', 'ibrahim', 'student', 'profiles/Screenshot_2026-03-11_133720_02714813.png', NULL, 1, '2026-03-12 11:49:52', '2026-03-12 11:51:22', '+254746075436', 'tester', NULL, NULL, 0),
-(9, 'actor@gmail.com', '$2b$12$qTNogxKhphinD4cn6y4C8uuftllsKAJe7iChiBwycEojHACJaRp12', 'actor ', 'actor ', 'student', NULL, NULL, 1, '2026-03-12 12:20:21', '2026-03-12 12:20:21', NULL, NULL, NULL, NULL, 0),
-(10, 'wahbih837@gmail.com', '$2b$12$Azu1.hUN/N/xLpmDRkTbmeSaCF0SB.DssoJ9969Oeu7PnbMAO9EnG', 'wahbi', 'hassan', 'student', 'profiles/Computer_Graphics_Assignment_ac52846a.png', NULL, 1, '2026-03-18 12:10:12', '2026-03-18 12:11:17', NULL, NULL, NULL, NULL, 0);
+INSERT INTO `users` (`id`, `email`, `password_hash`, `first_name`, `last_name`, `role`, `department`, `profile_image`, `face_encoding`, `is_active`, `created_at`, `updated_at`, `phone_number`, `bio`, `reset_token`, `reset_token_expires`, `share_contact`) VALUES
+(2, 'user@gmail.com', '$2b$12$LaHTXM/ifCNNtJL5yEeIK.E8FAT.BO2qGLOV0jNItK1MAs.KOfyN2', 'user', 'user', 'student', NULL, 'profiles/_26f3864c.jpg', 0x8004958c040000000000008c156e756d70792e636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b0074946289420004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000066150f3b66150f3b66158f3b33c73e3b33c73e3c33c7be3bc0da323cf328033c4deea63c8d8c623c00796e3c6dbdc43c2d1f093dd9019b3cd9011b3da00b153dbd06183d491a0c3dd9011b3df6fc1d3da987653dddd5353df328833d369b593d86e4ac3d66158f3ddb6ba83dd9019b3dc3aecd3df866ab3df866ab3dc0dab23df9d0b83d8b22d53df9d0b83d512ccf3df9d0b83dc682e83d6e27d23d1836c93dd62d003ea987e53df328033e3805e73d857a1f3e71fbec3d4b84193e81a6043e491a0c3e2e89163e66150f3e9060fd3d67ca153ebc51113ef592103e6560083e11d90c3e6560083e491a0c3ef4dd093ebb9c0a3ed8970d3e9f560e3ec8ecf53dbb9c0a3eabf1f23dbb9c0a3e9dec003ef328033efe0ee13d1edefe3d6e27d23d5396dc3d396ff43d89b8c73da549bd3de37deb3df866ab3d4deea63d2e89963d1562ae3d857a9f3da3dfaf3da175a23d857a9f3d69e9a93dfb3ac63dbd06983d9ea1873d66158f3da00b953df328833df592903da987653d857a9f3ddb6ba83d70915f3d89b8473d73657a3d33c73e3dc3ae4d3de0a9503d53965c3d53965c3d19a0563d86e42c3da00b153d491a0c3da00b153dd9011b3d7365fa3c8310123d396ff43c396ff43c8d8ce23cd62d003d0079ee3c8d8c623c19a0d63c33c7be3cf9d0b83c13f8a03c6dbdc43c73657a3c66158f3c2d1f893ca6b3ca3c66158f3cf9d0b83c2d1f893c4deea63c73657a3cf328833c4dee263c8d8c623cd9011b3cf328833ca6b34a3c73657a3c8d8c623cf328833cc0da323c19a0d63bc0da323c8d8c623c66150f3c2d1f893c00796e3c2d1f893cd9019b3cd9011b3c33c73e3c2d1f893c0079ee3b00796e3c66158f3c73657a3c00796e3c19a0563c4dee263c00796e3c33c73e3c19a0563c19a0563c4deea63c66158f3c6dbdc43cd9019b3c13f8a03ca6b34a3c73657a3c4deea63c66158f3c19a0563cf9d0b83ca00b953c73657a3c00796e3c13f8a03c4deea63cc682e83cf9d0b83c0079ee3cf9d0b83c396ff43c8d8ce23ca6b3ca3cf328033dc682e83c33c7be3cc3ae4d3d7365fa3cf6fc1d3dd9011b3d8310123dc0da323d4dee263dc0da323dfda4533df6fc1d3df6fc1d3d2d1f093dc3ae4d3d8310123dc0da323d396ff43ca6b3ca3c86e42c3d69e9293d33c7be3c69e9293d491a0c3dddd5353d30f3233d50c2413de0a9d03cc0da323d8310123dd62d003dbd06183d1024063dc0dab23c2d1f093d6dbdc43c6dbdc43ca6b3ca3ca00b953c86e4ac3c6dbdc43c00796e3cf9d0b83c33c73e3c19a0563cf328033cc0da323c33c73e3c4dee263c4dee263c33c7be3b19a0d63b66150f3b33c7be3b66150f3b33c73e3b947494622e, 1, '2026-03-06 10:55:03', '2026-03-30 18:54:15', '0746075436', 'i love books', NULL, NULL, 0),
+(3, 'lec@gmail.com', '$2b$12$o6J7..Zl4B0p57BWzHoiZ.Nh72VD04jF5WfJ/qEwFdYy0eXMW15Hi', 'Dr Lec', 'Rich', 'lecturer', NULL, 'profiles/_a6d187e9.jpg', NULL, 1, '2026-03-06 11:10:31', '2026-03-25 07:07:19', '0700000000', 'i love teaching', NULL, NULL, 1),
+(5, 'admin@gmail.com', '$2b$12$f92QtBuhZmNPTYm8SPWVGesAvRzyYPb7221wqkEuuJ9zTKp1p5oj2', 'admin', 'admin', 'admin', NULL, NULL, NULL, 1, '2026-03-06 12:16:12', '2026-03-06 12:16:12', NULL, NULL, NULL, NULL, 0),
+(6, 'jane123@gmail.com', '$2b$12$vWbZld8Tv8v56/uE4bFGxenUs/qzxwdhRc9h5UjbGyK6.PtxA1Sfi', 'jane ', 'doe', 'student', NULL, 'profiles/qr-code_53137d96.png', NULL, 1, '2026-03-06 18:25:58', '2026-03-06 18:53:52', '0799009660', 'i am a nursing student', NULL, NULL, 1),
+(7, 'edwinmeiteikini@gmail.com', '$2b$12$4EJ1cCXc1Min23ICXQzykeDs57BfZq2BDKnL.G5zOl0uLmNvQI0c.', 'Edwin', 'Meiteikini', 'student', NULL, 'profiles/download_1_23a85ef9.jpg', 0x8004958d040000000000008c166e756d70792e5f636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b0074946289420004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007366ac3a73662c3ad64c013ba5d9963b73662c3b0ca0213c3d138c3c43e3dc3c1270f23cdba4443d7746623d0d18af3dda2cb73da9b9cc3d103cde3d11f8e43d3d57053e0bca103e11f8e43d0b28143e71180e3e0a6c0d3e7176113e0c5c283ea651243ea66b2e3ea5f3203e0c5c283edace333e0e32393e0f664d3e0d76323ea651243e0a6c0d3e0be41a3e3f03273e0b86173e71180e3e3d130c3e3e8b193e1270f23ddbe8bd3d43e3dc3da841bf3da7c9b13d7366ac3ddc1cd23da8fdc53d7322b33d7322b33dd9f8a23dda2cb73dd880953d0dd4b53da785b83dd83c9c3d3d57853dd83c9c3dda70b03d0a6c8d3d71ba8a3d0a6c8d3d71ba8a3d445b6a3dde0c6d3d43e35c3d76ce543da9b94c3daba9673ddba4443d13e87f3d426b4f3d41f3413da7c9313d41f3413d43e35c3d7556473ddba4443ddba4443d1080573d3e8b193d407b343d0e903c3d0d182f3d0ab0063dd7c40e3d70fe033d1270f23c7176113d3f03a73c7556c73cd64c013d41f3c13cda2cb73c0ca0a13c0ca0a13c7556c73cd64c813cda2cb73c7176913c3d138c3c0ab0863ca9b94c3cd83c9c3cd83c9c3c41f3c13cd83c9c3c7556c73c45d3f73ca7c9b13c0ab0863c45d3773c0ab0863cd64c813ca9b94c3cda2c373c3f03a73c0e90bc3ca9b9cc3cd83c9c3c0ca0a13c73662c3ca9b94c3c0ab0863c7746623c7366ac3cdc1cd23cd64c013d0e90bc3c7556c73c1080d73c41f3c13ca7c9b13ca651243d41f3c13c1080d73c3d130c3d7176113ddf847a3d7746623d0b28943d7232983da785b83da785b83d426bcf3dd9b4a93d71ba8a3d71ba8a3d79367d3d79367d3d0f084a3daba9673d3ecf923d1270723daa315a3d70fe833da9b94c3dda2c373d0f084a3d70fe033d70fe033d7176113ddc1cd23cd83c1c3d7176113da461093daba9e73cde0ced3c0ab0063d0ca0a13c7556c73c0e90bc3c43e3dc3c1270f23c7556c73c41f3c13c0e90bc3ca5d9163d41f3c13c7556c73caba9e73cd83c9c3cd64c813c1080573c0ca0213c3d130c3c7746623c41f3c13bde0ced3b1080573c73662c3c1080d73b73662c3ca5d9163cde0ced3b1080573b41f3c13bd64c813b7366ac3a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000947494622e, 1, '2026-03-11 17:26:40', '2026-03-11 17:35:04', '+254746075436', 'i like computer science', NULL, NULL, 0),
+(8, 'hakeem@gmail.com', '$2b$12$B0NTCGY1kWf1dAjmLqse5.G8ioLCwpjC5zFnEkybfZlQUDIih.nN.', 'hakeem', 'ibrahim', 'student', NULL, 'profiles/Screenshot_2026-03-11_133720_02714813.png', NULL, 1, '2026-03-12 11:49:52', '2026-03-12 11:51:22', '+254746075436', 'tester', NULL, NULL, 0),
+(9, 'actor@gmail.com', '$2b$12$qTNogxKhphinD4cn6y4C8uuftllsKAJe7iChiBwycEojHACJaRp12', 'actor ', 'actor ', 'student', NULL, NULL, NULL, 1, '2026-03-12 12:20:21', '2026-03-12 12:20:21', NULL, NULL, NULL, NULL, 0),
+(10, 'wahbih837@gmail.com', '$2b$12$Azu1.hUN/N/xLpmDRkTbmeSaCF0SB.DssoJ9969Oeu7PnbMAO9EnG', 'wahbi', 'hassan', 'student', NULL, 'profiles/Computer_Graphics_Assignment_ac52846a.png', NULL, 1, '2026-03-18 12:10:12', '2026-03-18 12:11:17', NULL, NULL, NULL, NULL, 0),
+(11, 'janny@gmail.com', '$2b$12$v/D/yHUFQyKpFb7T4Vqq6u6Q.EcKqcAm9b47/7oyRiLHnFARQY8Za', 'janny', 'dae', 'student', NULL, NULL, NULL, 1, '2026-03-26 11:18:24', '2026-03-26 11:18:24', NULL, NULL, NULL, NULL, 0),
+(12, 'Jane@gmail.com', '$2b$12$7UiQPnSKvH1A6EmPOXdr5eXC9GUpaxwVFJN11n3oY4PwzZmgH2fy6', 'jane', 'Doe', 'student', 'Computer Science', 'profiles/_92bafaff.jpg', 0x8004958c040000000000008c156e756d70792e636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b00749462894200040000000000000000000000000000000000000000000000000000000000000000000000000000ae3b383a00000000ae3b383aae3b383ac22c8a3bae3b383b3834a13b24434f3c2443cf3b7db0153c8bfdbd3c24434f3cae3b383c8bfdbd3ce56a843c4681c93c4681c93c7db0953ce56a043d5b721b3dbc88e03c69bf433db10d0d3d8bfdbd3c4681493d6c91183d2443cf3c35624c3d7db0153d7ade403dcda75d3dbc88603ddfc65a3dd2e29c3df520973d58a0c63d3562cc3d66edee3d54cef13d30d9173ec1c31f3e850b1f3ef520173ebf5a353e37cb363e95c1313e6a282e3e95c1313e1fba1a3e7ade403e2f702d3ec7b53e3e8fcf123ed179323e4a531e3ea0ee0f3e8fcf123e2123053eba1ff63d9893063e6756d93d882be93d009cea3d7975d63df3b7ac3d22dae43ddfc6da3d8bfdbd3d8a94d33dbef1ca3d6c91983dae3bb83d8d66a83d0105d53d69bfc33d37cbb63d4bbc883d3834a13d7db0953dd179b23d0640943d6c91983df689813d0f527d3d66ed6e3dc22c8a3d21717a3de56a843db10d8d3d5b729b3d3290773d3290773dd44b873da0ee8f3d54ce713d7f19803dd44b873d6c91983d0105553d21717a3d4bbc883ddfc65a3d770c6c3d43af743dae3b383d7ade403d2715243d58a0463d0f52fd3c8bfd3d3d0105d53c2715243df3b72c3d2715243df689013df3b72c3d2715243dd44b073d04d7293d58a0463dae3bb83ca0ee0f3da0ee0f3ddfc6da3ce56a043dc22c0a3dc22c8a3c7db0153d2443cf3c0f52fd3ca0ee0f3d5b721b3d0105d53cd44b073dbc88e03c54cef13cf689013d3290f73cd44b073dc22c0a3d7db0953cc22c0a3d4681c93cae3bb83c6c91183d6c91183d54cef13c54cef13c7db0953c770cec3c9a4ae63c770cec3cc22c0a3d2443cf3c3290f73ce56a043d3290f73cdfc6da3cae3bb83c2443cf3c3834a13c2443cf3cf3b7ac3cdfc6da3c0f527d3cdfc6da3c54ce713c0f527d3c0105d53c16f6a63c5b729b3cd179b23c3834a13c0105d53c7db0953c0f527d3c69bfc33c5b729b3c54ce713c54ce713c54ce713c0f527d3c0f527d3c9a4a663c24434f3c69bf433cae3b383c24434f3c7db0153c54ce713c3834213cf3b72c3cdfc65a3c9a4a663c7db0953c54ce713ca0ee8f3cdfc65a3c3834213c69bf433cae3b383c7db0153c3834213cdfc65a3cae3b383c24434f3c0f527d3c69bf433c24434f3cae3b383c2443cf3b69bf433cdfc65a3cae3b383c24434f3c9a4a663c69bf433c3834213cc22c8a3c0f527d3cae3bb83b54ce713c9a4a663cdfc65a3c0f527d3c7db0953c24434f3cae3bb83c54ce713cbc88e03c16f6a63c5b721b3d8fcf123d175f913d8bfd3d3ddfc65a3d58a0463df0e5573d8fcf123d3290f73ce56a843c5b729b3c0f52fd3b24434f3c9a4ae63b7db0153cc22c0a3b947494622e, 1, '2026-03-26 11:19:54', '2026-03-31 04:48:08', '+254797242328', 'i am a computer science student intrested in improving my academic performance', NULL, NULL, 0),
+(13, 'test@student.com', '$2b$12$tZJOslM7p2cIVnuS6FqgsOMYC6oMd0R4Wr4sPo0RfEym4Sjew5Ftu', 'Test', 'Student', 'student', NULL, NULL, NULL, 1, '2026-03-30 21:35:22', '2026-03-30 21:35:22', NULL, NULL, NULL, NULL, 0),
+(14, 'student@gmail.com', '$2b$12$S81MD6168BT28Y.pvHDzbu6tgDfdR7cDVeo0I/1Oni69r.Fy6qQDG', 'student', 'student ', 'student', 'Biology', 'profiles/_4aea87bd.jpg', 0x8004958c040000000000008c156e756d70792e636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b007494628942000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000850d813980f8ff397d5b403ab5bffe3980f8ff39f7d57d393ca39f3af7d57d394f66203bbecf0f3b6d8b0f3b15e30f3ba54a3f3be3a97f3b0fe1873b7d8aaf3b94be5f3b15b8c73b80ded73b34e8333c071d283c5012483cdffa273cb43b243c0e3d203cb0ed473c599e4b3c27f7ab3c5b97673c5d257c3c500b823c7d028a3cfd1f683cd556ae3c89bea53cb539bc3c4cecb93c75f9d73c99efc53cf51a083d1814dc3cf1db0d3dcbfc1a3df0eb313d57ca333dd3ed4c3d6fd24a3daddc893dfcbc743d674c923d1340973de453b43dbb58973dccaebf3dd4b7c33d8cc6e83d7464e43d302d013e5dcbfe3dc6530c3e35fee43df7e2213eb82d083e2970153e3f080b3e6302183ebbef0e3e00b8153e40730a3ea942123e29b9083e43a7053e25bd0c3e99b30a3ea04df63d08dbfb3d24c10b3ea7a7023edb1f033e7819073e3373f43dd56a053e09defc3d1f63f03d585aef3db5f3fc3d0564f13de3d1f13dd873f33d7800063e8fd9ef3d3b5ef13dd3efd13d05cae33d07c6db3d10dbd13d4dd1d13ddb5fd03defc6be3d3d3dd53de356c03d2b4fb93d6de0ae3da562b03d84cd7f3dc1e69c3d316e8a3d036b993de3b6743de7629e3db0da683da3f8823d41ac4d3d98ff3f3d38c94c3defcf4c3d93e32b3da305393d59dc323d80cd2d3d11ef2d3dd4f1563d7bd9373d85f7283ddcf93e3d7dde313d0fbd2f3db8c2583d7bb82e3d14f2263dede92c3d60e1373d9d00343d48f7393d7403313d1040533d58ec2c3df1f31b3d1bef223dd31b3c3de409133d70f72a3d7015133ddb562e3df00c083d27ec3d3db815143d2b132c3d640a013d3042fa3c8fe60e3d4fcfeb3c93f10e3da1f2143d59db0d3d59000b3dd6d20d3d05b7f93cdbafe33c11e6013d04e9033d30d7db3cb9c1dd3c78f2f33cccc8e53cf0f1db3c01faeb3c58dce53c60f3e93c3ddf053d980cbc3c4411063dd500d43c93fcf93ccba2ff3ca323f63c31d0133d77ec0b3d4fe1083decdc293dc0e9153d85ef0b3db4c3073d13e73a3d9bd0193d69c91e3ddee7173d4f19333deeea173d89f71d3d1bc3fd3c38010c3d4761e63cebd2123d6d12fe3cc9fa0c3d0554e23c0bef103de13de63ca7ee0a3d2b1be43c44ff043de3fec33c54d9113da5dde13c47c8f53c07f4d13cd1e2d93cc0a3c93c3fd2db3c90b6cf3ca7a4c33cbf12a63c00d2bb3c30e59f3c3dd8b73c540ec23ccef9a33c09f4973c6bdf933c710a9e3cb58dd13c17cb873c65aab93c8117823cbdefab3cf038843c960a843c34359a3c5d2a963cc039a23c3105023d9a37113d7022333d0df82c3dad97c53cb4eebd3cb70b303c4e1e003c947494622e, 1, '2026-03-30 22:39:49', '2026-03-31 08:01:46', '0746075436', 'the best', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -542,128 +494,20 @@ CREATE TABLE `violations` (
 --
 
 INSERT INTO `violations` (`id`, `submission_id`, `violation_type`, `severity`, `description`, `screenshot_path`, `timestamp`, `video_path`, `video_format`, `video_duration`) VALUES
-(1, 1, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-06 13:49:38', NULL, NULL, NULL),
-(2, 2, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-06 18:48:19', NULL, NULL, NULL),
-(3, 2, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-06 18:48:28', NULL, NULL, NULL),
-(4, 2, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-06 18:48:48', NULL, NULL, NULL),
-(5, 2, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-06 18:48:58', NULL, NULL, NULL),
-(6, 2, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-06 18:49:18', NULL, NULL, NULL),
-(7, 2, 'background_person', 40, 'Background person detected', 'v_2_20260306_184918.png', '2026-03-06 18:49:18', NULL, NULL, NULL),
-(8, 2, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-06 18:49:28', NULL, NULL, NULL),
-(9, 2, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-06 18:49:37', NULL, NULL, NULL),
-(10, 3, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-10 06:55:11', NULL, NULL, NULL),
-(11, 3, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-10 06:55:46', NULL, NULL, NULL),
-(15, 5, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-11 17:48:43', NULL, NULL, NULL),
-(16, 5, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-11 17:48:53', NULL, NULL, NULL),
-(17, 5, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-11 17:49:03', NULL, NULL, NULL),
-(18, 5, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-11 17:49:13', NULL, NULL, NULL),
-(19, 5, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-11 17:49:23', NULL, NULL, NULL),
-(20, 5, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-11 17:49:33', NULL, NULL, NULL),
-(21, 5, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-11 17:49:44', NULL, NULL, NULL),
-(127, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:10:22', NULL, NULL, NULL),
-(128, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:10:33', NULL, NULL, NULL),
-(129, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:10:41', NULL, NULL, NULL),
-(130, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:10:48', NULL, NULL, NULL),
-(131, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:10:52', NULL, NULL, NULL),
-(132, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:11:02', NULL, NULL, NULL),
-(133, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:11:09', NULL, NULL, NULL),
-(134, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:11:11', NULL, NULL, NULL),
-(135, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:11:21', NULL, NULL, NULL),
-(136, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:11:30', NULL, NULL, NULL),
-(137, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:11:40', NULL, NULL, NULL),
-(138, 7, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-24 13:11:51', NULL, NULL, NULL),
-(139, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:12:02', NULL, NULL, NULL),
-(140, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:12:04', NULL, NULL, NULL),
-(141, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:12:11', NULL, NULL, NULL),
-(142, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:12:20', NULL, NULL, NULL),
-(143, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:12:30', NULL, NULL, NULL),
-(144, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:12:35', NULL, NULL, NULL),
-(145, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:12:41', NULL, NULL, NULL),
-(146, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:12:50', NULL, NULL, NULL),
-(147, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:12:51', NULL, NULL, NULL),
-(148, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:13:01', NULL, NULL, NULL),
-(149, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:13:01', NULL, NULL, NULL),
-(150, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:13:10', NULL, NULL, NULL),
-(151, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:13:21', NULL, NULL, NULL),
-(152, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:13:30', NULL, NULL, NULL),
-(153, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:13:30', NULL, NULL, NULL),
-(154, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:13:40', NULL, NULL, NULL),
-(155, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:13:43', NULL, NULL, NULL),
-(156, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:13:51', NULL, NULL, NULL),
-(157, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:14:01', NULL, NULL, NULL),
-(158, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:14:11', NULL, NULL, NULL),
-(159, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:14:19', NULL, NULL, NULL),
-(160, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:14:21', NULL, NULL, NULL),
-(161, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:14:30', NULL, NULL, NULL),
-(162, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:14:40', NULL, NULL, NULL),
-(163, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:14:50', NULL, NULL, NULL),
-(164, 7, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-24 13:15:00', NULL, NULL, NULL),
-(165, 7, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-24 13:15:08', NULL, NULL, NULL),
-(346, 10, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:33:25', NULL, NULL, NULL),
-(347, 10, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:33:35', NULL, NULL, NULL),
-(348, 10, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:33:45', NULL, NULL, NULL),
-(349, 10, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:33:48', NULL, NULL, NULL),
-(350, 10, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:33:49', NULL, NULL, NULL),
-(351, 11, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:40:56', NULL, NULL, NULL),
-(352, 11, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:40:57', NULL, NULL, NULL),
-(353, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:41:12', NULL, NULL, NULL),
-(354, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:41:22', NULL, NULL, NULL),
-(355, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:41:32', NULL, NULL, NULL),
-(356, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:41:42', NULL, NULL, NULL),
-(357, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:41:52', NULL, NULL, NULL),
-(358, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:42:02', NULL, NULL, NULL),
-(359, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:42:12', NULL, NULL, NULL),
-(360, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:42:22', NULL, NULL, NULL),
-(361, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:42:32', NULL, NULL, NULL),
-(362, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:42:42', NULL, NULL, NULL),
-(363, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:42:52', NULL, NULL, NULL),
-(364, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:43:02', NULL, NULL, NULL),
-(365, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:43:12', NULL, NULL, NULL),
-(366, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:43:22', NULL, NULL, NULL),
-(367, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:43:32', NULL, NULL, NULL),
-(368, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:43:42', NULL, NULL, NULL),
-(369, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:43:52', NULL, NULL, NULL),
-(370, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:44:02', NULL, NULL, NULL),
-(371, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:44:12', NULL, NULL, NULL),
-(372, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:44:22', NULL, NULL, NULL),
-(373, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:44:32', NULL, NULL, NULL),
-(374, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:44:42', NULL, NULL, NULL),
-(375, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:44:52', NULL, NULL, NULL),
-(376, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:45:02', NULL, NULL, NULL),
-(377, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:45:12', NULL, NULL, NULL),
-(378, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:45:22', NULL, NULL, NULL),
-(379, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:45:32', NULL, NULL, NULL),
-(380, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:45:42', NULL, NULL, NULL),
-(381, 11, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:45:52', NULL, NULL, NULL),
-(382, 11, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:45:59', NULL, NULL, NULL),
-(383, 11, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:46:00', NULL, NULL, NULL),
-(384, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:49:41', NULL, NULL, NULL),
-(385, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:49:51', NULL, NULL, NULL),
-(386, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:50:01', NULL, NULL, NULL),
-(387, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:50:11', NULL, NULL, NULL),
-(388, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:50:21', NULL, NULL, NULL),
-(389, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:50:31', NULL, NULL, NULL),
-(390, 12, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:50:33', NULL, NULL, NULL),
-(391, 12, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-25 08:50:41', NULL, NULL, NULL),
-(392, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:50:51', NULL, NULL, NULL),
-(393, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:51:01', NULL, NULL, NULL),
-(394, 12, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:51:10', NULL, NULL, NULL),
-(395, 12, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:51:11', NULL, NULL, NULL),
-(396, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:51:29', NULL, NULL, NULL),
-(397, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:51:39', NULL, NULL, NULL),
-(398, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:51:49', NULL, NULL, NULL),
-(399, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:51:59', NULL, NULL, NULL),
-(400, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:52:09', NULL, NULL, NULL),
-(401, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:52:19', NULL, NULL, NULL),
-(402, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:52:29', NULL, NULL, NULL),
-(403, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:52:39', NULL, NULL, NULL),
-(404, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:52:49', NULL, NULL, NULL),
-(405, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:52:59', NULL, NULL, NULL),
-(406, 12, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-25 08:53:09', NULL, NULL, NULL),
-(407, 12, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:53:11', NULL, NULL, NULL),
-(408, 12, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:53:12', NULL, NULL, NULL),
-(409, 12, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:54:07', NULL, NULL, NULL),
-(410, 12, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-25 08:54:08', NULL, NULL, NULL);
+(445, 25, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-30 22:27:41', 'clip_445_20260330_222749.webm', 'video/webm', 8),
+(446, 25, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-30 22:27:50', NULL, NULL, NULL),
+(447, 25, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-30 22:27:51', NULL, NULL, NULL),
+(448, 26, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-31 07:39:23', NULL, NULL, NULL),
+(449, 26, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-31 07:39:24', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `student_face_status`
+--
+DROP TABLE IF EXISTS `student_face_status`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `student_face_status`  AS SELECT `u`.`id` AS `student_id`, `u`.`email` AS `email`, `u`.`first_name` AS `first_name`, `u`.`last_name` AS `last_name`, `u`.`department` AS `department`, CASE WHEN `u`.`face_encoding` is not null THEN 'registered' ELSE 'not_registered' END AS `face_status`, count(distinct `s`.`id`) AS `total_exams`, sum(case when `s`.`face_verified` = 1 then 1 else 0 end) AS `verified_exams`, max(`fvl`.`created_at`) AS `last_verification_date` FROM ((`users` `u` left join `submissions` `s` on(`u`.`id` = `s`.`student_id`)) left join `face_verification_logs` `fvl` on(`u`.`id` = `fvl`.`user_id` and `fvl`.`verification_type` = 'pre_exam' and `fvl`.`status` = 'success')) WHERE `u`.`role` = 'student' GROUP BY `u`.`id`, `u`.`email`, `u`.`first_name`, `u`.`last_name`, `u`.`department`, `u`.`face_encoding` ;
 
 --
 -- Indexes for dumped tables
@@ -700,6 +544,24 @@ ALTER TABLE `exams`
   ADD PRIMARY KEY (`id`),
   ADD KEY `course_id` (`course_id`),
   ADD KEY `idx_exams_course_created` (`course_id`,`created_at`);
+
+--
+-- Indexes for table `face_admin_actions`
+--
+ALTER TABLE `face_admin_actions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_student_id` (`student_id`),
+  ADD KEY `idx_admin_id` (`admin_id`);
+
+--
+-- Indexes for table `face_verification_logs`
+--
+ALTER TABLE `face_verification_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_exam_id` (`exam_id`),
+  ADD KEY `idx_created_at` (`created_at`),
+  ADD KEY `fk_face_logs_submission` (`submission_id`);
 
 --
 -- Indexes for table `learning_progress`
@@ -780,67 +642,79 @@ ALTER TABLE `violations`
 -- AUTO_INCREMENT for table `answers`
 --
 ALTER TABLE `answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=94;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=164;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `enrollments`
 --
 ALTER TABLE `enrollments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `exams`
 --
 ALTER TABLE `exams`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+
+--
+-- AUTO_INCREMENT for table `face_admin_actions`
+--
+ALTER TABLE `face_admin_actions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `face_verification_logs`
+--
+ALTER TABLE `face_verification_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `learning_progress`
 --
 ALTER TABLE `learning_progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `lectures`
 --
 ALTER TABLE `lectures`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `live_classes`
 --
 ALTER TABLE `live_classes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `materials`
 --
 ALTER TABLE `materials`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `questions`
 --
 ALTER TABLE `questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=221;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=285;
 
 --
 -- AUTO_INCREMENT for table `submissions`
 --
 ALTER TABLE `submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `user_analytics`
@@ -852,7 +726,7 @@ ALTER TABLE `user_analytics`
 -- AUTO_INCREMENT for table `violations`
 --
 ALTER TABLE `violations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=411;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=450;
 
 --
 -- Constraints for dumped tables
@@ -883,6 +757,21 @@ ALTER TABLE `enrollments`
 --
 ALTER TABLE `exams`
   ADD CONSTRAINT `exams_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`);
+
+--
+-- Constraints for table `face_admin_actions`
+--
+ALTER TABLE `face_admin_actions`
+  ADD CONSTRAINT `fk_face_admin_admin` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_face_admin_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `face_verification_logs`
+--
+ALTER TABLE `face_verification_logs`
+  ADD CONSTRAINT `fk_face_logs_exam` FOREIGN KEY (`exam_id`) REFERENCES `exams` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_face_logs_submission` FOREIGN KEY (`submission_id`) REFERENCES `submissions` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_face_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `learning_progress`

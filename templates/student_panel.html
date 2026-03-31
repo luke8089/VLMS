@@ -183,6 +183,18 @@
     /* ── Progress bar initial state ── */
     .progress-zero { width: 0%; }
 
+    /* ── Dark select dropdown options ── */
+    select option {
+        background: #111111;
+        color: #ffffff;
+    }
+    select option:hover,
+    select option:focus,
+    select option:active {
+        background: #222222;
+        color: #ffffff;
+    }
+
     /* ── Exams page modern motion ── */
     .exam-course-card {
         position: relative;
@@ -405,13 +417,13 @@
                 <table class="w-full text-sm">
                     <thead class="bg-white/5 border-b border-white/10">
                         <tr>
-                            <th class="text-left py-3 px-4 font-medium text-neutral-400">Exam</th>
                             <th class="text-left py-3 px-4 font-medium text-neutral-400">Course</th>
-                            <th class="text-left py-3 px-4 font-medium text-neutral-400">Type</th>
-                            <th class="text-center py-3 px-4 font-medium text-neutral-400">Score</th>
+                            <th class="text-center py-3 px-4 font-medium text-neutral-400">CAT 1</th>
+                            <th class="text-center py-3 px-4 font-medium text-neutral-400">CAT 2</th>
+                            <th class="text-center py-3 px-4 font-medium text-neutral-400">Main Exam</th>
+                            <th class="text-center py-3 px-4 font-medium text-neutral-400">Assignment</th>
                             <th class="text-center py-3 px-4 font-medium text-neutral-400">Grade</th>
-                            <th class="text-left py-3 px-4 font-medium text-neutral-400">Status</th>
-                            <th class="text-left py-3 px-4 font-medium text-neutral-400">Date</th>
+                            <th class="text-left py-3 px-4 font-medium text-neutral-400">Date Released</th>
                         </tr>
                     </thead>
                     <tbody id="grades-table-body" class="divide-y divide-white/5">
@@ -498,6 +510,12 @@
                         </div>
                     </div>
                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-neutral-400 mb-1">Department</label>
+                        <select id="profile-department" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/30">
+                            <option value="">Select your department</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
                         <label class="block text-sm font-medium text-neutral-400 mb-1">Phone Number</label>
                         <input id="profile-phone" type="tel" placeholder="e.g. +27 123 456 789" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-white/30">
                     </div>
@@ -545,6 +563,10 @@
                                     Capture Face
                                 </span>
                             </button>
+                            <div id="face-registered-msg" class="hidden">
+                                <p class="text-sm text-white mb-2">Registered</p>
+                                <p class="text-xs text-neutral-500">Face verification complete. Contact admin if you need to reset your face registration.</p>
+                            </div>
                             <p id="face-error" class="text-xs text-neutral-400 mt-2 hidden"></p>
                         </div>
                     </div>
@@ -675,6 +697,13 @@
             <div id="setup-page-2" class="hidden">
                 <div class="space-y-4">
                     <div>
+                        <label class="block text-sm font-medium text-neutral-300 mb-1">Department <span class="text-red-400">*</span></label>
+                        <select id="setup-department" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/30">
+                            <option value="">Select your department</option>
+                        </select>
+                        <p class="text-xs text-neutral-500 mt-1">This determines which courses you can register for</p>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-neutral-300 mb-1">Phone Number</label>
                         <input id="setup-phone" type="tel" placeholder="e.g. +27 123 456 789" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-white/30">
                     </div>
@@ -776,6 +805,43 @@ function updateDropdownCompletion(pct) {
 }
 updateDropdownCompletion(user.profile_complete || 0);
 
+// ═══════ DEPARTMENTS ═══════
+let departmentsList = [];
+
+async function loadDepartments() {
+    try {
+        const resp = await fetch('/api/departments');
+        if (resp.ok) {
+            const data = await resp.json();
+            departmentsList = data.departments || [];
+            populateDepartmentSelects();
+        }
+    } catch (e) {
+        console.error('Failed to load departments:', e);
+    }
+}
+
+function populateDepartmentSelects() {
+    const profileSelect = document.getElementById('profile-department');
+    const setupSelect = document.getElementById('setup-department');
+    
+    const options = departmentsList.map(d => `<option value="${d}">${d}</option>`).join('');
+    
+    if (profileSelect) {
+        const currentValue = profileSelect.value;
+        profileSelect.innerHTML = '<option value="">Select your department</option>' + options;
+        profileSelect.value = currentValue;
+    }
+    if (setupSelect) {
+        const currentValue = setupSelect.value;
+        setupSelect.innerHTML = '<option value="">Select your department</option>' + options;
+        setupSelect.value = currentValue;
+    }
+}
+
+// Load departments on page load
+loadDepartments();
+
 // ═══════ NAVIGATION ═══════
 let currentSection = 'dashboard';
 const sections = ['dashboard', 'courses', 'exams', 'grades', 'resources', 'classes', 'calendar', 'profile'];
@@ -858,6 +924,8 @@ function navigateTo(section, { syncUrl = true } = {}) {
     if (syncUrl) {
         // Push view changes so browser back returns to previous in-dashboard section.
         syncViewInUrl(section, false);
+        // Force page refresh if syncUrl is true
+        window.location.href = window.location.pathname + window.location.search;
     }
 
     // Load section data
@@ -1166,7 +1234,7 @@ function renderExamCourseCard(group, index) {
 
     const openItems = sorted.filter(e => getExamLane(e) === 'open' || getExamLane(e) === 'in_progress');
     const upcomingItems = sorted.filter(e => e.availability === 'upcoming');
-    const closedItems = sorted.filter(e => e.availability === 'closed');
+    const closedItems = sorted.filter(e => getExamLane(e) === 'completed' || e.availability === 'closed');
 
     return `
     <div class="dark-card exam-course-card p-5" style="animation-delay:${index * 70}ms">
@@ -1194,7 +1262,9 @@ function renderExamCourseCard(group, index) {
 }
 
 function getExamLane(exam) {
-    if (exam.submission_status === 'in_progress') return 'in_progress';
+    const s = exam.submission_status;
+    if (s === 'in_progress') return 'in_progress';
+    if (s === 'submitted' || s === 'graded' || s === 'awaiting_release') return 'completed';
     return exam.availability || 'open';
 }
 
@@ -1237,17 +1307,21 @@ function renderExamLane(title, exams, subtitle) {
 }
 
 function renderExamItem(e, index = 0) {
-    const isAwaitingRelease = e.submission_status === 'awaiting_release';
-    const done = e.submission_status === 'submitted' || e.submission_status === 'graded';
-    const inProgress = e.submission_status === 'in_progress';
+    const s = e.submission_status;
+    const isAwaitingRelease = s === 'awaiting_release';
+    const done = s === 'submitted' || s === 'graded';
+    const inProgress = s === 'in_progress';
+    const hasSubmitted = isAwaitingRelease || done; // student has already submitted
+    const hasScore = e.total_score != null;
     const isUpcoming = e.availability === 'upcoming';
     const isClosed = e.availability === 'closed';
     const isOpen = e.availability === 'open';
 
     let badge = '';
-    if (isAwaitingRelease) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">Awaiting Release</span>';
-    else if (done) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white">Completed</span>';
-    else if (inProgress) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">In Progress</span>';
+    if (isAwaitingRelease) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">Submitted · Awaiting Results</span>';
+    else if (done && hasScore) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">Results Available</span>';
+    else if (done) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white">Submitted</span>';
+    else if (inProgress) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">In Progress</span>';
     else if (isUpcoming) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400">Upcoming</span>';
     else if (isClosed) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400">Closed</span>';
     else badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/15 text-white">Open</span>';
@@ -1255,19 +1329,31 @@ function renderExamItem(e, index = 0) {
     let timeInfo = '';
     if (isUpcoming && e.start_time) {
         timeInfo = `<span class="exam-countdown text-xs text-neutral-300 font-medium" data-start="${e.start_time}" data-examid="${e.id}"></span>`;
-    } else if (isOpen && e.end_time) {
+    } else if (isOpen && e.end_time && !hasSubmitted) {
         timeInfo = `<span class="text-xs text-neutral-400">Closes: ${new Date(e.end_time).toLocaleString()}</span>`;
     } else if (isClosed && e.end_time) {
         timeInfo = `<span class="text-xs text-neutral-500">Ended: ${new Date(e.end_time).toLocaleString()}</span>`;
     }
 
     let btn = '';
-    if (isAwaitingRelease) btn = '<span class="text-sm font-medium text-neutral-300">Results pending</span>';
-    else if (done) btn = `<span class="text-sm font-medium text-white">${e.total_score != null ? e.total_score + '/' + e.total_marks : 'Submitted'}</span>`;
-    else if (inProgress) btn = `<button onclick="startExam(${e.id})" class="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200">Continue</button>`;
-    else if (isOpen) btn = `<button onclick="startExam(${e.id})" class="bg-white hover:bg-neutral-200 text-black text-sm px-4 py-2 rounded-lg transition-all duration-200">Start Exam</button>`;
-    else if (isUpcoming) btn = `<button disabled class="bg-white/10 text-neutral-500 text-sm px-4 py-2 rounded-lg cursor-not-allowed">Not Yet Open</button>`;
-    else btn = `<button disabled class="bg-white/5 text-neutral-600 text-sm px-4 py-2 rounded-lg cursor-not-allowed">Closed</button>`;
+    if (isAwaitingRelease) {
+        btn = '<span class="text-xs font-medium text-neutral-400 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">Results pending</span>';
+    } else if (done && hasScore) {
+        btn = `<div class="text-right">
+            <div class="text-lg font-bold text-white">${e.total_score}<span class="text-sm font-normal text-neutral-400">/${e.total_marks}</span></div>
+            <button onclick="switchView('grades')" class="text-xs text-neutral-400 hover:text-white underline underline-offset-2 transition-colors">View grades</button>
+        </div>`;
+    } else if (done) {
+        btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
+    } else if (inProgress) {
+        btn = `<button onclick="startExam(${e.id})" class="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200">Continue</button>`;
+    } else if (isOpen) {
+        btn = `<button onclick="startExam(${e.id})" class="bg-white hover:bg-neutral-200 text-black text-sm px-4 py-2 rounded-lg transition-all duration-200">Start Exam</button>`;
+    } else if (isUpcoming) {
+        btn = `<button disabled class="bg-white/10 text-neutral-500 text-sm px-4 py-2 rounded-lg cursor-not-allowed">Not Yet Open</button>`;
+    } else {
+        btn = `<button disabled class="bg-white/5 text-neutral-600 text-sm px-4 py-2 rounded-lg cursor-not-allowed">Closed</button>`;
+    }
 
     return `
     <div class="exam-item bg-white/5 border border-white/10 rounded-xl p-3" style="animation-delay:${index * 55}ms">
@@ -1285,48 +1371,163 @@ function renderExamItem(e, index = 0) {
         </div>
     </div>`;
 }
-
 // ═══════ GRADES PAGE ═══════
+function letterGrade(pct) {
+    if (pct == null) return { letter: '-', color: 'text-neutral-300 bg-white/10' };
+    if (pct >= 80) return { letter: 'A', color: 'text-white bg-green-500' };
+    if (pct >= 70) return { letter: 'B', color: 'text-white bg-blue-500' };
+    if (pct >= 60) return { letter: 'C', color: 'text-white bg-yellow-500' };
+    if (pct >= 50) return { letter: 'D', color: 'text-white bg-orange-500' };
+    return { letter: 'F', color: 'text-white bg-red-500' };
+}
+
+function isGroupedAssessmentEntry(r) {
+    const title = String(r.exam_title || '').toLowerCase();
+    const type = String(r.exam_type || '').toLowerCase();
+    return title.includes('cat 1') || title.includes('cat1')
+        || title.includes('cat 2') || title.includes('cat2')
+        || title.includes('main exam') || title.includes('main_exam') || title.includes('final')
+        || type === 'quiz' || type === 'midterm' || type === 'final';
+}
+
 async function loadGradesPage() {
     const tbody = document.getElementById('grades-table-body');
     tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-neutral-500">Loading grades...</td></tr>';
-    const resp = await AUTH.fetch('/api/student/results');
-    if (!resp.ok) return;
-    const data = await resp.json();
-    const results = data.results || [];
+    console.log('Loading grades page...');
+    
+    try {
+        const resp = await AUTH.fetch('/api/student/results');
+        console.log('Grades API response status:', resp.status);
+        console.log('Grades API response ok:', resp.ok);
+        
+        if (!resp.ok) {
+            console.error('Grades API response not ok:', resp.status);
+            const errorText = await resp.text();
+            console.error('Grades API error text:', errorText);
+            tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-red-500">Failed to load grades: ${resp.status}</td></tr>`;
+            return;
+        }
 
-    // Summary stats
-    const graded = results.filter(r => r.total_score != null);
-    document.getElementById('grade-total').textContent = results.length;
-    if (graded.length > 0) {
-        const scores = graded.map(r => (r.total_score / (r.total_marks || 1)) * 100);
-        document.getElementById('grade-avg').textContent = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) + '%';
-        document.getElementById('grade-highest').textContent = Math.round(Math.max(...scores)) + '%';
-    } else {
-        document.getElementById('grade-avg').textContent = '-';
-        document.getElementById('grade-highest').textContent = '-';
-    }
-
-    if (results.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-neutral-500">No exam results yet.</td></tr>';
-        return;
-    }
-
-    function letterGrade(pct) {
-        if (pct >= 70) return { letter: 'A', color: 'text-white bg-white/20' };
-        if (pct >= 60) return { letter: 'B', color: 'text-neutral-200 bg-white/15' };
-        if (pct >= 50) return { letter: 'C', color: 'text-neutral-300 bg-white/10' };
-        if (pct >= 40) return { letter: 'D', color: 'text-neutral-400 bg-white/10' };
-        return { letter: 'F', color: 'text-neutral-500 bg-white/5' };
-    }
-
-    function isGroupedAssessmentEntry(r) {
-        const title = String(r.exam_title || '').toLowerCase();
-        const type = String(r.exam_type || '').toLowerCase();
-        return title.includes('cat 1') || title.includes('cat1')
-            || title.includes('cat 2') || title.includes('cat2')
-            || title.includes('main exam') || title.includes('main_exam') || title.includes('final')
-            || type === 'quiz' || type === 'midterm' || type === 'final';
+        const data = await resp.json();
+        console.log('Grades API response data:', data);
+        console.log('Number of results:', data.results ? data.results.length : 0);
+        
+        const results = data.results || [];
+        
+        // Group results by course and assessment type
+        const courseGroups = new Map();
+        results.forEach(r => {
+            const courseTitle = r.course_title || 'Unknown Course';
+            if (!courseGroups.has(courseTitle)) {
+                courseGroups.set(courseTitle, {
+                    courseTitle,
+                    cat1: null,
+                    cat2: null,
+                    mainExam: null,
+                    assignment: null,
+                    latestDate: null
+                });
+            }
+            
+            const group = courseGroups.get(courseTitle);
+            const examType = (r.exam_type || '').toLowerCase();
+            const examTitle = (r.exam_title || '').toLowerCase();
+            
+            // Categorize by assessment type
+            if (examTitle.includes('cat 1') || examTitle.includes('cat1') || examType === 'quiz') {
+                group.cat1 = r;
+            } else if (examTitle.includes('cat 2') || examTitle.includes('cat2') || examType === 'midterm') {
+                group.cat2 = r;
+            } else if (examTitle.includes('main exam') || examTitle.includes('main_exam') || examTitle.includes('final') || examType === 'final') {
+                group.mainExam = r;
+            } else if (examType === 'assignment' || examTitle.includes('assignment')) {
+                group.assignment = r;
+            }
+            
+            // Track latest date
+            if (r.submitted_at) {
+                const date = new Date(r.submitted_at);
+                if (!group.latestDate || date > new Date(group.latestDate)) {
+                    group.latestDate = r.submitted_at;
+                }
+            }
+        });
+        
+        // Calculate overall grade for each course
+        const courseGroupsArray = Array.from(courseGroups.values()).map(group => {
+            // Check if all required assessments are complete
+            const hasCat1Score = !!(group.cat1 && group.cat1.total_score != null);
+            const hasCat2Score = !!(group.cat2 && group.cat2.total_score != null);
+            const hasMainScore = !!(group.mainExam && group.mainExam.total_score != null);
+            const allComplete = hasCat1Score && hasCat2Score && hasMainScore;
+            
+            // Only calculate grade when all 3 assessments are complete
+            let percentage = null;
+            let gradeInfo = { letter: '-', color: 'text-neutral-300 bg-white/10' };
+            
+            if (allComplete) {
+                const scores = [group.cat1.total_score, group.cat2.total_score, group.mainExam.total_score];
+                const totalMarks = [group.cat1.total_marks, group.cat2.total_marks, group.mainExam.total_marks];
+                
+                const totalScore = scores.reduce((a, b) => a + b, 0);
+                const totalPossible = totalMarks.reduce((a, b) => a + b, 0);
+                percentage = Math.round((totalScore / totalPossible) * 100);
+                gradeInfo = letterGrade(percentage);
+            }
+            
+            group.percentage = percentage;
+            group.gradeInfo = gradeInfo;
+            group.allComplete = allComplete;
+            
+            return group;
+        });
+        
+        document.getElementById('grade-total').textContent = courseGroupsArray.length;
+        
+        // Calculate average and highest only for courses with complete assessments (CAT 1, CAT 2, Main Exam)
+        const completeCourses = courseGroupsArray.filter(g => g.allComplete);
+        
+        if (completeCourses.length > 0) {
+            const avgScore = Math.round(completeCourses.reduce((sum, g) => sum + g.percentage, 0) / completeCourses.length);
+            document.getElementById('grade-avg').textContent = avgScore + '%';
+            document.getElementById('grade-highest').textContent = Math.round(Math.max(...completeCourses.map(g => g.percentage))) + '%';
+        } else {
+            document.getElementById('grade-avg').textContent = 'Pending';
+            document.getElementById('grade-highest').textContent = '0';
+        }
+        
+        if (courseGroupsArray.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-neutral-500">No exam results yet.</td></tr>';
+        } else {
+            tbody.innerHTML = courseGroupsArray.map(group => {
+                const renderScore = (assessment) => {
+                    if (!assessment) return '<span class="text-neutral-500">—</span>';
+                    if (assessment.total_score == null) return '<span class="text-neutral-500">—</span>';
+                    return `<span class="text-white font-medium">${assessment.total_score}/${assessment.total_marks}</span>`;
+                };
+                
+                return `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="py-3 px-4 text-white font-medium">${group.courseTitle}</td>
+                        <td class="py-3 px-4 text-center">${renderScore(group.cat1)}</td>
+                        <td class="py-3 px-4 text-center">${renderScore(group.cat2)}</td>
+                        <td class="py-3 px-4 text-center">${renderScore(group.mainExam)}</td>
+                        <td class="py-3 px-4 text-center">${renderScore(group.assignment)}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${group.gradeInfo.color}">
+                                ${group.gradeInfo.letter}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-xs text-neutral-400">${group.latestDate ? new Date(group.latestDate).toLocaleDateString() : '—'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+    } catch (error) {
+        console.error('Error loading grades:', error);
+        console.error('Error stack:', error.stack);
+        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-red-500">Error loading grades. Please try again.</td></tr>';
     }
 
     function getGroupedSlot(r) {
@@ -1416,12 +1617,17 @@ async function loadGradesPage() {
         const hasMainScore = !!(mainExam && mainExam.total_score != null);
         const hasAnyScore = hasCat1Score || hasCat2Score || hasMainScore;
 
+        // Only calculate grade when all 3 assessments are complete
+        const allComplete = hasCat1Score && hasCat2Score && hasMainScore;
+
         const cat1Pct = hasCat1Score && cat1.total_marks ? (cat1.total_score / cat1.total_marks) * 100 : null;
         const cat2Pct = hasCat2Score && cat2.total_marks ? (cat2.total_score / cat2.total_marks) * 100 : null;
         const mainPct = hasMainScore && mainExam.total_marks ? (mainExam.total_score / mainExam.total_marks) * 100 : null;
         const pctValues = [cat1Pct, cat2Pct, mainPct].filter(v => v != null);
         const avgPct = pctValues.length ? Math.round(pctValues.reduce((a, b) => a + b, 0) / pctValues.length) : null;
-        const g = avgPct != null ? letterGrade(avgPct) : { letter: '?', color: 'text-neutral-300 bg-white/10' };
+        
+        // Only show grade letter if all 3 assessments are complete
+        const g = allComplete && avgPct != null ? letterGrade(avgPct) : { letter: '-', color: 'text-neutral-500 bg-white/5' };
 
         const scoreCell = `<div class="text-xs leading-5 text-left inline-block">
             <div><span class="text-neutral-400">CAT 1:</span> <span class="font-semibold ${hasCat1Score ? 'text-white' : 'text-neutral-300'}">${hasCat1Score ? `${cat1.total_score}/${cat1.total_marks}` : '—'}</span></div>
@@ -1866,18 +2072,22 @@ async function loadDashboard() {
             list.innerHTML = '<div class="p-6 text-center text-neutral-500">No exams available right now.</div>';
         } else {
             list.innerHTML = previewExams.map(e => {
-                const done = e.submission_status === 'submitted' || e.submission_status === 'graded';
-                const inProgress = e.submission_status === 'in_progress';
+                const sv = e.submission_status;
+                const isAwaitingRelease = sv === 'awaiting_release';
+                const done = sv === 'submitted' || sv === 'graded';
+                const hasSubmitted = isAwaitingRelease || done;
+                const hasScore = e.total_score != null;
+                const inProgress = sv === 'in_progress';
                 const isUpcoming = e.availability === 'upcoming';
                 const isClosed = e.availability === 'closed';
                 const isOpen = e.availability === 'open';
 
                 // Status badge
                 let badge = '';
-                const isAwaitingRelease = e.submission_status === 'awaiting_release';
-                if (isAwaitingRelease) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">Awaiting Release</span>';
-                else if (done) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white">Completed</span>';
-                else if (inProgress) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">In Progress</span>';
+                if (isAwaitingRelease) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">Submitted · Awaiting Results</span>';
+                else if (done && hasScore) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">Results Available</span>';
+                else if (done) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white">Submitted</span>';
+                else if (inProgress) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">In Progress</span>';
                 else if (isUpcoming) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400">Upcoming</span>';
                 else if (isClosed) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400">Closed</span>';
                 else badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/15 text-white">Open</span>';
@@ -1886,18 +2096,20 @@ async function loadDashboard() {
                 let timeInfo = '';
                 if (isUpcoming && e.start_time) {
                     timeInfo = `<span class="exam-countdown text-xs text-neutral-400 font-medium" data-start="${e.start_time}" data-examid="${e.id}"></span>`;
-                } else if (isOpen && e.end_time) {
+                } else if (isOpen && e.end_time && !hasSubmitted) {
                     timeInfo = `<span class="text-xs text-neutral-400">Closes: ${new Date(e.end_time).toLocaleString()}</span>`;
                 } else if (isClosed && e.end_time) {
                     timeInfo = `<span class="text-xs text-neutral-500">Ended: ${new Date(e.end_time).toLocaleString()}</span>`;
                 }
 
-                // Button
+                // Button — never show Start Exam if student already submitted
                 let btn = '';
                 if (isAwaitingRelease) {
-                    btn = '<span class="text-sm font-medium text-neutral-300">Results pending</span>';
+                    btn = '<span class="text-xs font-medium text-neutral-400 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">Results pending</span>';
+                } else if (done && hasScore) {
+                    btn = `<div class="text-right"><div class="text-lg font-bold text-white">${e.total_score}<span class="text-sm font-normal text-neutral-400">/${e.total_marks}</span></div></div>`;
                 } else if (done) {
-                    btn = `<span class="text-sm font-medium text-white">${e.total_score != null ? e.total_score + '/' + e.total_marks : 'Submitted'}</span>`;
+                    btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
                 } else if (inProgress) {
                     btn = `<button onclick="startExam(${e.id})" class="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200">Continue</button>`;
                 } else if (isOpen) {
@@ -2043,6 +2255,8 @@ function startExam(examId) {
     // Double-check via API that exam is open before navigating
     AUTH.fetch(`/api/student/exams/${examId}/start`, { method: 'POST' }).then(resp => {
         if (resp.ok) {
+            // Route through /exam/<id> so it handles face-registration check,
+            // existing verified submissions, and redirect to verify-face as needed.
             window.location.href = `/exam/${examId}`;
         } else {
             resp.json().then(d => showStudentNotice(d.error || 'Cannot start exam.')).catch(() => showStudentNotice('Cannot start this exam yet.'));
@@ -2300,6 +2514,7 @@ async function loadProfilePage() {
     const faceRegistered = !!u.face_registered;
     const checks = [
         { label: 'Profile Photo', done: !!u.profile_image, icon: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' },
+        { label: 'Department', done: !!u.department, icon: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' },
         { label: 'Phone Number', done: !!u.phone_number, icon: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>' },
         { label: 'Bio', done: !!u.bio, icon: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' },
         { label: 'Face Verification', done: faceRegistered, icon: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>' },
@@ -2315,6 +2530,7 @@ async function loadProfilePage() {
     // Fill form fields
     document.getElementById('profile-fname').value = u.first_name || '';
     document.getElementById('profile-lname').value = u.last_name || '';
+    document.getElementById('profile-department').value = u.department || '';
     document.getElementById('profile-phone').value = u.phone_number || '';
     document.getElementById('profile-bio').value = u.bio || '';
 
@@ -2335,10 +2551,19 @@ async function loadProfilePage() {
 
     // Face status
     const faceStatus = document.getElementById('face-status');
+    const faceCaptureBtn = document.getElementById('face-capture-btn');
+    const faceRegisteredMsg = document.getElementById('face-registered-msg');
+    
     if (faceRegistered) {
         faceStatus.innerHTML = '<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-white"></span> Registered</span>';
+        // Hide capture button, show registered message
+        faceCaptureBtn.classList.add('hidden');
+        faceRegisteredMsg.classList.remove('hidden');
     } else {
         faceStatus.innerHTML = '<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-neutral-500"></span> Not registered</span>';
+        // Show capture button, hide registered message
+        faceCaptureBtn.classList.remove('hidden');
+        faceRegisteredMsg.classList.add('hidden');
     }
 }
 
@@ -2367,6 +2592,7 @@ async function saveProfile() {
     const body = {
         first_name: document.getElementById('profile-fname').value.trim(),
         last_name: document.getElementById('profile-lname').value.trim(),
+        department: document.getElementById('profile-department').value.trim(),
         phone_number: document.getElementById('profile-phone').value.trim(),
         bio: document.getElementById('profile-bio').value.trim(),
     };
@@ -2450,75 +2676,15 @@ async function changePassword() {
 
 let faceStream = null;
 function startFaceCapture() {
-    const video = document.getElementById('face-video');
-    video.setAttribute('playsinline', '');
-    const preview = document.getElementById('face-preview');
-    const btn = document.getElementById('face-capture-btn');
-    const errEl = document.getElementById('face-error');
-    errEl.classList.add('hidden');
-
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 320 } })
-    .then(stream => {
-        faceStream = stream;
-        video.srcObject = stream;
-        video.classList.remove('hidden');
-        video.style.cssText = 'width:128px;height:128px;object-fit:cover;border-radius:12px;';
-        preview.innerHTML = '';
-        preview.appendChild(video);
-        btn.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg> Take Photo</span>';
-        btn.onclick = captureFace;
-    })
-    .catch(() => {
-        errEl.textContent = 'Camera access denied. Please allow camera permissions.';
-        errEl.classList.remove('hidden');
-    });
+    // Redirect to the dedicated face registration page
+    window.location.href = '/face-registration';
 }
 
+// Legacy inline capture - now redirects to dedicated page
 async function captureFace() {
-    const video = document.getElementById('face-video');
-    const canvas = document.getElementById('face-canvas');
-    canvas.width = 320;
-    canvas.height = 320;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, 320, 320);
-
-    // Stop camera
-    if (faceStream) { faceStream.getTracks().forEach(t => t.stop()); faceStream = null; }
-    video.classList.add('hidden');
-
-    const imageData = canvas.toDataURL('image/jpeg', 0.8);
-    const preview = document.getElementById('face-preview');
-    preview.innerHTML = `<img src="${imageData}" class="w-full h-full object-cover rounded-xl" alt="Face">`;
-
-    const btn = document.getElementById('face-capture-btn');
-    btn.innerHTML = '<span class="flex items-center gap-2">Registering...</span>';
-    btn.disabled = true;
-
-    try {
-        const resp = await AUTH.fetch('/api/auth/profile/face', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: imageData }),
-        });
-
-        if (resp.ok) {
-            const data = await resp.json();
-            AUTH.setUser(data.user);
-            updateDropdownCompletion(data.user.profile_complete || 0);
-            document.getElementById('face-status').innerHTML = '<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-white"></span>Registered</span>';
-            loadProfilePage();
-        } else {
-            const err = await resp.json().catch(() => ({}));
-            document.getElementById('face-error').textContent = err.error || 'Face registration failed. Please try again.';
-            document.getElementById('face-error').classList.remove('hidden');
-        }
-    } catch (e) {
-        document.getElementById('face-error').textContent = 'Network error. Please try again.';
-        document.getElementById('face-error').classList.remove('hidden');
-    }
-    btn.disabled = false;
-    btn.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Capture Face</span>';
-    btn.onclick = startFaceCapture;
+    // This function is no longer used inline
+    // Redirect to the dedicated face registration page
+    window.location.href = '/face-registration';
 }
 
 // ═══════ PROFILE SETUP MODAL ═══════
@@ -2571,13 +2737,15 @@ async function finishSetup() {
             setAvatarDisplay(imgData.user.profile_image);
         }
     }
-    // Save phone & bio
+    // Save department, phone & bio
+    const department = document.getElementById('setup-department').value.trim();
     const phone = document.getElementById('setup-phone').value.trim();
     const bio = document.getElementById('setup-bio').value.trim();
-    if (phone || bio) {
-        const body = {};
-        if (phone) body.phone_number = phone;
-        if (bio) body.bio = bio;
+    const body = {};
+    if (department) body.department = department;
+    if (phone) body.phone_number = phone;
+    if (bio) body.bio = bio;
+    if (Object.keys(body).length > 0) {
         const resp = await AUTH.fetch('/api/auth/profile', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -2610,7 +2778,16 @@ function logout() {
 
 checkProfileSetup();
 
+// Check if face registration is required (redirected from exam)
 const params = new URLSearchParams(window.location.search);
+if (params.get('face_registration_required') === 'true') {
+    // Show notification and navigate to profile
+    setTimeout(() => {
+        showStudentNotice('Face registration required. Please capture your face to take exams.', 5000);
+        navigateTo('profile', { syncUrl: true });
+    }, 500);
+}
+
 const requestedView = (params.get('view') || 'dashboard').toLowerCase();
 const requestedCoursesTab = (params.get('coursesTab') || '').toLowerCase();
 if (requestedCoursesTab === 'all' || requestedCoursesTab === 'mine') {

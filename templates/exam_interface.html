@@ -93,7 +93,7 @@
 {% endblock %}
 
 {% block body %}
-<div id="exam-root" data-exam-id="{{ exam_id }}" class="exam-bg min-h-screen text-white">
+<div id="exam-root" data-exam-id="{{ exam_id }}" data-submission-verified="{% if submission and submission.face_verified %}true{% else %}false{% endif %}" data-submission-id="{% if submission %}{{ submission.id }}{% endif %}" class="exam-bg min-h-screen text-white">
     <!-- Exam Header -->
     <nav class="glass-nav sticky top-0 z-30 px-4 py-3">
         <div class="max-w-6xl mx-auto flex justify-between items-center gap-3">
@@ -121,21 +121,15 @@
     <div class="max-w-6xl mx-auto py-6 px-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Questions Panel -->
         <div class="lg:col-span-3 space-y-6" id="questions-panel">
-            <!-- Face Verification Screen -->
-            <div id="face-verify-screen" class="glass-card rounded-2xl p-8 text-center fade-up">
-                <h2 class="text-2xl font-semibold mb-3">Face Verification Required</h2>
-                <p class="text-slate-300 mb-6">Please allow camera access and look directly at the camera.</p>
-                <p class="text-xs text-slate-400 mb-4">Proctoring may capture short evidence clips when violations are detected.</p>
-                <video id="verify-video" autoplay class="mx-auto rounded-xl mb-4 w-80 h-60 bg-black border border-slate-700"></video>
-                <button onclick="verifyFace()" id="verify-btn"
-                        class="bg-white text-black hover:bg-neutral-200 px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-[1.02]">
-                    Verify Face & Start Exam
-                </button>
-                <p id="verify-status" class="text-sm mt-3 text-slate-300"></p>
+            <!-- Questions (exam content) -->
+            <div id="questions-container" class="space-y-6">
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="inline-flex items-center gap-2 text-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                        Loading exam...
+                    </div>
+                </div>
             </div>
-
-            <!-- Questions (hidden until verified) -->
-            <div id="questions-container" class="hidden space-y-6"></div>
         </div>
 
         <!-- Sidebar: Camera & Question Nav -->
@@ -222,70 +216,59 @@ let violationRecordingInProgress = false;
 
 // ─── Initialize Camera ───
 async function initCamera() {
-    try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const verifyVideo = document.getElementById('verify-video');
-        const proctorVideo = document.getElementById('proctor-video');
-        verifyVideo.setAttribute('playsinline', '');
-        proctorVideo.setAttribute('playsinline', '');
-        verifyVideo.srcObject = stream;
-        proctorVideo.srcObject = stream;
-    } catch (err) {
-        document.getElementById('verify-status').textContent = 'Camera access denied. Proctoring requires camera.';
-    }
-}
+    const root = document.getElementById('exam-root');
+    const preloadedSubmissionId = root.dataset.submissionId;
 
-// ─── Face Verification ───
-async function verifyFace() {
-    const btn = document.getElementById('verify-btn');
-    const status = document.getElementById('verify-status');
-    btn.disabled = true;
-    status.textContent = 'Verifying...';
-
-    // Start exam first to get submission ID
-    const startResp = await AUTH.fetch(`/api/student/exams/${examId}/start`, { method: 'POST' });
-    if (!startResp.ok) {
-        let errorMessage = 'Failed to start exam.';
-        try {
-            const errorData = await startResp.json();
-            errorMessage = errorData.error || errorMessage;
-        } catch (_) {}
-        status.textContent = errorMessage;
-        btn.disabled = false;
+    if (!preloadedSubmissionId) {
+        showExamNotice('No valid submission found.');
         return;
     }
+
+    // Try to start camera for proctoring, but don't block exam if unavailable
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const proctorVideo = document.getElementById('proctor-video');
+        proctorVideo.setAttribute('playsinline', '');
+        proctorVideo.srcObject = stream;
+    } catch (err) {
+        console.warn('Camera unavailable — proctoring disabled:', err);
+        // Disable proctoring silently; exam continues normally
+        proctorRecordingEnabled = false;
+    }
+
+    // Load exam regardless of camera access
+    setTimeout(() => loadVerifiedExam(preloadedSubmissionId), 500);
+}
+
+// ─── Load Verified Exam (pre-verified submissions only) ───
+async function loadVerifiedExam(preloadedSubmissionId) {
+    submissionId = preloadedSubmissionId;
+    
+    // Start exam to get questions and remaining time
+    const startResp = await AUTH.fetch(`/api/student/exams/${examId}/start`, { method: 'POST' });
+    if (!startResp.ok) {
+        showExamNotice('Failed to load exam. Please try again.');
+        return;
+    }
+    
     const startData = await startResp.json();
-    submissionId = startData.submission_id;
     questions = startData.questions;
     answersByQuestion = (startData.answers || []).reduce((acc, ans) => {
         acc[ans.question_id] = ans;
         return acc;
     }, {});
-
-    // Capture frame for face verification
-    const frame = captureFrame();
-    const verifyResp = await AUTH.fetch(`/api/exam/${submissionId}/face-verify`, {
-        method: 'POST',
-        body: JSON.stringify({ image: frame }),
-    });
-    const verifyData = await verifyResp.json();
-
-    if (verifyData.verified) {
-        document.getElementById('face-verify-screen').classList.add('hidden');
-        document.getElementById('questions-container').classList.remove('hidden');
-        document.getElementById('exam-title').textContent = startData.exam.title;
-        proctorRecordingEnabled = Boolean(startData.exam?.is_proctored);
-        renderQuestions();
-        startTimer(startData.remaining_seconds ?? (startData.exam.duration_minutes * 60));
-        startProctoring();
-        setupTabDetection();
-        setupCopyProtection();
-        setupFullscreenGuard();
-        requestFullscreen();
-    } else {
-        status.innerHTML = '<span class="text-red-400">Face verification failed — your face does not match your registered profile. Please try again or update your face registration in your Profile.</span>';
-        btn.disabled = false;
-    }
+    
+    // Show exam
+    document.getElementById('questions-container').classList.remove('hidden');
+    document.getElementById('exam-title').textContent = startData.exam.title;
+    proctorRecordingEnabled = Boolean(startData.exam?.is_proctored);
+    renderQuestions();
+    startTimer(startData.remaining_seconds ?? (startData.exam.duration_minutes * 60));
+    startProctoring();
+    setupTabDetection();
+    setupCopyProtection();
+    setupFullscreenGuard();
+    requestFullscreen();
 }
 
 // ─── Capture Video Frame ───
@@ -589,36 +572,23 @@ function requestFullscreen() {
     const req = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
     if (req) {
         req.call(root).catch(() => {
-            forceExitExam('Fullscreen is required for this exam.');
+            // Fullscreen denied by browser or user — continue exam normally
+            console.warn('Fullscreen request denied; exam continues without fullscreen.');
         });
-        return;
     }
-    forceExitExam('Fullscreen is required for this exam.');
 }
 
 function setupFullscreenGuard() {
-    const onChange = async () => {
+    const onChange = () => {
         const isFull = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
         if (!isFull && submissionId) {
-            forceExitExam('Fullscreen exited. You have been exited from the exam.');
+            // Warn but do NOT force-exit — student keeps taking the exam
+            showCopyWarning('You exited fullscreen. Please return to fullscreen for best exam experience.');
         }
     };
     document.addEventListener('fullscreenchange', onChange);
     document.addEventListener('webkitfullscreenchange', onChange);
     document.addEventListener('msfullscreenchange', onChange);
-}
-
-async function forceExitExam(message) {
-    showCopyWarning(message);
-    if (submissionId) {
-        await AUTH.fetch(`/api/exam/${submissionId}/tab-switch`, { method: 'POST' });
-    }
-    clearInterval(timerInterval);
-    clearInterval(proctorInterval);
-    if (stream) stream.getTracks().forEach(t => t.stop());
-    setTimeout(() => {
-        window.location.href = '/student/dashboard?view=exams';
-    }, 800);
 }
 
 function openSubmitModal() {
@@ -667,8 +637,8 @@ function confirmSubmitExam() {
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+        // Prevent Escape from exiting fullscreen silently; just block the default
         e.preventDefault();
-        forceExitExam('You exited the exam.');
     }
 });
 

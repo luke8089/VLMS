@@ -47,6 +47,7 @@ class AuthenticationService:
             User.first_name,
             User.last_name,
             User.role,
+            User.department,
             User.profile_image,
             User.phone_number,
             User.bio,
@@ -76,6 +77,7 @@ class AuthenticationService:
             'first_name': user_row.first_name,
             'last_name': user_row.last_name,
             'role': user_row.role,
+            'department': user_row.department,
             'profile_image': user_row.profile_image,
             'phone_number': user_row.phone_number,
             'bio': user_row.bio,
@@ -108,7 +110,7 @@ class AuthenticationService:
         if not user:
             return None, 'User not found.'
 
-        allowed = ['first_name', 'last_name', 'profile_image', 'phone_number', 'bio', 'share_contact']
+        allowed = ['first_name', 'last_name', 'profile_image', 'phone_number', 'bio', 'share_contact', 'department']
         for key, value in kwargs.items():
             if key in allowed and value is not None:
                 setattr(user, key, value)

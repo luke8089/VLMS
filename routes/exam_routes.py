@@ -1,12 +1,45 @@
+
 import os
 import base64
-from flask import Blueprint, request, jsonify, render_template, current_app
+from flask import Blueprint, request, jsonify, render_template, current_app, redirect
 from flask_jwt_extended import jwt_required
 from database.models import db, Exam, Submission, Violation, Question, Answer
 from utils.security import role_required, get_identity
 from datetime import datetime
 
 exam_bp = Blueprint('exam', __name__)
+
+# ──────────────── FACE VERIFICATION PAGE ────────────────
+
+@exam_bp.route('/exam/<int:exam_id>/verify-face')
+@jwt_required()
+@role_required('student')
+def face_verification_page(exam_id):
+    """Pre-exam face verification page."""
+    from database.models import Exam, Submission
+    identity = get_identity()
+    exam = Exam.query.get_or_404(exam_id)
+    # Get or create submission for this exam
+    submission = Submission.query.filter_by(
+        exam_id=exam_id,
+        student_id=identity['id']
+    ).first()
+    if not submission:
+        submission = Submission(
+            exam_id=exam_id,
+            student_id=identity['id'],
+            status='in_progress'
+        )
+        db.session.add(submission)
+        db.session.commit()
+    # If already verified, redirect to exam
+    if submission.face_verified:
+        return redirect(f'/exam/{exam_id}?submission={submission.id}')
+    return render_template('face_verification.html', exam=exam, submission=submission, submission_id=submission.id)
+
+
+# ──────────────── FACE VERIFICATION PAGE ────────────────
+
 
 
 # ──────────────── EXAM INTERFACE PAGE ────────────────
@@ -15,7 +48,26 @@ exam_bp = Blueprint('exam', __name__)
 @jwt_required()
 @role_required('student')
 def exam_interface(exam_id):
-    return render_template('exam_interface.html', exam_id=exam_id)
+    from database.models import Exam, Submission
+
+    identity = get_identity()
+
+    # Get or create submission
+    submission = Submission.query.filter_by(
+        exam_id=exam_id,
+        student_id=identity['id']
+    ).order_by(Submission.id.desc()).first()
+
+    if not submission:
+        submission = Submission(
+            exam_id=exam_id,
+            student_id=identity['id'],
+            status='in_progress'
+        )
+        db.session.add(submission)
+        db.session.commit()
+
+    return render_template('exam_interface.html', exam_id=exam_id, submission=submission)
 
 
 # ──────────────── PROCTORING ENDPOINTS ────────────────
@@ -32,27 +84,91 @@ def face_verify(submission_id):
         return jsonify({'error': 'Submission not found'}), 404
 
     data = request.get_json()
-    image_data = data.get('image')  # Base64 encoded frame
+    image_data = data.get('image')
 
     if not image_data:
         return jsonify({'error': 'No image provided'}), 400
 
-    # Import face auth module
     try:
         from ai_modules.exam_proctoring.face_auth import FaceAuthenticator
         authenticator = FaceAuthenticator()
-        is_verified = authenticator.verify_face(identity['id'], image_data)
-    except ImportError:
-        # Fallback if AI module not fully configured — allow pass
-        is_verified = True
+        result = authenticator.verify_face(identity['id'], image_data)
+        is_verified = result.get('verified', False)
+    except Exception as e:
+        current_app.logger.error(f"Face verification error: {e}")
+        return jsonify({'error': 'Face verification system error'}), 500
 
-    submission.face_verified = is_verified
-    db.session.commit()
+    if is_verified:
+        submission.face_verified = True
+        submission.face_verified_at = datetime.utcnow()
+        db.session.commit()
 
     return jsonify({
         'verified': is_verified,
         'message': 'Face verified successfully' if is_verified else 'Face verification failed'
     })
+
+
+@exam_bp.route('/api/exam/<int:submission_id>/face-verify-enhanced', methods=['POST'])
+@jwt_required()
+@role_required('student')
+def face_verify_enhanced(submission_id):
+    """
+    Enhanced face verification with liveness detection.
+    Required before starting proctored exams.
+    """
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+
+    if not submission or submission.student_id != identity['id']:
+        return jsonify({'error': 'Submission not found'}), 404
+    
+    exam = Exam.query.get(submission.exam_id)
+    if not exam:
+        return jsonify({'error': 'Exam not found'}), 404
+
+    data = request.get_json()
+    image_data = data.get('image')
+    previous_frames = data.get('previous_frames', [])
+
+    if not image_data:
+        return jsonify({'error': 'No image provided'}), 400
+
+    # Check if user has face registered
+    from database.models import User
+    user = User.query.get(identity['id'])
+    if not user or not user.face_encoding:
+        return jsonify({
+            'verified': False,
+            'message': 'No face registered. Please register your face first.',
+            'needs_registration': True
+        }), 400
+
+    try:
+        from ai_modules.exam_proctoring.face_auth import FaceAuthenticator
+        authenticator = FaceAuthenticator()
+        
+        result = authenticator.verify_face(
+            identity['id'], 
+            image_data,
+            exam_id=submission.exam_id,
+            submission_id=submission_id,
+            previous_frames=previous_frames
+        )
+        
+        if result['verified']:
+            submission.face_verified = True
+            submission.face_verified_at = datetime.utcnow()
+            db.session.commit()
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        current_app.logger.error(f"Face verification error: {e}")
+        return jsonify({
+            'verified': False,
+            'message': 'Verification system error. Please try again.'
+        }), 500
 
 
 @exam_bp.route('/api/exam/<int:submission_id>/proctor-frame', methods=['POST'])

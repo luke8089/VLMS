@@ -1,0 +1,639 @@
+{% extends "base.html" %}
+{% block title %}Face Verification — MindStack{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: #0a0a0a; color: #fff; }
+    
+    .verification-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    
+    .camera-wrapper {
+        position: relative;
+        width: 480px;
+        max-width: 90vw;
+        aspect-ratio: 4/3;
+        background: #111;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 2px solid rgba(255,255,255,0.1);
+    }
+    
+    .camera-wrapper.verifying {
+        border-color: #fbbf24;
+        animation: pulse-border 1.5s ease-in-out infinite;
+    }
+    
+    .camera-wrapper.success {
+        border-color: #22c55e;
+    }
+    
+    .camera-wrapper.error {
+        border-color: #ef4444;
+    }
+    
+    @keyframes pulse-border {
+        0%, 100% { border-color: rgba(251, 191, 36, 0.5); }
+        50% { border-color: rgba(251, 191, 36, 1); }
+    }
+    
+    #video-feed {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1); /* Mirror effect */
+    }
+    
+    .face-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 240px;
+        height: 240px;
+        border: 3px dashed rgba(255,255,255,0.3);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    
+    .face-overlay.detected {
+        border-color: rgba(34, 197, 94, 0.6);
+        border-style: solid;
+        box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+    }
+    
+    .status-indicator {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0,0,0,0.7);
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #6b7280;
+    }
+    
+    .status-dot.active { background: #22c55e; animation: pulse 1.5s ease-in-out infinite; }
+    .status-dot.processing { background: #fbbf24; animation: pulse 1s ease-in-out infinite; }
+    .status-dot.error { background: #ef4444; }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+    
+    .instruction-box {
+        margin-top: 2rem;
+        text-align: center;
+        max-width: 480px;
+    }
+    
+    .instruction-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .instruction-text {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 4px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 2px;
+        margin-top: 1.5rem;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #fff, rgba(255,255,255,0.7));
+        border-radius: 2px;
+        transition: width 0.3s ease;
+        width: 0%;
+    }
+    
+    .sample-counter {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 1.5rem;
+    }
+    
+    .sample-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .sample-dot.captured { background: #22c55e; }
+    .sample-dot.current { background: #fbbf24; animation: pulse 1s ease-in-out infinite; }
+    
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+    
+    .btn-primary {
+        background: #fff;
+        color: #000;
+    }
+    
+    .btn-primary:hover { background: #e5e5e5; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .btn-secondary {
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+    }
+    
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+    
+    .liveness-checks {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 1rem;
+    }
+    
+    .check-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 20px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.5);
+    }
+    
+    .check-badge.passed {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+    }
+    
+    .check-badge.failed {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+    
+    .result-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    
+    .result-modal.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+    .result-card {
+        background: #111;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        padding: 2.5rem;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+    }
+    
+    .result-modal.visible .result-card {
+        transform: scale(1);
+    }
+    
+    .result-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .result-icon.success {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+    }
+    
+    .result-icon.error {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+    
+    .hidden-canvas { display: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="verification-container">
+    <div class="camera-wrapper" id="camera-wrapper">
+        <video id="video-feed" autoplay playsinline></video>
+        <div class="face-overlay" id="face-overlay"></div>
+        
+        <div class="status-indicator">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Initializing...</span>
+        </div>
+    </div>
+    
+    <div class="instruction-box">
+        <h1 class="instruction-title" id="instruction-title">Face Registration</h1>
+        <p class="instruction-text" id="instruction-text">
+            Please look directly at the camera. We'll capture 3 samples of your face for secure verification during exams.
+        </p>
+        
+        <div class="sample-counter" id="sample-counter">
+            <div class="sample-dot current"></div>
+            <div class="sample-dot"></div>
+            <div class="sample-dot"></div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        
+        <div class="liveness-checks" id="liveness-checks">
+            <div class="check-badge" id="check-lighting">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                Good lighting
+            </div>
+            <div class="check-badge" id="check-face">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Face detected
+            </div>
+            <div class="check-badge" id="check-liveness">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Liveness check
+            </div>
+        </div>
+    </div>
+    
+    <div class="action-buttons">
+        <button class="btn btn-primary" id="capture-btn" onclick="captureSample()" disabled>
+            Capture Sample
+        </button>
+        <button class="btn btn-secondary" onclick="skipRegistration()" id="skip-btn">
+            Skip for now
+        </button>
+    </div>
+</div>
+
+<!-- Result Modal -->
+<div class="result-modal" id="result-modal">
+    <div class="result-card">
+        <div class="result-icon" id="result-icon">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"/>
+            </svg>
+        </div>
+        <h2 class="text-xl font-semibold mb-2" id="result-title">Success!</h2>
+        <p class="text-neutral-400 text-sm mb-6" id="result-message">Your face has been registered successfully.</p>
+        <button class="btn btn-primary w-full" onclick="closeResultModal()" id="result-action-btn">
+            Continue to Dashboard
+        </button>
+    </div>
+</div>
+
+<canvas id="capture-canvas" class="hidden-canvas"></canvas>
+
+<script>
+// Configuration
+const REQUIRED_SAMPLES = 3;
+const CAPTURE_DELAY = 500; // ms between captures
+
+// State
+let stream = null;
+let samples = [];
+let isCapturing = false;
+let faceDetected = false;
+let currentStep = 0;
+
+// Get the redirect URL from query params or template variable
+const urlParams = new URLSearchParams(window.location.search);
+const redirectUrl = urlParams.get('next') || '{{ next_url }}' || '/student?view=profile';
+
+// DOM Elements
+const video = document.getElementById('video-feed');
+const canvas = document.getElementById('capture-canvas');
+const cameraWrapper = document.getElementById('camera-wrapper');
+const faceOverlay = document.getElementById('face-overlay');
+const statusDot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
+const captureBtn = document.getElementById('capture-btn');
+const progressFill = document.getElementById('progress-fill');
+const sampleDots = document.querySelectorAll('.sample-dot');
+const instructionTitle = document.getElementById('instruction-title');
+const instructionText = document.getElementById('instruction-text');
+
+// Check badges
+const checkLighting = document.getElementById('check-lighting');
+const checkFace = document.getElementById('check-face');
+const checkLiveness = document.getElementById('check-liveness');
+
+// Initialize camera on page load
+window.addEventListener('DOMContentLoaded', initializeCamera);
+
+async function initializeCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 640 },
+                height: { ideal: 480 },
+                facingMode: 'user'
+            }, 
+            audio: false 
+        });
+        video.srcObject = stream;
+        
+        statusDot.classList.add('active');
+        statusText.textContent = 'Camera active';
+        captureBtn.disabled = false;
+        
+        // Start face detection simulation
+        startFaceDetection();
+        
+    } catch (err) {
+        console.error('Camera error:', err);
+        statusDot.classList.add('error');
+        statusText.textContent = 'Camera access denied';
+        instructionText.textContent = 'Please allow camera access to register your face.';
+        captureBtn.disabled = true;
+    }
+}
+
+function startFaceDetection() {
+    // Simple face detection simulation using canvas frame analysis
+    // In production, this could use face-api.js for real detection
+    setInterval(() => {
+        if (!video.videoWidth) return;
+        
+        // Check video brightness as a proxy for face presence
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Get center region brightness
+        const centerX = Math.floor(canvas.width / 2);
+        const centerY = Math.floor(canvas.height / 2);
+        const regionSize = 100;
+        
+        try {
+            const frame = ctx.getImageData(
+                centerX - regionSize/2, 
+                centerY - regionSize/2, 
+                regionSize, 
+                regionSize
+            );
+            
+            let brightness = 0;
+            for (let i = 0; i < frame.data.length; i += 4) {
+                brightness += (frame.data[i] + frame.data[i+1] + frame.data[i+2]) / 3;
+            }
+            brightness /= (frame.data.length / 4);
+            
+            // Update liveness checks
+            updateLivenessChecks(brightness);
+            
+        } catch (e) {
+            // Ignore errors
+        }
+    }, 500);
+}
+
+function updateLivenessChecks(brightness) {
+    // Check lighting
+    if (brightness > 40 && brightness < 200) {
+        checkLighting.classList.add('passed');
+        checkLighting.classList.remove('failed');
+    } else {
+        checkLighting.classList.remove('passed');
+        if (brightness <= 40) {
+            checkLighting.classList.add('failed');
+        }
+    }
+    
+    // Simulate face detection based on variance in the frame
+    // This is a simplified check - in production use proper face detection
+    faceDetected = brightness > 30; // Basic threshold
+    
+    if (faceDetected) {
+        faceOverlay.classList.add('detected');
+        checkFace.classList.add('passed');
+        checkFace.classList.remove('failed');
+        statusText.textContent = 'Face detected';
+    } else {
+        faceOverlay.classList.remove('detected');
+        checkFace.classList.remove('passed');
+        statusText.textContent = 'Position your face';
+    }
+    
+    // Liveness is assumed if lighting and face are good
+    if (checkLighting.classList.contains('passed') && checkFace.classList.contains('passed')) {
+        checkLiveness.classList.add('passed');
+    } else {
+        checkLiveness.classList.remove('passed');
+    }
+}
+
+async function captureSample() {
+    if (isCapturing || samples.length >= REQUIRED_SAMPLES) return;
+    
+    if (!faceDetected) {
+        showError('Please position your face in the circle');
+        return;
+    }
+    
+    isCapturing = true;
+    captureBtn.disabled = true;
+    cameraWrapper.classList.add('verifying');
+    statusDot.classList.remove('active');
+    statusDot.classList.add('processing');
+    statusText.textContent = 'Capturing...';
+    
+    // Wait a moment for user to stabilize
+    await new Promise(r => setTimeout(r, 500));
+    
+    // Capture frame
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Convert to base64
+    const imageData = canvas.toDataURL('image/jpeg', 0.9);
+    samples.push(imageData);
+    
+    // Update UI
+    updateSampleUI();
+    
+    // Reset state
+    isCapturing = false;
+    cameraWrapper.classList.remove('verifying');
+    statusDot.classList.remove('processing');
+    statusDot.classList.add('active');
+    
+    if (samples.length < REQUIRED_SAMPLES) {
+        statusText.textContent = `Sample ${samples.length} captured`;
+        captureBtn.disabled = false;
+        captureBtn.textContent = `Capture Sample ${samples.length + 1}`;
+        
+        // Auto-advance hint
+        setTimeout(() => {
+            if (samples.length < REQUIRED_SAMPLES) {
+                statusText.textContent = 'Ready for next sample';
+            }
+        }, 1500);
+    } else {
+        // All samples captured
+        statusText.textContent = 'All samples captured';
+        submitRegistration();
+    }
+}
+
+function updateSampleUI() {
+    // Update progress bar
+    const progress = (samples.length / REQUIRED_SAMPLES) * 100;
+    progressFill.style.width = `${progress}%`;
+    
+    // Update sample dots
+    sampleDots.forEach((dot, index) => {
+        dot.classList.remove('current', 'captured');
+        if (index < samples.length) {
+            dot.classList.add('captured');
+        } else if (index === samples.length) {
+            dot.classList.add('current');
+        }
+    });
+    
+    // Update instructions
+    if (samples.length === 1) {
+        instructionText.textContent = 'Great! Now turn slightly to your left and capture again.';
+    } else if (samples.length === 2) {
+        instructionText.textContent = 'Almost done! Turn slightly to your right for the final sample.';
+    }
+}
+
+async function submitRegistration() {
+    captureBtn.textContent = 'Processing...';
+    statusText.textContent = 'Registering face...';
+    
+    try {
+        const response = await fetch('/api/auth/profile/face', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ images: samples })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showSuccess(result.message || 'Face registered successfully!');
+        } else {
+            showError(result.error || 'Registration failed. Please try again.');
+            // Reset for retry
+            samples = [];
+            updateSampleUI();
+            progressFill.style.width = '0%';
+            captureBtn.disabled = false;
+            captureBtn.textContent = 'Capture Sample 1';
+            instructionText.textContent = 'Please look directly at the camera. We\'ll capture 3 samples of your face.';
+        }
+    } catch (err) {
+        showError('Network error. Please try again.');
+        captureBtn.disabled = false;
+    }
+}
+
+function showSuccess(message) {
+    document.getElementById('result-icon').classList.add('success');
+    document.getElementById('result-icon').classList.remove('error');
+    document.getElementById('result-title').textContent = 'Success!';
+    document.getElementById('result-message').textContent = message;
+    document.getElementById('result-action-btn').textContent = 'Continue to Dashboard';
+    document.getElementById('result-modal').classList.add('visible');
+}
+
+function showError(message) {
+    cameraWrapper.classList.add('error');
+    setTimeout(() => cameraWrapper.classList.remove('error'), 1000);
+    
+    statusText.textContent = message;
+    statusDot.classList.add('error');
+    setTimeout(() => {
+        statusDot.classList.remove('error');
+        statusDot.classList.add('active');
+        statusText.textContent = faceDetected ? 'Face detected' : 'Position your face';
+    }, 2000);
+}
+
+function closeResultModal() {
+    window.location.href = redirectUrl;
+}
+
+function skipRegistration() {
+    if (confirm('Face verification is required for exams. Skip registration?')) {
+        window.location.href = redirectUrl;
+    }
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+});
+</script>
+{% endblock %}

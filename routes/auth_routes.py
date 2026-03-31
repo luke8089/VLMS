@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 from utils.security import get_identity, hash_password
 from utils.helpers import save_uploaded_file, allowed_file
 from services.authentication_service import AuthenticationService
+from config import UNIVERSITY_DEPARTMENTS
 import secrets
 from datetime import datetime, timedelta
 
@@ -22,6 +23,14 @@ def login_page():
 @auth_bp.route('/register', methods=['GET'])
 def register_page():
     return render_template('register.html')
+
+
+@auth_bp.route('/face-registration', methods=['GET'])
+@jwt_required()
+def face_registration_page():
+    """Page for students to register their face."""
+    next_url = request.args.get('next', '/student')
+    return render_template('face_registration.html', next_url=next_url)
 
 
 # ──────────────── API ROUTES ────────────────
@@ -144,15 +153,25 @@ def upload_profile_image():
 @auth_bp.route('/api/auth/profile/face', methods=['POST'])
 @jwt_required()
 def register_face():
+    """Register a user's face with multiple samples for better accuracy."""
     identity = get_identity()
     data = request.get_json()
-    if not data or not data.get('image'):
-        return jsonify({'error': 'No face image provided'}), 400
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    # Support both single image (legacy) and multiple images (new)
+    images = data.get('images', [])
+    if not images and data.get('image'):
+        images = [data.get('image')]
+    
+    if not images:
+        return jsonify({'error': 'No face images provided'}), 400
 
     try:
         from ai_modules.exam_proctoring.face_auth import FaceAuthenticator
         fa = FaceAuthenticator()
-        success, msg = fa.register_face(identity['id'], data['image'])
+        success, msg = fa.register_face(identity['id'], images)
     except Exception as e:
         return jsonify({'error': f'Face registration error: {str(e)}'}), 500
 
@@ -161,7 +180,11 @@ def register_face():
 
     from database.models import User
     user = User.query.get(identity['id'])
-    return jsonify({'message': msg, 'user': user.to_dict()})
+    return jsonify({
+        'message': msg, 
+        'user': user.to_dict(),
+        'face_registered': True
+    })
 
 
 # ──────────────── FORGOT PASSWORD ────────────────
@@ -225,3 +248,9 @@ def reset_password():
     db.session.commit()
 
     return jsonify({'message': 'Password has been reset successfully. You can now log in.'})
+
+
+@auth_bp.route('/api/departments', methods=['GET'])
+def get_departments():
+    """Return list of all university departments"""
+    return jsonify({'departments': UNIVERSITY_DEPARTMENTS})

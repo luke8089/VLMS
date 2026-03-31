@@ -5,6 +5,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
     * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
     body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; letter-spacing: -0.011em; }
@@ -276,7 +277,19 @@
                         <h3 class="text-xl font-semibold text-black">Results Center</h3>
                         <p class="text-sm text-black/45 mt-1">Review CATs, assignments, and exams. Filter, release grades, and adjust scores when needed.</p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <!-- Download dropdown -->
+                        <div class="relative" id="download-dropdown-wrap">
+                            <button onclick="toggleDownloadMenu()" class="flex items-center gap-1.5 px-4 py-2 text-sm bg-black/[0.04] hover:bg-black/[0.08] text-black/70 font-semibold rounded-xl transition-all">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download
+                                <svg class="w-3 h-3 text-black/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div id="download-menu" class="hidden absolute right-0 mt-1 w-52 bg-white border border-black/10 rounded-xl shadow-lg shadow-black/10 z-20 overflow-hidden">
+                                <button onclick="downloadResults('all'); toggleDownloadMenu()" class="w-full text-left px-4 py-2.5 text-sm text-black/70 hover:bg-black/[0.04] font-medium">Download All Results</button>
+                                <button onclick="downloadResults('shown'); toggleDownloadMenu()" class="w-full text-left px-4 py-2.5 text-sm text-black/70 hover:bg-black/[0.04] font-medium">Download Shown</button>
+                            </div>
+                        </div>
                         <button id="results-release-btn" onclick="toggleReleaseGrades(resultsState.currentExamId)"
                                 class="px-4 py-2 text-sm bg-black hover:bg-black/80 text-white font-semibold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed" disabled>
                             Release Grades
@@ -284,21 +297,11 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mt-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
                     <div>
                         <label class="block text-xs font-medium text-black/50 mb-1">Course (Unit)</label>
                         <select id="results-course" class="w-full px-3 py-2.5 border border-black/10 rounded-xl text-sm text-black">
                             <option value="">Loading courses...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-black/50 mb-1">Assessment Type</label>
-                        <select id="results-assessment" class="w-full px-3 py-2.5 border border-black/10 rounded-xl text-sm text-black">
-                            <option value="all">All</option>
-                            <option value="cat1">CAT 1</option>
-                            <option value="cat2">CAT 2</option>
-                            <option value="assignment">Assignment</option>
-                            <option value="main_exam">Main Exam</option>
                         </select>
                     </div>
                     <div>
@@ -323,6 +326,22 @@
                 </div>
 
                 <div id="results-summary-chips" class="mt-4 flex flex-wrap gap-2 text-xs text-black/60"></div>
+
+                <!-- Excel import section -->
+                <div class="mt-5 pt-5 border-t border-black/[0.06]">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div class="flex-1">
+                            <p class="text-xs font-semibold text-black/60 mb-0.5">Import Grades from Excel / CSV</p>
+                            <p class="text-[11px] text-black/35">Upload a <span class="font-mono bg-black/[0.04] px-1 rounded">.xlsx</span> or <span class="font-mono bg-black/[0.04] px-1 rounded">.csv</span> file with columns <span class="font-mono bg-black/[0.04] px-1 rounded">Student Name</span> and <span class="font-mono bg-black/[0.04] px-1 rounded">Score</span>. Matches are saved automatically.</p>
+                        </div>
+                        <label class="shrink-0 cursor-pointer flex items-center gap-2 px-4 py-2 bg-black/[0.04] hover:bg-black/[0.08] text-black/70 text-sm font-semibold rounded-xl transition-all border border-black/10 select-none">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Choose File
+                            <input id="excel-upload-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleExcelUpload(this)" />
+                        </label>
+                    </div>
+                    <div id="excel-preview" class="hidden mt-4"></div>
+                </div>
             </div>
 
             <div class="bg-white rounded-2xl border border-black/[0.06]">
@@ -392,8 +411,11 @@
                 <textarea id="course-desc" rows="3" placeholder="Course description" class="w-full px-4 py-2.5 border border-black/10 rounded-xl focus:ring-1 focus:ring-black/20 outline-none text-black"></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-black/60 mb-1">Category</label>
-                <input type="text" id="course-category" class="w-full px-4 py-2.5 border border-black/10 rounded-xl focus:ring-1 focus:ring-black/20 outline-none text-black" placeholder="Computer Science">
+                <label class="block text-sm font-medium text-black/60 mb-1">Department <span class="text-red-500">*</span></label>
+                <select id="course-category" class="w-full px-4 py-2.5 border border-black/10 rounded-xl focus:ring-1 focus:ring-black/20 outline-none text-black bg-white">
+                    <option value="">Select Department</option>
+                </select>
+                <p class="text-xs text-black/40 mt-1">Students from this department will see this course</p>
             </div>
             <div class="flex items-center space-x-2">
                 <input type="checkbox" id="course-published" checked class="w-4 h-4 accent-black rounded">
@@ -646,14 +668,23 @@
 
 <!-- Global Confirm Modal -->
 <div id="confirm-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-black/[0.06]">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-black/[0.06] transform transition-all duration-300 scale-95 opacity-0" id="confirm-modal-content">
         <div class="p-6 border-b border-black/[0.06]">
-            <h3 id="confirm-title" class="text-lg font-semibold text-black">Confirm Action</h3>
-            <p id="confirm-message" class="text-sm text-black/50 mt-2">Are you sure?</p>
+            <div class="flex items-start gap-4">
+                <div id="confirm-icon" class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 id="confirm-title" class="text-lg font-semibold text-black">Confirm Action</h3>
+                    <p id="confirm-message" class="text-sm text-black/60 mt-2 leading-relaxed">Are you sure?</p>
+                </div>
+            </div>
         </div>
         <div class="p-4 flex justify-end gap-3 bg-black/[0.02] rounded-b-2xl">
-            <button id="confirm-cancel" class="px-4 py-2 text-sm text-black/50 hover:text-black font-medium transition-colors">Cancel</button>
-            <button id="confirm-ok" class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all">Delete</button>
+            <button id="confirm-cancel" class="px-4 py-2 text-sm text-black/50 hover:text-black font-medium transition-all hover:bg-black/5 rounded-xl">Cancel</button>
+            <button id="confirm-ok" class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all transform hover:scale-105">Delete</button>
         </div>
     </div>
 </div>
@@ -685,12 +716,140 @@
         </div>
     </div>
 </div>
+
+<!-- Marking Review Modal -->
+<div id="marking-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[75] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="p-6 border-b border-black/[0.06] flex justify-between items-center">
+            <div>
+                <h3 id="marking-title" class="text-xl font-semibold text-black">Marking Review</h3>
+                <p class="text-sm text-black/40 mt-1">Review and edit AI-generated marking for student answers</p>
+            </div>
+            <button title="Close" onclick="closeMarkingModal()" 
+                    class="w-8 h-8 rounded-lg bg-black/[0.04] hover:bg-black/[0.08] flex items-center justify-center text-black/30 hover:text-black transition-all">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-6">
+            <!-- Student Info Header -->
+            <div class="bg-black/[0.02] rounded-xl p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <p class="text-xs text-black/50">Student</p>
+                        <p id="marking-student-name" class="text-sm font-semibold text-black">—</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-black/50">Submission ID</p>
+                        <p id="marking-submission-id" class="text-sm font-semibold text-black">—</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-black/50">Current Score</p>
+                        <p id="marking-current-score" class="text-sm font-semibold text-black">—</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Answers Table -->
+            <div class="border border-black/[0.06] rounded-xl overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-black/[0.02]">
+                        <tr>
+                            <th class="text-left py-3 px-4 font-medium text-black/50">Question</th>
+                            <th class="text-left py-3 px-4 font-medium text-black/50">Student Answer</th>
+                            <th class="text-center py-3 px-4 font-medium text-black/50">AI Score</th>
+                            <th class="text-center py-3 px-4 font-medium text-black/50">Your Score</th>
+                            <th class="text-left py-3 px-4 font-medium text-black/50">AI Feedback</th>
+                            <th class="text-center py-3 px-4 font-medium text-black/50">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marking-answers-tbody" class="divide-y divide-black/[0.04]">
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-black/30">Loading answers...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Score Summary -->
+            <div class="mt-6 bg-black/[0.02] rounded-xl p-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <p class="text-xs text-black/50">AI Total Score</p>
+                        <p id="marking-ai-total" class="text-lg font-bold text-black">—</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-black/50">Your Total Score</p>
+                        <p id="marking-lecturer-total" class="text-lg font-bold text-green-600">—</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-black/50">Total Marks</p>
+                        <p id="marking-total-marks" class="text-lg font-bold text-black">—</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-black/[0.06] flex justify-between items-center bg-black/[0.02]">
+            <div class="flex items-center gap-4">
+                <button onclick="acceptAllMarking()" id="accept-all-btn" 
+                        class="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all">
+                    Accept All AI Marking
+                </button>
+                <button onclick="resetToOriginal()" 
+                        class="px-4 py-2 text-sm bg-black/[0.04] text-black/60 hover:bg-black/[0.08] font-medium rounded-xl transition-all">
+                    Reset to Original
+                </button>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeMarkingModal()" 
+                        class="px-4 py-2 text-sm text-black/40 hover:text-black font-medium transition-colors">Cancel</button>
+                <button onclick="saveMarking()" id="save-marking-btn"
+                        class="px-6 py-2 text-sm bg-black hover:bg-black/80 text-white font-semibold rounded-xl transition-all">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
 let user = AUTH.getUser();
 if (!user || user.role !== 'lecturer') { window.location.href = '/login'; }
+
+// ═══════ DEPARTMENTS ═══════
+let departmentsList = [];
+
+async function loadDepartments() {
+    try {
+        const resp = await fetch('/api/departments');
+        if (resp.ok) {
+            const data = await resp.json();
+            departmentsList = data.departments || [];
+            populateDepartmentSelects();
+        }
+    } catch (e) {
+        console.error('Failed to load departments:', e);
+    }
+}
+
+function populateDepartmentSelects() {
+    const courseSelect = document.getElementById('course-category');
+    if (courseSelect) {
+        const currentValue = courseSelect.value;
+        const options = departmentsList.map(d => `<option value="${d}">${d}</option>`).join('');
+        courseSelect.innerHTML = '<option value="">Select Department</option>' + options;
+        courseSelect.value = currentValue;
+    }
+}
+
+// Load departments on page load
+loadDepartments();
 
 function setHeaderAvatar(profile, initials) {
     const avatarEl = document.getElementById('user-avatar');
@@ -764,23 +923,66 @@ async function hydrateUserFromDatabase() {
 
 hydrateUserFromDatabase();
 
-function showConfirmModal({ title = 'Confirm Action', message = 'Are you sure?', confirmText = 'Confirm', confirmClass = 'bg-red-600 hover:bg-red-700 text-white' } = {}) {
+function showConfirmModal({ 
+    title = 'Confirm Action', 
+    message = 'Are you sure?', 
+    confirmText = 'Confirm', 
+    confirmClass = 'bg-red-600 hover:bg-red-700 text-white',
+    iconType = 'warning' 
+} = {}) {
     const modal = document.getElementById('confirm-modal');
+    const modalContent = document.getElementById('confirm-modal-content');
     const titleEl = document.getElementById('confirm-title');
     const messageEl = document.getElementById('confirm-message');
     const okBtn = document.getElementById('confirm-ok');
     const cancelBtn = document.getElementById('confirm-cancel');
+    const iconEl = document.getElementById('confirm-icon');
 
     titleEl.textContent = title;
     messageEl.textContent = message;
     okBtn.textContent = confirmText;
-    okBtn.className = `px-4 py-2 text-sm font-semibold rounded-xl transition-all ${confirmClass}`;
+    okBtn.className = `px-4 py-2 text-sm font-semibold rounded-xl transition-all transform hover:scale-105 ${confirmClass}`;
+
+    // Set icon based on type
+    if (iconType === 'success') {
+        iconEl.className = 'w-12 h-12 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0';
+        iconEl.innerHTML = `
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        `;
+    } else if (iconType === 'info') {
+        iconEl.className = 'w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0';
+        iconEl.innerHTML = `
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        `;
+    } else {
+        // warning (default)
+        iconEl.className = 'w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0';
+        iconEl.innerHTML = `
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+        `;
+    }
 
     modal.classList.remove('hidden');
+    
+    // Trigger entrance animation
+    requestAnimationFrame(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    });
 
     return new Promise((resolve) => {
         const cleanup = () => {
-            modal.classList.add('hidden');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
             okBtn.onclick = null;
             cancelBtn.onclick = null;
             modal.onclick = null;
@@ -1822,7 +2024,6 @@ async function loadResultsView() {
 
 function initResultsFilters() {
     const courseEl = document.getElementById('results-course');
-    const assessmentEl = document.getElementById('results-assessment');
     const examEl = document.getElementById('results-exam');
     const statusEl = document.getElementById('results-status');
     const searchEl = document.getElementById('results-search');
@@ -1832,13 +2033,6 @@ function initResultsFilters() {
             resultsState.currentCourseId = parseInt(e.target.value || '', 10) || null;
             currentCourseId = resultsState.currentCourseId;
             await loadResultsExams(resultsState.currentCourseId);
-        });
-    }
-
-    if (assessmentEl) {
-        assessmentEl.addEventListener('change', () => {
-            resultsState.assessment = assessmentEl.value || 'all';
-            applyResultsExamOptions();
         });
     }
 
@@ -1906,12 +2100,9 @@ function applyResultsExamOptions() {
     const examEl = document.getElementById('results-exam');
     if (!examEl) return;
 
-    const filtered = resultsState.exams.filter(exam => {
-        if (resultsState.assessment === 'all') return true;
-        return getAssessmentTypeFromExam(exam) === resultsState.assessment;
-    });
+    const exams = resultsState.exams;
 
-    if (filtered.length === 0) {
+    if (exams.length === 0) {
         resultsState.currentExamId = null;
         examEl.innerHTML = '<option value="">No assessments available</option>';
         updateResultsReleaseButton();
@@ -1919,11 +2110,11 @@ function applyResultsExamOptions() {
         return;
     }
 
-    if (!resultsState.currentExamId || !filtered.find(ex => ex.id === resultsState.currentExamId)) {
-        resultsState.currentExamId = filtered[0].id;
+    if (!resultsState.currentExamId || !exams.find(ex => ex.id === resultsState.currentExamId)) {
+        resultsState.currentExamId = exams[0].id;
     }
 
-    examEl.innerHTML = filtered.map(exam => {
+    examEl.innerHTML = exams.map(exam => {
         const label = `${formatAssessmentType(exam)} — ${exam.title}`;
         return `<option value="${exam.id}" ${exam.id === resultsState.currentExamId ? 'selected' : ''}>${label}</option>`;
     }).join('');
@@ -2073,7 +2264,6 @@ function renderResultsTable() {
                         <th class="text-center py-3 px-4 font-medium text-black/50">Status</th>
                         <th class="text-center py-3 px-4 font-medium text-black/50">Score</th>
                         <th class="text-center py-3 px-4 font-medium text-black/50">Flags</th>
-                        <th class="text-left py-3 px-4 font-medium text-black/50">Assessment</th>
                         <th class="text-left py-3 px-4 font-medium text-black/50">Submitted</th>
                         <th class="text-center py-3 px-4 font-medium text-black/50">Actions</th>
                     </tr>
@@ -2100,7 +2290,6 @@ function renderResultsTable() {
                                         : '<span class="text-xs text-black/30">—</span>'
                                     }
                                 </td>
-                                <td class="py-3 px-4 text-xs text-black/50">${formatAssessmentType(exam)} · ${exam.title}</td>
                                 <td class="py-3 px-4 text-xs text-black/40">${s.submitted_at ? new Date(s.submitted_at).toLocaleString() : '—'}</td>
                                 <td class="py-3 px-4 text-center">
                                     ${canEdit ? `<button onclick="editSubmissionScore(${s.id}, ${s.total_score != null ? s.total_score : 'null'})" class="text-xs bg-black/[0.04] text-black/60 px-2.5 py-1 rounded-lg hover:bg-black/[0.08] font-medium">Edit</button>` : '<span class="text-xs text-black/30">—</span>'}
@@ -2149,6 +2338,271 @@ async function editSubmissionScore(submissionId, currentScore) {
     await loadResultsSubmissions(resultsState.currentExamId);
 }
 
+// ═══════ DOWNLOAD ═══════
+
+function toggleDownloadMenu() {
+    const menu = document.getElementById('download-menu');
+    if (!menu) return;
+    menu.classList.toggle('hidden');
+    // Close on outside click
+    if (!menu.classList.contains('hidden')) {
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!document.getElementById('download-dropdown-wrap')?.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }, 0);
+    }
+}
+
+function downloadResults(mode) {
+    const exam = getSelectedResultsExam();
+    if (!exam) { showNoticeModal({ title: 'No Assessment', message: 'Select an assessment first.' }); return; }
+
+    const course = resultsState.courses.find(c => c.id === resultsState.currentCourseId);
+    const courseLabel = course ? `${course.code} — ${course.title}` : 'Course';
+    const examLabel = `${formatAssessmentType(exam)} — ${exam.title}`;
+    const totalMarks = exam.total_marks || '';
+
+    let rows;
+    if (mode === 'all') {
+        rows = [...(resultsState.submissions || [])];
+    } else {
+        // Apply same filters as renderResultsTable
+        rows = [...(resultsState.submissions || [])];
+        if (resultsState.status === 'graded') rows = rows.filter(s => s.is_graded);
+        else if (resultsState.status === 'pending') rows = rows.filter(s => !s.is_graded && s.status !== 'in_progress');
+        else if (resultsState.status === 'in_progress') rows = rows.filter(s => s.status === 'in_progress');
+        if (resultsState.query) {
+            const q = resultsState.query.toLowerCase();
+            rows = rows.filter(s => (s.student_name || '').toLowerCase().includes(q));
+        }
+    }
+
+    // Build worksheet data
+    const wsData = [
+        [`${courseLabel} — ${examLabel}`],
+        [`Downloaded: ${new Date().toLocaleString()}`],
+        [],
+        ['#', 'Student', 'Status', 'Score', `Out of`, 'Violations', 'Submitted'],
+        ...rows.map((s, i) => [
+            i + 1,
+            s.student_name || 'Unknown',
+            s.status === 'graded' ? 'Graded' : s.status === 'submitted' ? 'Needs Review' : 'In Progress',
+            s.is_graded && s.total_score != null ? s.total_score : '',
+            totalMarks,
+            s.violations_count || 0,
+            s.submitted_at ? new Date(s.submitted_at).toLocaleString() : '',
+        ])
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    // Column widths
+    ws['!cols'] = [{ wch: 4 }, { wch: 28 }, { wch: 14 }, { wch: 8 }, { wch: 8 }, { wch: 12 }, { wch: 22 }];
+
+    // Merge title row
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }, { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Results');
+    const filename = `${examLabel.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_')}_results.xlsx`;
+    XLSX.writeFile(wb, filename);
+}
+
+// ═══════ EXCEL IMPORT ═══════
+
+async function handleExcelUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const exam = getSelectedResultsExam();
+    if (!exam) {
+        showNoticeModal({ title: 'No Assessment', message: 'Select an assessment before importing.' });
+        input.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const wb = XLSX.read(data, { type: 'array' });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+
+            // Normalise column names — try common variants
+            const normalise = str => String(str || '').trim().toLowerCase().replace(/[\s_\-#]+/g, '');
+            const knownNames  = new Set(['studentname', 'name', 'fullname', 'student']);
+            const knownScores = new Set(['score', 'total', 'totalscore', 'marks', 'grade', 'outofscore']);
+
+            // Auto-detect the real header row (skip metadata rows at the top)
+            const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+            let headerRowIndex = 0;
+            for (let i = 0; i < Math.min(10, rawRows.length); i++) {
+                const cells = rawRows[i].map(c => normalise(c));
+                if (cells.some(c => knownNames.has(c)) && cells.some(c => knownScores.has(c))) {
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+
+            const rows = XLSX.utils.sheet_to_json(ws, { defval: '', range: headerRowIndex });
+
+            if (!rows.length) {
+                showNoticeModal({ title: 'Empty File', message: 'The file contains no data rows.' });
+                return;
+            }
+
+            const nameKey  = Object.keys(rows[0]).find(k => knownNames.has(normalise(k)));
+            const scoreKey = Object.keys(rows[0]).find(k => knownScores.has(normalise(k)));
+
+            if (!nameKey || !scoreKey) {
+                showNoticeModal({ title: 'Invalid Format', message: `Could not find "Student Name" and "Score" columns. Found: ${Object.keys(rows[0]).join(', ')}` });
+                return;
+            }
+
+            // Match rows to submissions — deduplicate by submission id (first occurrence wins)
+            const subs = resultsState.submissions || [];
+            const matches = [], skipped = [], unmatched = [];
+            const seenSubIds = new Set();
+
+            for (const row of rows) {
+                const name = String(row[nameKey] || '').trim();
+                const scoreRaw = row[scoreKey];
+                const score = parseFloat(scoreRaw);
+                if (!name) continue;
+
+                const sub = subs.find(s =>
+                    (s.student_name || '').toLowerCase().includes(name.toLowerCase()) ||
+                    name.toLowerCase().includes((s.student_name || '').toLowerCase())
+                );
+
+                if (!sub || isNaN(score)) {
+                    unmatched.push({ name, score: isNaN(score) ? scoreRaw : score, reason: !sub ? 'Student not found' : 'Invalid score' });
+                    continue;
+                }
+
+                // Duplicate row in the file — skip (first occurrence already recorded)
+                if (seenSubIds.has(sub.id)) {
+                    skipped.push({ name, score, reason: 'Duplicate row' });
+                    continue;
+                }
+
+                // Score unchanged — no point re-saving
+                const currentScore = sub.is_graded && sub.total_score != null ? sub.total_score : null;
+                if (currentScore !== null && currentScore === score) {
+                    skipped.push({ name, score, reason: 'No change' });
+                    seenSubIds.add(sub.id);
+                    continue;
+                }
+
+                seenSubIds.add(sub.id);
+                matches.push({ sub, name, score, currentScore });
+            }
+
+            if (!matches.length && !skipped.length) {
+                showNoticeModal({ title: 'No Matches', message: 'No rows could be matched to students in this assessment. Check that names match.' });
+                return;
+            }
+
+            if (!matches.length) {
+                showNoticeModal({ title: 'Nothing to Import', message: `All matched rows are either duplicates or already have the same score. No changes needed.` });
+                return;
+            }
+
+            const skipCount = skipped.length;
+            // Show preview
+            const previewEl = document.getElementById('excel-preview');
+            previewEl.classList.remove('hidden');
+            previewEl.innerHTML = `
+            <div class="rounded-xl border border-black/[0.08] overflow-hidden">
+                <div class="px-4 py-3 bg-black/[0.02] border-b border-black/[0.06] flex items-center justify-between flex-wrap gap-2">
+                    <span class="text-xs font-semibold text-black/60">
+                        ${matches.length} to import
+                        ${skipCount ? `· <span class="text-black/40">${skipCount} skipped (duplicate / no change)</span>` : ''}
+                        ${unmatched.length ? `· <span class="text-black/40">${unmatched.length} unmatched</span>` : ''}
+                    </span>
+                    <div class="flex gap-2">
+                        <button onclick="cancelExcelImport()" class="text-xs px-3 py-1.5 rounded-lg text-black/50 hover:text-black font-medium transition-colors">Cancel</button>
+                        <button onclick="confirmExcelImport()" class="text-xs px-3 py-1.5 rounded-lg bg-black text-white font-semibold hover:bg-black/80 transition-colors">Import ${matches.length} Score${matches.length !== 1 ? 's' : ''}</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead class="bg-black/[0.02] border-b border-black/[0.04]">
+                            <tr>
+                                <th class="text-left py-2 px-4 font-medium text-black/50">Student</th>
+                                <th class="text-center py-2 px-4 font-medium text-black/50">Current Score</th>
+                                <th class="text-center py-2 px-4 font-medium text-black/50">New Score</th>
+                                <th class="text-center py-2 px-4 font-medium text-black/50">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-black/[0.04]">
+                            ${matches.map(m => `
+                            <tr class="hover:bg-black/[0.02]">
+                                <td class="py-2 px-4 font-medium text-black">${m.sub.student_name}</td>
+                                <td class="py-2 px-4 text-center text-black/40">${m.currentScore != null ? m.currentScore : '—'}</td>
+                                <td class="py-2 px-4 text-center font-semibold text-black">${m.score}</td>
+                                <td class="py-2 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-medium">Ready</span></td>
+                            </tr>`).join('')}
+                            ${skipped.map(s => `
+                            <tr class="hover:bg-black/[0.02] opacity-40">
+                                <td class="py-2 px-4 text-black/50">${s.name}</td>
+                                <td class="py-2 px-4 text-center text-black/30">${s.score}</td>
+                                <td class="py-2 px-4 text-center text-black/30">${s.score}</td>
+                                <td class="py-2 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-black/[0.04] text-black/40 font-medium">${s.reason}</span></td>
+                            </tr>`).join('')}
+                            ${unmatched.map(u => `
+                            <tr class="hover:bg-black/[0.02] opacity-40">
+                                <td class="py-2 px-4 text-black/50">${u.name}</td>
+                                <td class="py-2 px-4 text-center text-black/30">—</td>
+                                <td class="py-2 px-4 text-center text-black/30">${u.score}</td>
+                                <td class="py-2 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-black/[0.04] text-black/40 font-medium">${u.reason}</span></td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+
+            // Store only the rows that actually need updating
+            previewEl.dataset.pending = JSON.stringify(matches.map(m => ({ id: m.sub.id, score: m.score })));
+        } catch (err) {
+            showNoticeModal({ title: 'Parse Error', message: 'Could not read the file. Make sure it is a valid .xlsx or .csv file.' });
+        }
+    };
+    reader.readAsArrayBuffer(file);
+    input.value = '';
+}
+
+async function confirmExcelImport() {
+    const previewEl = document.getElementById('excel-preview');
+    let pending;
+    try { pending = JSON.parse(previewEl.dataset.pending || '[]'); } catch { pending = []; }
+    if (!pending.length) return;
+
+    let ok = 0, fail = 0;
+    for (const { id, score } of pending) {
+        const resp = await AUTH.fetch(`/api/lecturer/submissions/${id}/override-score`, {
+            method: 'PUT',
+            body: JSON.stringify({ score })
+        });
+        if (resp.ok) ok++; else fail++;
+    }
+
+    cancelExcelImport();
+    showNoticeModal({ title: 'Import Complete', message: `${ok} score${ok !== 1 ? 's' : ''} saved${fail ? `, ${fail} failed` : ''}.` });
+    await loadResultsSubmissions(resultsState.currentExamId);
+}
+
+function cancelExcelImport() {
+    const previewEl = document.getElementById('excel-preview');
+    if (previewEl) { previewEl.classList.add('hidden'); previewEl.innerHTML = ''; delete previewEl.dataset.pending; }
+    const input = document.getElementById('excel-upload-input');
+    if (input) input.value = '';
+}
+
 async function openViolations(submissionId, studentName) {
     const modal = document.getElementById('violations-modal');
     const titleEl = document.getElementById('violations-title');
@@ -2172,6 +2626,9 @@ async function openViolations(submissionId, studentName) {
         return;
     }
 
+    // Generate AI recommendation for this submission
+    const recommendation = generateAIRecommendation(violations.length, violations.map(v => v.violation_type));
+
     const labelMap = {
         multiple_faces: 'Multiple Faces',
         no_face: 'No Face Detected',
@@ -2186,6 +2643,14 @@ async function openViolations(submissionId, studentName) {
 
     contentEl.innerHTML = `
         <div class="space-y-4">
+            ${recommendation ? `
+                <div class="border border-black/[0.06] rounded-xl p-4 bg-black/[0.02]">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-sm font-semibold text-black">AI Recommendation</span>
+                    </div>
+                    <div>${recommendation}</div>
+                </div>
+            ` : ''}
             ${violations.map(v => {
                 const label = labelMap[v.violation_type] || v.violation_type;
                 const time = v.timestamp ? new Date(v.timestamp).toLocaleString() : '—';
@@ -2412,25 +2877,13 @@ async function loadSubmissions(examId) {
     const pending = subs.filter(s => !s.is_graded && s.status !== 'in_progress');
     const inProgress = subs.filter(s => s.status === 'in_progress');
 
-    document.getElementById('submissions-summary').textContent =
-        `${subs.length} total · ${graded.length} graded · ${pending.length} pending`;
+    const summaryParts = [`${subs.length} total`, `${graded.length} graded`];
+    if (pending.length) summaryParts.push(`${pending.length} needs review`);
+    if (inProgress.length) summaryParts.push(`${inProgress.length} in progress`);
+    document.getElementById('submissions-summary').textContent = summaryParts.join(' · ');
 
-    // Update release button state
-    const examResp = await AUTH.fetch(`/api/lecturer/courses/${currentCourseId}/exams`);
-    if (examResp.ok) {
-        const examData = await examResp.json();
-        const exam = (examData.exams || []).find(e => e.id === examId);
-        if (exam) {
-            const btn = document.getElementById('release-grades-btn');
-            if (exam.grades_released) {
-                btn.textContent = 'Hide Grades from Students';
-                btn.className = 'px-6 py-2 text-sm bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all';
-            } else {
-                btn.textContent = 'Release Grades to Students';
-                btn.className = 'px-6 py-2 text-sm bg-black hover:bg-black/80 text-white font-semibold rounded-xl transition-all';
-            }
-        }
-    }
+    // Update release button using counts from API response
+    updateReleaseButton(data.grades_released, data.graded_count, data.in_progress_count, data.pending_count, data.unreleased_count);
 
     container.innerHTML = `
     <div class="overflow-x-auto">
@@ -2447,7 +2900,7 @@ async function loadSubmissions(examId) {
             </thead>
             <tbody class="divide-y divide-black/[0.04]">
                 ${subs.map(s => `
-                <tr class="hover:bg-black/[0.02]">
+                <tr class="hover:bg-black/[0.02]" data-submission-id="${s.id}">
                     <td class="py-3 px-4 font-medium text-black">${s.student_name}</td>
                     <td class="py-3 px-4 text-center">
                         ${s.status === 'graded'
@@ -2457,7 +2910,7 @@ async function loadSubmissions(examId) {
                             : '<span class="text-xs px-2 py-0.5 rounded-full bg-black/[0.03] text-black/40 font-medium">In Progress</span>'
                         }
                     </td>
-                    <td class="py-3 px-4 text-center font-semibold ${s.is_graded ? 'text-black' : 'text-black/30'}">${s.is_graded ? (s.total_score != null ? s.total_score : '-') : '—'}</td>
+                    <td class="py-3 px-4 text-center font-semibold ${s.total_score != null ? 'text-black' : 'text-black/30'}">${s.total_score != null ? s.total_score : '—'}</td>
                     <td class="py-3 px-4 text-center">
                         ${s.violations_count > 0
                             ? `<button onclick="openViolations(${s.id}, '${s.student_name.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1 rounded-full bg-red-50 text-red-600 hover:bg-red-100 font-medium">${s.violations_count} flags</button>`
@@ -2466,11 +2919,16 @@ async function loadSubmissions(examId) {
                     </td>
                     <td class="py-3 px-4 text-xs text-black/40">${s.submitted_at ? new Date(s.submitted_at).toLocaleString() : '—'}</td>
                     <td class="py-3 px-4 text-center">
-                        ${s.status === 'submitted' && !s.is_graded
-                            ? '<span class="text-xs text-black/40 font-medium">Awaiting AI / manual grade</span>'
-                            : s.is_graded
-                            ? '<span class="text-xs text-black/60">✓ Reviewed</span>'
-                            : ''
+                        ${s.status === 'in_progress'
+                            ? '<span class="text-xs text-black/30">In progress</span>'
+                            : `<div class="flex items-center justify-center gap-2 flex-wrap">
+                                <button onclick="openMarkingModal(${s.id}, '${s.student_name.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1 rounded-lg bg-black/[0.05] text-black/70 hover:bg-black/10 font-medium">View Marking</button>
+                                ${s.is_graded && !s.grades_released
+                                    ? `<button onclick="releaseSubmission(${s.id}, '${s.student_name.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 font-medium">Release</button>`
+                                    : (s.grades_released ? '<span class="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-600 font-medium">✓ Released</span>' : '')
+                                }
+                                <button onclick="deleteSubmission(${s.id}, '${s.student_name.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-medium">Delete</button>
+                               </div>`
                         }
                     </td>
                 </tr>
@@ -2480,23 +2938,399 @@ async function loadSubmissions(examId) {
     </div>`;
 }
 
+function updateReleaseButton(gradesReleased, gradedCount, inProgressCount, pendingCount, unreleasedCount) {
+    const btn = document.getElementById('release-grades-btn');
+    if (!btn) return;
+    if (gradesReleased) {
+        const unreleased = unreleasedCount || 0;
+        btn.textContent = unreleased > 0
+            ? `✓ Grades Released · ${unreleased} still pending`
+            : '✓ All Grades Released';
+        btn.className = 'px-6 py-2 text-sm bg-green-700 hover:bg-green-800 text-white font-semibold rounded-xl transition-all';
+    } else {
+        btn.textContent = gradedCount > 0
+            ? `Release Grades · ${gradedCount} ready`
+            : 'Release Grades';
+        btn.className = 'px-6 py-2 text-sm bg-black hover:bg-black/80 text-white font-semibold rounded-xl transition-all';
+    }
+}
+
 async function toggleReleaseGrades(examId) {
+    const btn = document.getElementById('release-grades-btn');
+    const isCurrentlyReleased = btn && btn.textContent.includes('✓');
+
+    // Confirm before hiding grades (only if already released)
+    if (isCurrentlyReleased) {
+        const confirmed = await showConfirmModal({
+            title: 'Hide Grades',
+            message: 'Are you sure you want to hide grades from students? They will no longer be able to see their results.',
+            confirmText: 'Hide Grades',
+            confirmClass: 'bg-red-600 hover:bg-red-700 text-white',
+            iconType: 'warning'
+        });
+        if (!confirmed) return;
+    }
+
     const resp = await AUTH.fetch(`/api/lecturer/exams/${examId}/release-grades`, { method: 'POST' });
     if (resp.ok) {
         const data = await resp.json();
         showNoticeModal({ title: 'Grades Updated', message: data.message });
+        updateReleaseButton(data.grades_released, data.graded_count, data.in_progress_count, data.pending_count, data.unreleased_count);
         loadExams();
-        if (document.getElementById('submissions-modal').classList.contains('hidden') === false) {
-            await loadSubmissions(examId);
-        }
         const resultsView = document.getElementById('results-view');
-        if (resultsView && resultsView.classList.contains('hidden') === false) {
+        if (resultsView && !resultsView.classList.contains('hidden')) {
             await loadResultsExams(resultsState.currentCourseId);
         }
     } else {
         const d = await resp.json().catch(() => ({}));
-        showNoticeModal({ title: 'Update Failed', message: d.error || 'Failed to toggle grades release.' });
+        showNoticeModal({ title: 'Update Failed', message: d.error || 'Failed to update grades release.' });
     }
+}
+
+async function deleteSubmission(submissionId, studentName) {
+    const confirmed = await showConfirmModal({
+        title: 'Delete Submission',
+        message: `Are you sure you want to delete ${studentName}'s submission? This will permanently remove their answers, score, and all records. This cannot be undone.`,
+        confirmText: 'Delete',
+        confirmClass: 'bg-red-600 hover:bg-red-700 text-white',
+        iconType: 'warning'
+    });
+    if (!confirmed) return;
+
+    const resp = await AUTH.fetch(`/api/lecturer/submissions/${submissionId}`, { method: 'DELETE' });
+    if (resp.ok) {
+        showNoticeModal({ title: 'Deleted', message: 'Submission deleted successfully.' });
+        await loadSubmissions(submissionsExamId);
+    } else {
+        const d = await resp.json().catch(() => ({}));
+        showNoticeModal({ title: 'Delete Failed', message: d.error || 'Failed to delete submission.' });
+    }
+}
+
+async function releaseSubmission(submissionId, studentName) {
+    const resp = await AUTH.fetch(`/api/lecturer/submissions/${submissionId}/release`, { method: 'POST' });
+    if (resp.ok) {
+        const data = await resp.json();
+        updateReleaseButton(data.grades_released, data.graded_count, data.in_progress_count, data.pending_count, data.unreleased_count);
+        await loadSubmissions(submissionsExamId);
+        loadExams();
+    } else {
+        const d = await resp.json().catch(() => ({}));
+        showNoticeModal({ title: 'Release Failed', message: d.error || 'Failed to release grades.' });
+    }
+}
+
+// Marking Modal Functions
+let markingState = {
+    submissionId: null,
+    answers: [],
+    originalScores: {},
+    editedScores: {},
+    examTotalMarks: 0
+};
+
+function openMarkingModal(submissionId, studentName) {
+    markingState.submissionId = submissionId;
+    markingState.answers = [];
+    markingState.originalScores = {};
+    markingState.editedScores = {};
+    
+    // Update modal header
+    document.getElementById('marking-student-name').textContent = studentName;
+    document.getElementById('marking-submission-id').textContent = `#${submissionId}`;
+    
+    // Show modal
+    const modal = document.getElementById('marking-modal');
+    modal.classList.remove('hidden');
+    
+    // Load submission data
+    loadMarkingData(submissionId);
+}
+
+async function loadMarkingData(submissionId) {
+    try {
+        const resp = await AUTH.fetch(`/api/lecturer/submissions/${submissionId}/answers`);
+        if (!resp.ok) {
+            throw new Error('Failed to load submission data');
+        }
+        
+        const data = await resp.json();
+        markingState.answers = data.answers || [];
+        markingState.examTotalMarks = data.exam_total_marks || 0;
+        
+        // Store original scores
+        markingState.answers.forEach(answer => {
+            markingState.originalScores[answer.id] = answer.score;
+            markingState.editedScores[answer.id] = answer.score;
+        });
+        
+        renderMarkingTable();
+        updateScoreSummary();
+        
+        // Update current score
+        const currentTotal = Object.values(markingState.editedScores).reduce((sum, score) => sum + (score || 0), 0);
+        document.getElementById('marking-current-score').textContent = `${currentTotal}/${markingState.examTotalMarks}`;
+        
+    } catch (error) {
+        console.error('Error loading marking data:', error);
+        showNoticeModal({ title: 'Error', message: 'Failed to load submission data' });
+    }
+}
+
+function renderMarkingTable() {
+    const tbody = document.getElementById('marking-answers-tbody');
+    if (!tbody) return;
+    
+    if (markingState.answers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-black/30">No answers found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = markingState.answers.map((answer, index) => `
+        <tr>
+            <td class="py-3 px-4">
+                <div class="text-sm font-medium text-black">Q${index + 1}</div>
+                <div class="text-xs text-black/50">${answer.question_type || 'Unknown'}</div>
+                <div class="text-xs text-black/50">${answer.marks} marks</div>
+            </td>
+            <td class="py-3 px-4">
+                <div class="text-sm text-black max-w-xs">
+                    ${answer.question_type === 'mcq' 
+                        ? `Selected: Option ${answer.selected_option + 1}` 
+                        : answer.answer_text || 'No answer'}
+                </div>
+            </td>
+            <td class="py-3 px-4 text-center">
+                <div class="text-sm font-medium text-black">${answer.score || 0}/${answer.marks || 0}</div>
+            </td>
+            <td class="py-3 px-4 text-center">
+                <input type="number" 
+                       id="score-input-${answer.id}"
+                       value="${markingState.editedScores[answer.id] || 0}" 
+                       min="0" 
+                       max="${answer.marks || 0}"
+                       class="w-16 px-2 py-1 text-center border border-black/10 rounded-lg text-sm font-medium"
+                       onchange="updateAnswerScore(${answer.id}, this.value)">
+            </td>
+            <td class="py-3 px-4">
+                <div class="text-xs text-black/60 max-w-xs">${answer.ai_feedback || 'No feedback'}</div>
+            </td>
+            <td class="py-3 px-4 text-center">
+                <button onclick="resetAnswerScore(${answer.id})" 
+                        class="text-xs px-2 py-1 rounded-lg bg-black/[0.04] text-black/60 hover:bg-black/[0.08] font-medium">
+                    Reset
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function updateAnswerScore(answerId, newScore) {
+    const score = parseFloat(newScore) || 0;
+    markingState.editedScores[answerId] = score;
+    updateScoreSummary();
+    
+    // Update current score display
+    const currentTotal = Object.values(markingState.editedScores).reduce((sum, score) => sum + score, 0);
+    document.getElementById('marking-current-score').textContent = `${currentTotal}/${markingState.examTotalMarks}`;
+}
+
+function resetAnswerScore(answerId) {
+    markingState.editedScores[answerId] = markingState.originalScores[answerId];
+    document.getElementById(`score-input-${answerId}`).value = markingState.originalScores[answerId];
+    updateScoreSummary();
+    
+    // Update current score display
+    const currentTotal = Object.values(markingState.editedScores).reduce((sum, score) => sum + score, 0);
+    document.getElementById('marking-current-score').textContent = `${currentTotal}/${markingState.examTotalMarks}`;
+}
+
+function updateScoreSummary() {
+    const aiTotal = Object.values(markingState.originalScores).reduce((sum, score) => sum + (score || 0), 0);
+    const lecturerTotal = Object.values(markingState.editedScores).reduce((sum, score) => sum + (score || 0), 0);
+    
+    document.getElementById('marking-ai-total').textContent = `${aiTotal}/${markingState.examTotalMarks}`;
+    document.getElementById('marking-lecturer-total').textContent = `${lecturerTotal}/${markingState.examTotalMarks}`;
+    document.getElementById('marking-total-marks').textContent = markingState.examTotalMarks;
+}
+
+function acceptAllMarking() {
+    // Reset all scores to original AI scores
+    markingState.answers.forEach(answer => {
+        markingState.editedScores[answer.id] = markingState.originalScores[answer.id];
+        const input = document.getElementById(`score-input-${answer.id}`);
+        if (input) {
+            input.value = markingState.originalScores[answer.id];
+        }
+    });
+    updateScoreSummary();
+    
+    // Update current score display
+    const currentTotal = Object.values(markingState.editedScores).reduce((sum, score) => sum + score, 0);
+    document.getElementById('marking-current-score').textContent = `${currentTotal}/${markingState.examTotalMarks}`;
+}
+
+function resetToOriginal() {
+    acceptAllMarking(); // Same functionality
+}
+
+async function saveMarking() {
+    try {
+        const answersData = markingState.answers.map(answer => ({
+            id: answer.id,
+            score: markingState.editedScores[answer.id],
+            ai_feedback: answer.ai_feedback
+        }));
+        
+        console.log('Saving marking data:', {
+            submissionId: markingState.submissionId,
+            answersCount: answersData.length,
+            answers: answersData
+        });
+        
+        const resp = await AUTH.fetch(`/api/lecturer/submissions/${markingState.submissionId}/update-marks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                answers: answersData
+            })
+        });
+        
+        console.log('Response status:', resp.status);
+        console.log('Response ok:', resp.ok);
+        
+        if (!resp.ok) {
+            const errorText = await resp.text();
+            console.error('Response error text:', errorText);
+            throw new Error(`Failed to save marking: ${resp.status} ${errorText}`);
+        }
+        
+        const data = await resp.json();
+        console.log('Response data:', data);
+        
+        showNoticeModal({ 
+            title: 'Marking Saved', 
+            message: `The marking has been updated successfully. New score: ${data.total_score}/${markingState.examTotalMarks}` 
+        });
+        
+        closeMarkingModal();
+        
+        // Update specific submission row without full reload
+        const examId = document.getElementById('submissions-modal').dataset.examId;
+        if (examId) {
+            updateSubmissionRow(markingState.submissionId, data.total_score, data.submission);
+            
+            // Highlight updated score
+            setTimeout(() => {
+                const submissionRow = document.querySelector(`[data-submission-id="${markingState.submissionId}"]`);
+                if (submissionRow) {
+                    const scoreCell = submissionRow.querySelector('td:nth-child(3)');
+                    scoreCell.classList.add('bg-green-50', 'text-green-700');
+                    setTimeout(() => {
+                        scoreCell.classList.remove('bg-green-50', 'text-green-700');
+                    }, 2000);
+                }
+            }, 100);
+        }
+        
+    } catch (error) {
+        console.error('Error saving marking:', error);
+        console.error('Error stack:', error.stack);
+        showNoticeModal({ 
+            title: 'Error', 
+            message: `Failed to save marking changes: ${error.message}` 
+        });
+    }
+}
+
+function closeMarkingModal() {
+    const modal = document.getElementById('marking-modal');
+    modal.classList.add('hidden');
+    
+    // Reset state
+    markingState = {
+        submissionId: null,
+        answers: [],
+        originalScores: {},
+        editedScores: {},
+        examTotalMarks: 0
+    };
+}
+
+function updateSubmissionRow(submissionId, newScore, submissionData) {
+    // Find the submission row
+    const submissionRow = document.querySelector(`[data-submission-id="${submissionId}"]`);
+    if (!submissionRow) return;
+    
+    // Update score cell (3rd column)
+    const scoreCell = submissionRow.querySelector('td:nth-child(3)');
+    if (scoreCell) {
+        scoreCell.textContent = newScore;
+        scoreCell.classList.remove('text-black/30');
+        scoreCell.classList.add('text-black', 'font-semibold');
+    }
+    
+    // Update status cell (2nd column) based on submission data
+    const statusCell = submissionRow.querySelector('td:nth-child(2)');
+    if (statusCell && submissionData) {
+        if (submissionData.status === 'in_progress') {
+            statusCell.innerHTML = '<span class="text-xs px-2 py-0.5 rounded-full bg-black/[0.03] text-black/40 font-medium">In Progress</span>';
+        } else if (submissionData.is_graded) {
+            statusCell.innerHTML = '<span class="text-xs px-2 py-0.5 rounded-full bg-black/5 text-black/60 font-medium">Graded</span>';
+        } else {
+            statusCell.innerHTML = '<span class="text-xs px-2 py-0.5 rounded-full bg-black/[0.04] text-black/50 font-medium">Needs Review</span>';
+        }
+    }
+    
+    // Update actions cell (last column) if submission data provided
+    const actionsCell = submissionRow.querySelector('td:last-child');
+    if (actionsCell && submissionData) {
+        if (submissionData.status === 'in_progress') {
+            actionsCell.innerHTML = '<span class="text-xs text-black/30">In progress</span>';
+        } else {
+            const releaseBtn = submissionData.is_graded && !submissionData.grades_released
+                ? `<button onclick="releaseSubmission(${submissionId}, '${submissionData.student_name.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 font-medium">Release</button>`
+                : (submissionData.grades_released ? '<span class="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-600 font-medium">✓ Released</span>' : '');
+            actionsCell.innerHTML = `<div class="flex items-center justify-center gap-2 flex-wrap">
+                <button onclick="openMarkingModal(${submissionId}, '${submissionData.student_name.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1 rounded-lg bg-black/[0.05] text-black/70 hover:bg-black/10 font-medium">View Marking</button>
+                ${releaseBtn}
+                <button onclick="deleteSubmission(${submissionId}, '${submissionData.student_name.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-medium">Delete</button>
+               </div>`;
+        }
+    }
+}
+
+function generateAIRecommendation(violationsCount, violationTypes) {
+    if (!violationTypes || violationTypes.length === 0) return '';
+    
+    const types = violationTypes.map(v => v.violation_type || v);
+    const hasEyeGaze = types.includes('Eye Gaze');
+    const hasMultipleFaces = types.includes('Multiple Faces');
+    const hasBackgroundPerson = types.includes('Background Person');
+    const hasTabSwitch = types.includes('Tab Switch');
+    
+    let recommendation = '';
+    
+    if (violationsCount >= 8) {
+        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-medium">Recommend: Cancel exam</span>';
+    } else if (violationsCount >= 5) {
+        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">Recommend: Repeat CAT</span>';
+    } else if (violationsCount >= 3) {
+        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium">Recommend: Manual review</span>';
+    }
+    
+    // Specific recommendations based on violation types
+    if (hasTabSwitch && violationsCount >= 2) {
+        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-medium">Recommend: Cancel (tab switching)</span>';
+    } else if (hasMultipleFaces || hasBackgroundPerson) {
+        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">Recommend: Repeat CAT</span>';
+    } else if (hasEyeGaze && violationsCount >= 4) {
+        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium">Recommend: Manual review</span>';
+    }
+    
+    return recommendation;
 }
 
 function autoCalcEndTime() {

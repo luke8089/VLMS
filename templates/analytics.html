@@ -316,7 +316,7 @@ function renderPerformanceChart(examStats) {
         data: {
             labels: examStats.map(e => e.exam_title),
             datasets: [{
-                label: 'Average Score',
+                label: 'Avg Score %',
                 data: examStats.map(e => e.average_score),
                 backgroundColor: 'rgba(15,23,42,0.75)',
                 borderRadius: 8,
@@ -335,7 +335,7 @@ function renderPerformanceChart(examStats) {
             plugins: { legend: { labels: { color: '#334155' } } },
             scales: {
                 x: { ticks: { color: '#475569' }, grid: { color: 'rgba(15,23,42,0.06)' } },
-                y: { ticks: { color: '#475569' }, grid: { color: 'rgba(15,23,42,0.1)' }, beginAtZero: true, max: 100 },
+                y: { ticks: { color: '#475569', callback: v => v + '%' }, grid: { color: 'rgba(15,23,42,0.1)' }, beginAtZero: true, max: 100 },
             },
         },
     });
@@ -399,7 +399,7 @@ function renderExamTable(examStats) {
         <tr class="hover:bg-slate-50 transition-colors">
             <td class="py-2">${e.exam_title}</td>
             <td class="py-2 text-slate-600">${e.total_submissions}</td>
-            <td class="py-2 text-slate-600">${e.average_score}</td>
+            <td class="py-2 text-slate-600">${e.average_score}%</td>
             <td class="py-2 text-slate-600">${e.pass_rate}%</td>
         </tr>
     `).join('');
@@ -481,7 +481,7 @@ function openStudentDetail(studentId) {
             plugins: { legend: { labels: { color: '#334155' } } },
             scales: {
                 x: { ticks: { color: '#475569' }, grid: { color: 'rgba(15,23,42,0.06)' } },
-                y: { ticks: { color: '#475569' }, grid: { color: 'rgba(15,23,42,0.1)' }, beginAtZero: true, max: 100 },
+                y: { ticks: { color: '#475569', callback: v => v + '%' }, grid: { color: 'rgba(15,23,42,0.1)' }, beginAtZero: true, max: 100 },
             },
         },
     });
@@ -494,8 +494,8 @@ function closeStudentDetail() {
 }
 
 async function loadAnalytics() {
-    if (user.role !== 'lecturer') {
-        document.getElementById('course-selector').innerHTML = '<div class="text-sm text-slate-500">Detailed lecturer analytics available for lecturer accounts.</div>';
+    if (user.role === 'student') {
+        await loadStudentAnalytics();
         return;
     }
 
@@ -509,8 +509,48 @@ async function loadAnalytics() {
     });
 }
 
+async function loadStudentAnalytics() {
+    // Hide lecturer-only controls
+    document.getElementById('course-selector').innerHTML = `
+        <div id="student-overview-wrap" class="space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="student-kpi-grid">
+                <div class="text-center text-slate-400 col-span-4 py-4 text-sm">Loading your analytics…</div>
+            </div>
+        </div>`;
+
+    const resp = await AUTH.fetch('/api/analytics/student/overview');
+    if (!resp.ok) {
+        document.getElementById('student-kpi-grid').innerHTML = '<div class="col-span-4 text-red-500 text-sm text-center">Failed to load analytics.</div>';
+        return;
+    }
+    const d = await resp.json();
+
+    const cards = [
+        { label: 'Enrolled Courses', value: d.enrolled_courses, icon: '📚' },
+        { label: 'Exams Taken', value: d.total_exams_taken, icon: '📝' },
+        { label: 'Average Score', value: d.average_score != null ? `${d.average_score}` : '—', icon: '📊' },
+        { label: 'Flagged Exams', value: d.flagged_exams, icon: '🚩' },
+    ];
+
+    document.getElementById('student-kpi-grid').innerHTML = cards.map((c, i) => `
+        <div class="glass-card rounded-2xl p-4 fade-up" style="animation-delay:${i*60}ms">
+            <p class="text-2xl mb-1">${c.icon}</p>
+            <p class="text-xs text-slate-500 uppercase tracking-wide">${c.label}</p>
+            <p class="text-2xl font-bold mt-1 text-slate-900">${c.value}</p>
+        </div>
+    `).join('');
+}
+
 async function loadCourseAnalytics(courseId) {
     if (!courseId) return;
+
+    // Show loading state
+    ['charts-grid', 'tables-grid', 'students-panel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+    document.getElementById('kpi-grid').innerHTML = '<div class="col-span-5 text-center text-slate-500 py-4 text-sm">Loading analytics…</div>';
+    document.getElementById('kpi-grid').classList.remove('hidden');
 
     const [courseResp, insightsResp, readingResp] = await Promise.all([
         AUTH.fetch(`/api/analytics/course/${courseId}`),
@@ -518,7 +558,10 @@ async function loadCourseAnalytics(courseId) {
         AUTH.fetch(`/api/analytics/course/${courseId}/materials-reading`),
     ]);
 
-    if (!courseResp.ok || !insightsResp.ok || !readingResp.ok) return;
+    if (!courseResp.ok || !insightsResp.ok || !readingResp.ok) {
+        document.getElementById('kpi-grid').innerHTML = '<div class="col-span-5 text-center text-red-500 py-4 text-sm">Failed to load analytics. Please try again.</div>';
+        return;
+    }
 
     const courseData = await courseResp.json();
     const insightsData = await insightsResp.json();

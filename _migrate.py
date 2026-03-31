@@ -66,6 +66,27 @@ if 'video_duration' not in violation_cols:
 else:
     print("violations.video_duration already exists")
 
+cursor.execute("SHOW COLUMNS FROM submissions")
+submission_cols = [r[0] for r in cursor.fetchall()]
+
+if 'approval_status' not in submission_cols:
+    cursor.execute("ALTER TABLE submissions ADD COLUMN approval_status ENUM('pending', 'approved', 'cancelled') DEFAULT 'pending'")
+    print("Added submissions.approval_status column")
+else:
+    print("submissions.approval_status already exists")
+
+if 'face_verified_at' not in submission_cols:
+    cursor.execute("ALTER TABLE submissions ADD COLUMN face_verified_at DATETIME NULL")
+    print("Added submissions.face_verified_at column")
+else:
+    print("submissions.face_verified_at already exists")
+
+if 'grades_released' not in submission_cols:
+    cursor.execute("ALTER TABLE submissions ADD COLUMN grades_released TINYINT(1) NOT NULL DEFAULT 0")
+    print("Added submissions.grades_released column")
+else:
+    print("submissions.grades_released already exists")
+
 conn.commit()
 cursor.close()
 conn.close()

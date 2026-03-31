@@ -82,17 +82,22 @@ def course_analytics(course_id):
     exam_stats = []
     for exam in exams:
         subs = Submission.query.filter_by(exam_id=exam.id, status='graded').all()
-        scores = [s.total_score for s in subs if s.total_score is not None]
+        raw_scores = [s.total_score for s in subs if s.total_score is not None]
+        total = exam.total_marks or 100
+        # Normalize to percentage so chart axes are consistent (0–100%)
+        scores_pct = [round((s / total) * 100, 1) for s in raw_scores]
+        passing_pct = round(((exam.passing_marks or 50) / total) * 100, 1)
         exam_stats.append({
             'exam_id': exam.id,
             'exam_title': exam.title,
+            'total_marks': total,
             'total_submissions': len(subs),
-            'average_score': round(sum(scores) / len(scores), 2) if scores else 0,
-            'highest_score': max(scores) if scores else 0,
-            'lowest_score': min(scores) if scores else 0,
+            'average_score': round(sum(scores_pct) / len(scores_pct), 1) if scores_pct else 0,
+            'highest_score': max(scores_pct) if scores_pct else 0,
+            'lowest_score': min(scores_pct) if scores_pct else 0,
             'pass_rate': round(
-                sum(1 for s in scores if s >= (exam.passing_marks or 50)) / len(scores) * 100, 1
-            ) if scores else 0,
+                sum(1 for s in scores_pct if s >= passing_pct) / len(scores_pct) * 100, 1
+            ) if scores_pct else 0,
         })
 
     return jsonify({
@@ -119,6 +124,7 @@ def course_student_insights(course_id):
 
     exams = Exam.query.filter_by(course_id=course_id).all()
     exam_ids = [e.id for e in exams]
+    exam_map = {e.id: e for e in exams}  # for fast lookup of total_marks / passing_marks
 
     students = db.session.query(User).join(
         Enrollment, Enrollment.student_id == User.id
@@ -141,7 +147,14 @@ def course_student_insights(course_id):
             Submission.exam_id.in_(exam_ids) if exam_ids else False
         ).order_by(Submission.submitted_at.asc(), Submission.started_at.asc()).all() if exam_ids else []
 
-        graded_scores = [s.total_score for s in submissions if s.total_score is not None]
+        # Normalize each score to a percentage so averages are comparable across exams
+        graded_scores = []
+        for s in submissions:
+            if s.total_score is not None:
+                ex = exam_map.get(s.exam_id)
+                total = ex.total_marks if ex and ex.total_marks else 100
+                graded_scores.append(round((s.total_score / total) * 100, 1))
+
         avg_score = round(sum(graded_scores) / len(graded_scores), 1) if graded_scores else 0
         trend = _score_trend(graded_scores)
 
@@ -158,14 +171,19 @@ def course_student_insights(course_id):
             sum((p.progress_percent or 0) for p in progress_rows) / len(progress_rows), 1
         ) if progress_rows else 0
 
-        score_history = [
-            {
-                'exam_title': (s.exam.title if s.exam else 'Exam'),
-                'score': s.total_score,
-                'submitted_at': s.submitted_at.isoformat() if s.submitted_at else None,
-            }
-            for s in submissions if s.total_score is not None
-        ]
+        score_history = []
+        for s in submissions:
+            if s.total_score is not None:
+                ex = exam_map.get(s.exam_id)
+                total = ex.total_marks if ex and ex.total_marks else 100
+                pct = round((s.total_score / total) * 100, 1)
+                score_history.append({
+                    'exam_title': (s.exam.title if s.exam else 'Exam'),
+                    'score': pct,
+                    'raw_score': s.total_score,
+                    'total_marks': total,
+                    'submitted_at': s.submitted_at.isoformat() if s.submitted_at else None,
+                })
 
         if avg_score < 50 and len(graded_scores) > 0:
             at_risk_count += 1
@@ -342,18 +360,20 @@ def engagement_analytics(course_id):
         if not course:
             return jsonify({'error': 'Course not found'}), 404
 
-    # Material engagement
+    # Material engagement — scoped to this course's materials
+    course_material_ids = [
+        m.id for m in Material.query.filter_by(course_id=course_id).all()
+    ]
+    if not course_material_ids:
+        return jsonify({'course_id': course_id, 'engagement': []})
+
     progress_records = db.session.query(
         LearningProgress.material_id,
         func.count(LearningProgress.id).label('views'),
         func.avg(LearningProgress.progress_percent).label('avg_progress'),
         func.sum(LearningProgress.time_spent_seconds).label('total_time'),
-    ).join(
-        LearningProgress.material_id == LearningProgress.material_id
     ).filter(
-        LearningProgress.material_id.in_(
-            db.session.query(func.distinct(LearningProgress.material_id))
-        )
+        LearningProgress.material_id.in_(course_material_ids)
     ).group_by(LearningProgress.material_id).all()
 
     engagement = []

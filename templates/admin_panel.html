@@ -202,7 +202,7 @@
                 </div>
             </div>
 
-            <div class="mt-10 grid lg:grid-cols-[1.2fr_0.8fr] gap-8">
+            <div class="mt-10 grid lg:grid-cols-[1.2fr_0.8fr] gap-8" id="overview-section">
                 <div class="ghost-card rounded-3xl p-6">
                     <div class="flex items-center justify-between">
                         <h3 class="text-xl font-semibold">Priority Actions</h3>
@@ -228,8 +228,8 @@
                         <div class="flex items-start gap-3">
                             <div class="w-10 h-10 rounded-2xl bg-black/90 text-white flex items-center justify-center">3</div>
                             <div>
-                                <p class="font-semibold">Confirm upcoming exam roster</p>
-                                <p class="text-sm text-black/50">Verify course data is synced and ready.</p>
+                                <p class="font-semibold"><a href="/admin/face-verification" class="hover:underline">Manage Face Verification</a></p>
+                                <p class="text-sm text-black/50">Review and manage student face registrations.</p>
                             </div>
                         </div>
                     </div>
@@ -256,6 +256,90 @@
                             <span class="text-sm text-black/60">Queue length</span>
                             <span class="text-sm font-semibold" id="stat-queue">0</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Face Verification Management Section -->
+            <div class="mt-10 hidden" id="face-verification-section">
+                <div class="ghost-card rounded-3xl p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-2xl font-semibold">Face Verification Management</h3>
+                            <p class="text-sm text-black/60 mt-1">Manage student face registrations and verification logs</p>
+                        </div>
+                        <a href="/admin/dashboard" class="text-sm text-black/60 hover:text-black">&larr; Back to Dashboard</a>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card rounded-2xl p-4">
+                            <p class="text-xs text-white/60 uppercase tracking-wider">Total Students</p>
+                            <p class="text-2xl font-semibold mt-1 text-white" id="fv-total-students">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4">
+                            <p class="text-xs text-white/60 uppercase tracking-wider">Registered</p>
+                            <p class="text-2xl font-semibold mt-1 text-green-400" id="fv-registered">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4">
+                            <p class="text-xs text-white/60 uppercase tracking-wider">Not Registered</p>
+                            <p class="text-2xl font-semibold mt-1 text-yellow-400" id="fv-not-registered">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4">
+                            <p class="text-xs text-white/60 uppercase tracking-wider">Registration Rate</p>
+                            <p class="text-2xl font-semibold mt-1 text-white" id="fv-rate">0%</p>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <input type="text" id="fv-search" placeholder="Search students..." 
+                               class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30 w-64">
+                        <select id="fv-status-filter" class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30">
+                            <option value="all">All Status</option>
+                            <option value="registered">Registered</option>
+                            <option value="not_registered">Not Registered</option>
+                        </select>
+                        <button onclick="loadFaceVerificationData()" class="px-4 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-black/80">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Students Table -->
+                <div class="ghost-card rounded-3xl p-6 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-black/10">
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Student</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Department</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Face Status</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Exams</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fv-students-table">
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-black/50">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Face Detail Modal -->
+            <div id="fv-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold" id="fv-modal-title">Student Details</h3>
+                        <button onclick="closeFvModal()" class="text-black/50 hover:text-black">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div id="fv-modal-content" class="space-y-4">
+                        <!-- Content loaded dynamically -->
                     </div>
                 </div>
             </div>
@@ -351,6 +435,204 @@
                 }
             }
         });
+
+        // Face Verification Management Functions
+        let fvStudents = [];
+        let selectedStudentId = null;
+
+        function showFaceVerificationSection() {
+            document.getElementById('overview-section').classList.add('hidden');
+            document.getElementById('face-verification-section').classList.remove('hidden');
+            loadFaceVerificationData();
+        }
+
+        function showOverviewSection() {
+            document.getElementById('overview-section').classList.remove('hidden');
+            document.getElementById('face-verification-section').classList.add('hidden');
+        }
+
+        async function loadFaceVerificationData() {
+            const statusFilter = document.getElementById('fv-status-filter').value;
+            const search = document.getElementById('fv-search').value;
+            
+            try {
+                const params = new URLSearchParams({ status: statusFilter });
+                if (search) params.append('search', search);
+                
+                const response = await fetch(`/api/admin/face-verification/students?${params}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load data');
+                
+                const data = await response.json();
+                fvStudents = data.students;
+                
+                // Update stats
+                document.getElementById('fv-total-students').textContent = data.total;
+                document.getElementById('fv-registered').textContent = data.registered;
+                document.getElementById('fv-not-registered').textContent = data.not_registered;
+                const rate = data.total > 0 ? Math.round((data.registered / data.total) * 100) : 0;
+                document.getElementById('fv-rate').textContent = `${rate}%`;
+                
+                // Render table
+                renderFvTable();
+                
+            } catch (error) {
+                console.error('Error loading face verification data:', error);
+                document.getElementById('fv-students-table').innerHTML = `
+                    <tr><td colspan="5" class="py-8 text-center text-red-500">Failed to load data</td></tr>
+                `;
+            }
+        }
+
+        function renderFvTable() {
+            const tbody = document.getElementById('fv-students-table');
+            
+            if (fvStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-black/50">No students found</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = fvStudents.map(student => {
+                const statusBadge = student.face_status === 'registered' 
+                    ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Registered</span>'
+                    : '<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">Not Registered</span>';
+                
+                const actions = student.face_status === 'registered'
+                    ? `<button onclick="resetStudentFace(${student.id})" class="text-red-600 hover:text-red-800 text-sm">Reset</button>`
+                    : `<span class="text-black/30 text-sm">-</span>`;
+                
+                return `
+                    <tr class="border-b border-black/5 hover:bg-black/5">
+                        <td class="py-3 px-4">
+                            <div class="font-medium">${student.first_name} ${student.last_name}</div>
+                            <div class="text-sm text-black/50">${student.email}</div>
+                        </td>
+                        <td class="py-3 px-4 text-sm">${student.department || '-'}</td>
+                        <td class="py-3 px-4">${statusBadge}</td>
+                        <td class="py-3 px-4 text-sm">${student.verified_exams}/${student.total_exams} verified</td>
+                        <td class="py-3 px-4">
+                            <button onclick="viewStudentLogs(${student.id})" class="text-blue-600 hover:text-blue-800 text-sm mr-3">Logs</button>
+                            ${actions}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function viewStudentLogs(studentId) {
+            selectedStudentId = studentId;
+            const student = fvStudents.find(s => s.id === studentId);
+            
+            try {
+                const response = await fetch(`/api/admin/face-verification/logs/${studentId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load logs');
+                
+                const data = await response.json();
+                
+                document.getElementById('fv-modal-title').textContent = `Verification Logs - ${data.student_name}`;
+                
+                if (data.logs.length === 0) {
+                    document.getElementById('fv-modal-content').innerHTML = `
+                        <p class="text-black/50 text-center py-4">No verification logs found</p>
+                    `;
+                } else {
+                    document.getElementById('fv-modal-content').innerHTML = `
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            ${data.logs.map(log => {
+                                const statusColor = log.status === 'success' ? 'text-green-600' : 'text-red-600';
+                                const date = new Date(log.created_at).toLocaleString();
+                                return `
+                                    <div class="p-3 bg-black/5 rounded-xl">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-medium capitalize">${log.verification_type.replace('_', ' ')}</span>
+                                            <span class="text-sm ${statusColor} font-medium">${log.status}</span>
+                                        </div>
+                                        <div class="text-sm text-black/50 mt-1">${date}</div>
+                                        ${log.confidence_score ? `<div class="text-sm text-black/60 mt-1">Confidence: ${(log.confidence_score * 100).toFixed(1)}%</div>` : ''}
+                                        ${log.failure_reason ? `<div class="text-sm text-red-600 mt-1">${log.failure_reason}</div>` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('fv-modal').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                alert('Failed to load verification logs');
+            }
+        }
+
+        async function resetStudentFace(studentId) {
+            const student = fvStudents.find(s => s.id === studentId);
+            const reason = prompt(`Reset face registration for ${student.first_name} ${student.last_name}?\n\nPlease provide a reason:`);
+            
+            if (!reason) return;
+            
+            try {
+                const response = await fetch(`/api/admin/face-verification/${studentId}/reset`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ reason })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to reset');
+                }
+                
+                alert('Face registration reset successfully');
+                loadFaceVerificationData();
+                
+            } catch (error) {
+                console.error('Error resetting face:', error);
+                alert(error.message || 'Failed to reset face registration');
+            }
+        }
+
+        function closeFvModal() {
+            document.getElementById('fv-modal').classList.add('hidden');
+            selectedStudentId = null;
+        }
+
+        // Search and filter handlers
+        document.getElementById('fv-search')?.addEventListener('input', debounce(() => {
+            loadFaceVerificationData();
+        }, 300));
+
+        document.getElementById('fv-status-filter')?.addEventListener('change', () => {
+            loadFaceVerificationData();
+        });
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initialize page based on active section
+        const activePage = '{{ admin_active_page }}';
+        if (activePage === 'face_verification') {
+            showFaceVerificationSection();
+        } else {
+            showOverviewSection();
+        }
 
         fetchProfile();
         fetchAdminOverview();

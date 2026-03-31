@@ -15,6 +15,7 @@ class User(db.Model):
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     role = db.Column(db.Enum('admin', 'lecturer', 'student', name='user_roles'), nullable=False, default='student')
+    department = db.Column(db.String(100), nullable=True)  # Student/lecturer department
     profile_image = db.Column(db.String(255), nullable=True)
     phone_number = db.Column(db.String(20), nullable=True)
     bio = db.Column(db.Text, nullable=True)
@@ -41,6 +42,7 @@ class User(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'role': self.role,
+            'department': self.department,
             'profile_image': self.profile_image,
             'phone_number': self.phone_number,
             'bio': self.bio,
@@ -55,6 +57,7 @@ class User(db.Model):
         """Calculate profile completion percentage."""
         steps = [
             bool(self.profile_image),
+            bool(self.department),
             bool(self.phone_number),
             bool(self.bio),
             bool(self.face_encoding),
@@ -279,7 +282,10 @@ class Submission(db.Model):
     is_flagged = db.Column(db.Boolean, default=False)
     risk_score = db.Column(db.Integer, default=0)
     status = db.Column(db.Enum('in_progress', 'submitted', 'graded', name='submission_status'), default='in_progress')
+    approval_status = db.Column(db.Enum('pending', 'approved', 'cancelled', name='approval_status'), default='pending')
     face_verified = db.Column(db.Boolean, default=False)
+    face_verified_at = db.Column(db.DateTime, nullable=True)
+    grades_released = db.Column(db.Boolean, default=False)  # Per-submission grade visibility
 
     # Relationships
     answers = db.relationship('Answer', backref='submission', lazy='dynamic', cascade='all, delete-orphan')
@@ -299,7 +305,10 @@ class Submission(db.Model):
             'is_flagged': self.is_flagged,
             'risk_score': self.risk_score,
             'status': self.status,
+            'approval_status': self.approval_status,
             'face_verified': self.face_verified,
+            'face_verified_at': self.face_verified_at.isoformat() if self.face_verified_at else None,
+            'grades_released': self.grades_released,
         }
 
 
@@ -458,4 +467,71 @@ class LiveClass(db.Model):
             'duration_minutes': self.duration_minutes,
             'is_unlocked': self.is_unlocked,
             'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+# ──────────────────────────── FACE VERIFICATION LOGS ────────────────────────────
+
+class FaceVerificationLog(db.Model):
+    __tablename__ = 'face_verification_logs'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=True)
+    submission_id = db.Column(db.Integer, db.ForeignKey('submissions.id'), nullable=True)
+    verification_type = db.Column(db.Enum('registration', 'pre_exam', 'liveness_check', name='verification_types'), nullable=False)
+    status = db.Column(db.Enum('success', 'failed', 'pending', name='verification_status'), nullable=False)
+    confidence_score = db.Column(db.Float, nullable=True)
+    liveness_score = db.Column(db.Float, nullable=True)
+    failure_reason = db.Column(db.String(255), nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    user_agent = db.Column(db.String(500), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = db.relationship('User', backref=db.backref('face_verification_logs', lazy='dynamic'))
+    exam = db.relationship('Exam', backref=db.backref('face_verification_logs', lazy='dynamic'))
+    submission = db.relationship('Submission', backref=db.backref('face_verification_logs', lazy='dynamic'))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'exam_id': self.exam_id,
+            'submission_id': self.submission_id,
+            'verification_type': self.verification_type,
+            'status': self.status,
+            'confidence_score': self.confidence_score,
+            'liveness_score': self.liveness_score,
+            'failure_reason': self.failure_reason,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+# ──────────────────────────── FACE ADMIN ACTIONS ────────────────────────────
+
+class FaceAdminAction(db.Model):
+    __tablename__ = 'face_admin_actions'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    action_type = db.Column(db.Enum('register_face', 'reset_face', 'verify_face', 'view_logs', name='admin_action_types'), nullable=False)
+    reason = db.Column(db.Text, nullable=True)
+    old_encoding = db.Column(db.LargeBinary, nullable=True)
+    new_encoding = db.Column(db.LargeBinary, nullable=True)
+    performed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    student = db.relationship('User', foreign_keys=[student_id], backref=db.backref('face_admin_actions_as_student', lazy='dynamic'))
+    admin = db.relationship('User', foreign_keys=[admin_id], backref=db.backref('face_admin_actions_as_admin', lazy='dynamic'))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'student_id': self.student_id,
+            'admin_id': self.admin_id,
+            'action_type': self.action_type,
+            'reason': self.reason,
+            'performed_at': self.performed_at.isoformat() if self.performed_at else None,
         }

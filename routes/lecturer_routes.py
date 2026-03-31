@@ -207,6 +207,7 @@ def read_material_lecturer(material_id):
         material_data=material_data,
         progress_data=None,
         back_url='/lecturer/dashboard?view=materials',
+        show_ai_summary=True,
     )
 
 
@@ -254,7 +255,7 @@ def create_course():
         title=data['title'],
         description=data.get('description', ''),
         lecturer_id=identity['id'],
-        category=data.get('category', ''),
+        category=data.get('category', '').strip(),
         is_published=data.get('is_published', False),
     )
     db.session.add(course)
@@ -274,7 +275,10 @@ def update_course(course_id):
     data = request.get_json()
     for field in ['title', 'description', 'category', 'is_published']:
         if field in data:
-            setattr(course, field, data[field])
+            value = data[field]
+            if field == 'category' and value:
+                value = value.strip()
+            setattr(course, field, value)
 
     db.session.commit()
     return jsonify({'message': 'Course updated', 'course': course.to_dict()})
@@ -775,11 +779,73 @@ def release_grades(exam_id):
         return jsonify({'error': 'Unauthorized'}), 403
 
     exam.grades_released = not exam.grades_released
+
+    # When releasing: bulk-release all currently graded submissions so students can see them.
+    # When hiding: retract all per-submission releases too.
+    all_subs = Submission.query.filter_by(exam_id=exam_id).all()
+    for s in all_subs:
+        if exam.grades_released and s.is_graded:
+            s.grades_released = True
+        elif not exam.grades_released:
+            s.grades_released = False
+
     db.session.commit()
+
+    graded_count = sum(1 for s in all_subs if s.is_graded)
+    in_progress_count = sum(1 for s in all_subs if s.status == 'in_progress')
+    pending_count = sum(1 for s in all_subs if not s.is_graded and s.status != 'in_progress')
+    unreleased_count = sum(1 for s in all_subs if s.is_graded and not s.grades_released)
+
     return jsonify({
-        'message': 'Grades released' if exam.grades_released else 'Grades hidden',
+        'message': 'Grades released to students' if exam.grades_released else 'Grades hidden from students',
         'grades_released': exam.grades_released,
+        'graded_count': graded_count,
+        'in_progress_count': in_progress_count,
+        'pending_count': pending_count,
+        'unreleased_count': unreleased_count,
         'exam': exam.to_dict()
+    })
+
+
+@lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/release', methods=['POST'])
+@jwt_required()
+@role_required('lecturer')
+def release_submission_grades(submission_id):
+    """Release grades for a single submission when the exam is already in released state."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    exam = Exam.query.get(submission.exam_id)
+    course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    if not submission.is_graded:
+        return jsonify({'error': 'This submission has not been graded yet.'}), 400
+
+    submission.grades_released = True
+    # Auto-enable exam-level flag so the student can actually see their result
+    if not exam.grades_released:
+        exam.grades_released = True
+    db.session.commit()
+
+    # Return updated counts
+    all_subs = Submission.query.filter_by(exam_id=exam.id).all()
+    graded_count = sum(1 for s in all_subs if s.is_graded)
+    in_progress_count = sum(1 for s in all_subs if s.status == 'in_progress')
+    pending_count = sum(1 for s in all_subs if not s.is_graded and s.status != 'in_progress')
+    unreleased_count = sum(1 for s in all_subs if s.is_graded and not s.grades_released)
+
+    return jsonify({
+        'message': 'Results released to student.',
+        'submission': submission.to_dict(),
+        'grades_released': exam.grades_released,
+        'graded_count': graded_count,
+        'in_progress_count': in_progress_count,
+        'pending_count': pending_count,
+        'unreleased_count': unreleased_count,
     })
 
 
@@ -1067,8 +1133,22 @@ def get_exam_submissions(exam_id):
             **sub.to_dict(),
             'student_name': f"{student.first_name} {student.last_name}" if student else 'Unknown',
             'violations_count': len(violations),
+            'violations_types': [{'violation_type': v.violation_type, 'severity': v.severity} for v in violations],
         })
-    return jsonify({'submissions': result})
+
+    graded_count = sum(1 for s in submissions if s.is_graded)
+    in_progress_count = sum(1 for s in submissions if s.status == 'in_progress')
+    pending_count = sum(1 for s in submissions if not s.is_graded and s.status != 'in_progress')
+    unreleased_count = sum(1 for s in submissions if s.is_graded and not s.grades_released)
+
+    return jsonify({
+        'submissions': result,
+        'grades_released': exam.grades_released,
+        'graded_count': graded_count,
+        'in_progress_count': in_progress_count,
+        'pending_count': pending_count,
+        'unreleased_count': unreleased_count,
+    })
 
 
 @lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/grade', methods=['POST'])
@@ -1140,6 +1220,188 @@ def override_submission_score(submission_id):
     return jsonify({'message': 'Score updated', 'submission': submission.to_dict()})
 
 
+@lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/cancel', methods=['POST'])
+@jwt_required()
+@role_required('lecturer')
+def cancel_submission(submission_id):
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    exam = Exam.query.get(submission.exam_id)
+    course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    # Only allow cancellation of submitted but not yet released submissions
+    if submission.status != 'submitted':
+        return jsonify({'error': 'Can only cancel submitted submissions'}), 400
+    
+    if exam.grades_released:
+        return jsonify({'error': 'Cannot cancel submission after grades have been released'}), 400
+
+    submission.approval_status = 'cancelled'
+    db.session.commit()
+
+    return jsonify({'message': 'Submission cancelled successfully', 'submission': submission.to_dict()})
+
+
+@lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/approve', methods=['POST'])
+@jwt_required()
+@role_required('lecturer')
+def approve_submission(submission_id):
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    exam = Exam.query.get(submission.exam_id)
+    course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    # Only allow approval of submitted submissions
+    if submission.status != 'submitted':
+        return jsonify({'error': 'Can only approve submitted submissions'}), 400
+
+    submission.approval_status = 'approved'
+    # Set status to 'graded' when approved
+    submission.status = 'graded'
+    db.session.commit()
+
+    return jsonify({'message': 'Submission approved successfully', 'submission': submission.to_dict()})
+
+
+@lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>', methods=['DELETE'])
+@jwt_required()
+@role_required('lecturer')
+def delete_submission(submission_id):
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    exam = Exam.query.get(submission.exam_id)
+    course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    # Prevent deleting a submission that is currently in progress
+    if submission.status == 'in_progress':
+        return jsonify({'error': 'Cannot delete a submission that is currently in progress.'}), 400
+
+    db.session.delete(submission)
+    db.session.commit()
+    return jsonify({'message': 'Submission deleted successfully'})
+
+
+@lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/answers', methods=['GET'])
+@jwt_required()
+@role_required('lecturer')
+def get_submission_answers(submission_id):
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    exam = Exam.query.get(submission.exam_id)
+    course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    # Get all answers for this submission
+    answers = Answer.query.filter_by(submission_id=submission_id).all()
+    
+    result = []
+    for answer in answers:
+        question = Question.query.get(answer.question_id)
+        answer_data = answer.to_dict()
+        if question:
+            answer_data.update({
+                'question_text': question.question_text,
+                'question_type': question.question_type,
+                'marks': question.marks,
+                'options': question.options
+            })
+        result.append(answer_data)
+
+    return jsonify({
+        'answers': result,
+        'exam_total_marks': exam.total_marks,
+        'submission': submission.to_dict()
+    })
+
+
+@lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/update-marks', methods=['POST'])
+@jwt_required()
+@role_required('lecturer')
+def update_submission_marks(submission_id):
+    try:
+        identity = get_identity()
+        submission = Submission.query.get(submission_id)
+        if not submission:
+            return jsonify({'error': 'Submission not found'}), 404
+
+        exam = Exam.query.get(submission.exam_id)
+        course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+        if not course:
+            return jsonify({'error': 'Unauthorized'}), 403
+
+        data = request.get_json()
+        if not data or 'answers' not in data:
+            return jsonify({'error': 'Invalid request data'}), 400
+
+        print(f"Updating marks for submission {submission_id}")
+        print(f"Received {len(data['answers'])} answers")
+
+        # Update each answer
+        total_score = 0
+        updated_count = 0
+        for answer_data in data['answers']:
+            answer = Answer.query.get(answer_data['id'])
+            if answer and answer.submission_id == submission_id:
+                old_score = answer.score or 0
+                new_score = answer_data.get('score', 0)
+                answer.score = new_score
+                answer.ai_feedback = answer_data.get('ai_feedback', answer.ai_feedback)
+                answer.is_correct = (new_score or 0) > 0
+                total_score += (new_score or 0)
+                updated_count += 1
+                print(f"Updated answer {answer.id}: score {old_score} -> {new_score}")
+            else:
+                print(f"Warning: Answer {answer_data['id']} not found or doesn't belong to submission")
+
+        print(f"Updated {updated_count} answers, total score: {total_score}")
+
+        # Update submission total
+        submission.total_score = total_score
+        submission.is_graded = True
+        # Keep status as 'submitted' to allow Cancel/Approved workflow
+        # Only change to 'graded' when lecturer explicitly approves
+        if submission.approval_status == 'approved':
+            submission.status = 'graded'
+        else:
+            submission.status = 'submitted'
+        
+        db.session.commit()
+        
+        print(f"Successfully saved marks for submission {submission_id}")
+
+        return jsonify({
+            'message': 'Marks updated successfully',
+            'submission': submission.to_dict(),
+            'total_score': total_score
+        })
+        
+    except Exception as e:
+        print(f"Error updating submission marks: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        return jsonify({'error': f'Failed to update marks: {str(e)}'}), 500
+
+
 # ──────────────── ENROLLED STUDENTS ────────────────
 
 @lecturer_bp.route('/api/lecturer/courses/<int:course_id>/students', methods=['GET'])
@@ -1151,15 +1413,69 @@ def get_enrolled_students(course_id):
     if not course:
         return jsonify({'error': 'Course not found'}), 404
 
+    # Get all materials and exams for this course to calculate progress
+    materials = Material.query.filter_by(course_id=course_id).all()
+    total_materials = len(materials)
+    material_ids = [m.id for m in materials]
+
+    # Get all exams for this course (CATs and main exam)
+    exams = Exam.query.filter_by(course_id=course_id, is_published=True).all()
+    total_exams = len(exams)
+
     enrollments = Enrollment.query.filter_by(course_id=course_id).all()
     students = []
     for enr in enrollments:
         student = User.query.get(enr.student_id)
         if student:
+            # Calculate materials progress
+            materials_completed = 0
+            materials_accessed = 0
+            if total_materials > 0:
+                progress_records = LearningProgress.query.filter(
+                    LearningProgress.student_id == student.id,
+                    LearningProgress.material_id.in_(material_ids)
+                ).all()
+                for r in progress_records:
+                    materials_accessed += 1
+                    if r.completed:
+                        materials_completed += 1
+                materials_progress = (materials_completed / total_materials) * 40  # 40% weight
+            else:
+                materials_progress = 0
+
+            # Calculate exams progress (CATs and main exam)
+            exams_completed = 0
+            if total_exams > 0:
+                submissions = Submission.query.filter(
+                    Submission.student_id == student.id,
+                    Submission.exam_id.in_([e.id for e in exams])
+                ).filter(Submission.status.in_(['submitted', 'graded'])).all()
+                exams_completed = len(submissions)
+                exams_progress = (exams_completed / total_exams) * 60  # 60% weight
+            else:
+                exams_progress = 0
+
+            # Total progress percentage
+            total_progress = round(materials_progress + exams_progress, 1)
+
             students.append({
                 **student.to_dict(),
                 'enrollment_status': enr.status,
-                'progress': enr.progress,
+                'progress': total_progress,
+                'progress_details': {
+                    'percentage': total_progress,
+                    'materials_accessed': materials_accessed,
+                    'materials_completed': materials_completed,
+                    'total_materials': total_materials,
+                    'exams_completed': exams_completed,
+                    'total_exams': total_exams,
+                    'cats_done': exams_completed - (1 if exams_completed > 0 and any(e.exam_type == 'main_exam' for e in exams) else 0),
+                    'main_exam_done': any(
+                        Submission.query.filter_by(student_id=student.id, exam_id=e.id).filter(
+                            Submission.status.in_(['submitted', 'graded'])
+                        ).first() for e in exams if e.exam_type == 'main_exam'
+                    )
+                }
             })
     return jsonify({'students': students})
 

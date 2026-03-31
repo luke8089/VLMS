@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        {% if material_data.ai_summary %}
+        {% if material_data.ai_summary and show_ai_summary %}
         <div class="reader-card rounded-xl p-3 md:p-5">
             <h2 class="text-sm font-semibold text-neutral-200 mb-2">AI Summary</h2>
             <div class="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">{{ material_data.ai_summary }}</div>

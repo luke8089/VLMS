@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+{% block title %}Pre-Exam Face Verification — MindStack{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: #0a0a0a; color: #fff; }
+    .verification-container { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+    .exam-info { text-align: center; margin-bottom: 2rem; }
+    .exam-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .exam-course { color: rgba(255,255,255,0.6); font-size: 0.95rem; }
+    .camera-wrapper { position: relative; width: 480px; max-width: 90vw; aspect-ratio: 4/3; background: #111; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); transition: border-color 0.3s ease; }
+    .camera-wrapper.verifying { border-color: #fbbf24; animation: pulse-border 1.5s ease-in-out infinite; }
+    .camera-wrapper.success { border-color: #22c55e; animation: none; }
+    .camera-wrapper.error { border-color: #ef4444; animation: none; }
+    @keyframes pulse-border { 0%, 100% { border-color: rgba(251, 191, 36, 0.5); } 50% { border-color: rgba(251, 191, 36, 1); } }
+    #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .face-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 240px; height: 240px; border: 3px dashed rgba(255,255,255,0.3); border-radius: 50%; pointer-events: none; transition: all 0.3s ease; }
+    .face-overlay.detected { border-color: rgba(34, 197, 94, 0.6); border-style: solid; box-shadow: 0 0 30px rgba(34, 197, 94, 0.3); }
+    .status-indicator { position: absolute; top: 16px; right: 16px; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.7); padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #6b7280; }
+    .status-dot.active { background: #22c55e; animation: pulse 1.5s ease-in-out infinite; }
+    .status-dot.processing { background: #fbbf24; animation: pulse 1s ease-in-out infinite; }
+    .status-dot.error { background: #ef4444; }
+    .status-dot.success { background: #22c55e; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .instruction-box { margin-top: 2rem; text-align: center; max-width: 480px; }
+    .instruction-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .instruction-text { color: rgba(255,255,255,0.6); font-size: 0.95rem; line-height: 1.5; }
+    .liveness-checks { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 1.5rem; }
+    .check-badge { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(255,255,255,0.05); border-radius: 20px; font-size: 13px; color: rgba(255,255,255,0.5); transition: all 0.3s ease; }
+    .check-badge.passed { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .check-badge.failed { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .check-badge.processing { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+    .action-buttons { display: flex; gap: 12px; margin-top: 2rem; }
+    .btn { padding: 14px 32px; border-radius: 12px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; border: none; }
+    .btn-primary { background: #fff; color: #000; }
+    .btn-primary:hover { background: #e5e5e5; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+    .result-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .result-modal.visible { opacity: 1; pointer-events: auto; }
+    .result-card { background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem; text-align: center; max-width: 420px; width: 90%; transform: scale(0.95); transition: transform 0.3s ease; }
+    .result-modal.visible .result-card { transform: scale(1); }
+    .result-icon { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+    .result-icon.success { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .result-icon.error { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .result-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .result-message { color: rgba(255,255,255,0.6); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+    .result-details { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; text-align: left; }
+    .result-detail-item { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.375rem 0; }
+    .result-detail-label { color: rgba(255,255,255,0.5); }
+    .result-detail-value { font-weight: 500; }
+    .result-detail-value.success { color: #22c55e; }
+    .result-detail-value.error { color: #ef4444; }
+    .hidden-canvas { display: none; }
+    .timer-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.1); }
+    .timer-fill { height: 100%; background: linear-gradient(90deg, #fbbf24, #f59e0b); width: 0%; transition: width 0.1s linear; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="verification-container">
+    <div class="exam-info">
+        <h1 class="exam-title">{{ exam.title }}</h1>
+        <p class="exam-course">{{ exam.course.code }} - {{ exam.course.title }}</p>
+    </div>
+    <div class="camera-wrapper" id="camera-wrapper">
+        <video id="video-feed" autoplay playsinline></video>
+        <div class="face-overlay" id="face-overlay"></div>
+        <div class="status-indicator">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Initializing...</span>
+        </div>
+        <div class="timer-bar" id="timer-bar" style="display: none;">
+            <div class="timer-fill" id="timer-fill"></div>
+        </div>
+    </div>
+    <div class="instruction-box">
+        <h2 class="instruction-title" id="instruction-title">Identity Verification Required</h2>
+        <p class="instruction-text" id="instruction-text">
+            Please position your face within the circle. We'll verify your identity before you can start the exam.
+        </p>
+        <div class="liveness-checks" id="liveness-checks">
+            <div class="check-badge" id="check-lighting">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                Good lighting
+            </div>
+            <div class="check-badge" id="check-face">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Face detected
+            </div>
+            <div class="check-badge" id="check-liveness">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Liveness verified
+            </div>
+            <div class="check-badge" id="check-match">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                Face match
+            </div>
+        </div>
+    </div>
+    <div class="action-buttons">
+        <button class="btn btn-secondary" onclick="cancelVerification()">Cancel</button>
+    </div>
+</div>
+<!-- Result Modal -->
+<div class="result-modal" id="result-modal">
+    <div class="result-card">
+        <div class="result-icon" id="result-icon">
+            <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"/>
+            </svg>
+        </div>
+        <h2 class="result-title" id="result-title">Verification Successful</h2>
+        <p class="result-message" id="result-message">Your identity has been verified. You can now start the exam.</p>
+        <div class="result-details" id="result-details" style="display: none;">
+            <div class="result-detail-item">
+                <span class="result-detail-label">Confidence Score</span>
+                <span class="result-detail-value" id="confidence-score">-</span>
+            </div>
+            <div class="result-detail-item">
+                <span class="result-detail-label">Liveness Score</span>
+                <span class="result-detail-value" id="liveness-score">-</span>
+            </div>
+        </div>
+        <button class="btn btn-primary w-full" onclick="closeResultModal()" id="result-action-btn">Start Exam</button>
+    </div>
+</div>
+<canvas id="capture-canvas" class="hidden-canvas"></canvas>
+<script>
+// Configuration - Fast verification like mobile unlock
+const AUTO_VERIFY_DELAY = 800; // Start verification 800ms after face detected
+const FRAME_INTERVAL = 200; // Check face every 200ms
+const MAX_RETRIES = 5; // Max attempts before showing persistent error
+
+// State
+let stream = null;
+let isVerifying = false;
+let faceDetected = false;
+let verificationAttempts = 0;
+let previousFrames = [];
+const MAX_PREVIOUS_FRAMES = 3;
+
+// DOM Elements
+const video = document.getElementById('video-feed');
+const canvas = document.getElementById('capture-canvas');
+const cameraWrapper = document.getElementById('camera-wrapper');
+const faceOverlay = document.getElementById('face-overlay');
+const statusDot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
+const timerBar = document.getElementById('timer-bar');
+
+// Check badges
+const checkLighting = document.getElementById('check-lighting');
+const checkFace = document.getElementById('check-face');
+const checkLiveness = document.getElementById('check-liveness');
+const checkMatch = document.getElementById('check-match');
+
+let faceDetectionInterval = null;
+let autoVerifyTimeout = null;
+
+// Initialize camera on page load
+window.addEventListener('DOMContentLoaded', initializeCamera);
+
+async function initializeCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 640 },
+                height: { ideal: 480 },
+                facingMode: 'user'
+            }, 
+            audio: false 
+        });
+        video.srcObject = stream;
+        
+        statusDot.classList.add('active');
+        statusText.textContent = 'Position your face in the circle';
+        
+        // Start continuous face detection for auto-verification
+        startAutoFaceDetection();
+        
+    } catch (err) {
+        console.error('Camera error:', err);
+        statusDot.classList.add('error');
+        statusText.textContent = 'Camera access denied';
+        showErrorModal('Camera access is required for face verification. Please enable camera permissions and refresh.', true);
+    }
+}
+
+function startAutoFaceDetection() {
+    // Check face every 200ms for fast response
+    faceDetectionInterval = setInterval(() => {
+        if (!video.videoWidth || isVerifying) return;
+        
+        // Store frame for liveness detection
+        storeFrame();
+        
+        // Analyze frame for face detection
+        const hasFace = analyzeFrameForFace();
+        
+        if (hasFace && !faceDetected) {
+            // Face just detected - start auto-verify countdown
+            faceDetected = true;
+            faceOverlay.classList.add('detected');
+            statusText.textContent = 'Face detected - Verifying...';
+            
+            // Auto-verify after short delay (like mobile unlock)
+            clearTimeout(autoVerifyTimeout);
+            autoVerifyTimeout = setTimeout(() => {
+                performFastVerification();
+            }, AUTO_VERIFY_DELAY);
+        } else if (!hasFace && faceDetected) {
+            // Face lost - cancel auto-verify
+            faceDetected = false;
+            faceOverlay.classList.remove('detected');
+            statusText.textContent = 'Position your face in the circle';
+            clearTimeout(autoVerifyTimeout);
+        }
+        
+    }, FRAME_INTERVAL);
+}
+
+function storeFrame() {
+    canvas.width = 320; // Smaller for storage
+    canvas.height = 240;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const frameData = canvas.toDataURL('image/jpeg', 0.5);
+    previousFrames.push(frameData);
+    
+    if (previousFrames.length > MAX_PREVIOUS_FRAMES) {
+        previousFrames.shift();
+    }
+}
+
+function analyzeFrameForFace() {
+    // Simple brightness/variance check for face detection
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const centerX = Math.floor(canvas.width / 2);
+    const centerY = Math.floor(canvas.height / 2);
+    const regionSize = 150;
+    
+    try {
+        const frame = ctx.getImageData(
+            centerX - regionSize/2, 
+            centerY - regionSize/2, 
+            regionSize, 
+            regionSize
+        );
+        
+        let brightness = 0;
+        let variance = 0;
+        const pixels = [];
+        
+        for (let i = 0; i < frame.data.length; i += 4) {
+            const gray = (frame.data[i] + frame.data[i+1] + frame.data[i+2]) / 3;
+            pixels.push(gray);
+            brightness += gray;
+        }
+        
+        brightness /= pixels.length;
+        
+        // Calculate variance (measure of texture/detail)
+        const mean = brightness;
+        variance = pixels.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / pixels.length;
+        
+        // Update lighting check
+        const lightingGood = brightness > 40 && brightness < 220;
+        updateCheckBadge(checkLighting, lightingGood);
+        
+        // Face detected if brightness and variance are in reasonable range
+        const hasFace = brightness > 35 && variance > 30;
+        updateCheckBadge(checkFace, hasFace);
+        
+        return hasFace && lightingGood;
+        
+    } catch (e) {
+        return false;
+    }
+}
+
+function updateCheckBadge(badge, passed) {
+    if (passed) {
+        badge.classList.add('passed');
+        badge.classList.remove('failed', 'processing');
+    } else {
+        badge.classList.remove('passed', 'processing');
+    }
+}
+
+// Fast automatic verification - like mobile phone unlock
+async function performFastVerification() {
+    if (isVerifying) return;
+    
+    isVerifying = true;
+    cameraWrapper.classList.add('verifying');
+    statusDot.classList.remove('active');
+    statusDot.classList.add('processing');
+    statusText.textContent = 'Verifying...';
+    
+    // Mark checks as processing
+    checkLiveness.classList.add('processing');
+    checkMatch.classList.add('processing');
+    
+    try {
+        // Capture current frame at high quality
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/jpeg', 0.95);
+        
+        // Send fast verification request
+        const response = await fetch(`/api/exam/{{ submission_id }}/face-verify-enhanced`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                image: imageData,
+                previous_frames: previousFrames.slice(-2)
+            })
+        });
+        
+        const result = await response.json();
+        
+        // Stop detection while processing result
+        clearInterval(faceDetectionInterval);
+        
+        // Update checks based on response
+        if (result.liveness) {
+            updateCheckBadge(checkLiveness, result.liveness.is_live);
+            updateCheckBadge(checkMatch, result.verified);
+        }
+        
+        if (result.verified) {
+            handleSuccess(result);
+        } else {
+            handleFailure(result);
+        }
+        
+    } catch (err) {
+        console.error('Verification error:', err);
+        handleFailure({ message: 'Network error. Please try again.' });
+    }
+}
+
+function handleSuccess(result) {
+    cameraWrapper.classList.remove('verifying');
+    cameraWrapper.classList.add('success');
+    statusDot.classList.remove('processing');
+    statusDot.classList.add('success');
+    statusText.textContent = 'Identity verified';
+    timerBar.style.display = 'none';
+    
+    // Show success modal
+    setTimeout(() => {
+        document.getElementById('result-icon').classList.add('success');
+        document.getElementById('result-icon').classList.remove('error');
+        document.getElementById('result-title').textContent = 'Verification Successful';
+        document.getElementById('result-message').textContent = 'Your identity has been verified. Redirecting to exam...';
+        
+        // Show details
+        const details = document.getElementById('result-details');
+        details.style.display = 'block';
+        
+        const confidenceEl = document.getElementById('confidence-score');
+        const livenessEl = document.getElementById('liveness-score');
+        
+        if (result.confidence !== undefined) {
+            confidenceEl.textContent = `${(result.confidence * 100).toFixed(1)}%`;
+            confidenceEl.className = 'result-detail-value success';
+        }
+        
+        if (result.liveness && result.liveness.score !== undefined) {
+            livenessEl.textContent = `${(result.liveness.score * 100).toFixed(1)}%`;
+            livenessEl.className = result.liveness.is_live ? 'result-detail-value success' : 'result-detail-value error';
+        }
+        
+        document.getElementById('result-action-btn').textContent = 'Start Exam';
+        document.getElementById('result-modal').classList.add('visible');
+        
+        // Auto-redirect after 2 seconds
+        setTimeout(() => {
+            window.location.href = `/exam/{{ exam.id }}?submission={{ submission_id }}`;
+        }, 2000);
+    }, 500);
+}
+
+function handleFailure(result) {
+    cameraWrapper.classList.remove('verifying');
+    cameraWrapper.classList.add('error');
+    statusDot.classList.remove('processing');
+    statusDot.classList.add('error');
+    statusText.textContent = 'Verification failed';
+    timerBar.style.display = 'none';
+    
+    verificationAttempts++;
+    
+    // Clear processing state on badges
+    checkLiveness.classList.remove('processing');
+    checkMatch.classList.remove('processing');
+    
+    setTimeout(() => {
+        if (verificationAttempts < MAX_RETRIES) {
+            // Allow retry - restart face detection
+            cameraWrapper.classList.remove('error');
+            statusDot.classList.remove('error');
+            statusDot.classList.add('active');
+            isVerifying = false;
+            faceDetected = false;
+            statusText.textContent = result.message || 'Verification failed. Please try again.';
+            
+            // Restart detection
+            startAutoFaceDetection();
+        } else {
+            // Max retries reached - show not authorized modal
+            let errorMessage = result.message || 'Face verification failed.';
+            let isNotAuthorized = false;
+            
+            // Add specific guidance based on error
+            if (result.needs_registration) {
+                errorMessage = 'You need to register your face first. Please go to your profile and register your face.';
+            } else if (result.liveness && !result.liveness.is_live) {
+                const failedChecks = Object.entries(result.liveness.checks || {})
+                    .filter(([k, v]) => !v.passed)
+                    .map(([k, v]) => k);
+                if (failedChecks.includes('face_size')) {
+                    errorMessage = 'Please move closer to the camera so your face fills more of the frame.';
+                } else if (failedChecks.includes('blur')) {
+                    errorMessage = 'Image is blurry. Please hold still and ensure good lighting.';
+                } else if (failedChecks.includes('lighting')) {
+                    errorMessage = 'Lighting issue detected. Please ensure your face is well-lit (not too dark or too bright).';
+                } else {
+                    errorMessage = 'Liveness check failed. Please ensure you are a real person (not a photo) and blink naturally.';
+                }
+            } else if (result.confidence !== undefined && result.confidence < 0.5) {
+                errorMessage = 'Face does not match registered face. You are not authorized to take this exam.';
+                isNotAuthorized = true;
+            }
+            
+            showErrorModal(errorMessage, result.needs_registration, isNotAuthorized);
+        }
+    }, 1500);
+}
+
+function restartVerification() {
+    document.getElementById('result-modal').classList.remove('visible');
+    verificationAttempts = 0;
+    cameraWrapper.classList.remove('error');
+    statusDot.classList.remove('error');
+    statusDot.classList.add('active');
+    isVerifying = false;
+    faceDetected = false;
+    statusText.textContent = 'Position your face in the circle';
+    startAutoFaceDetection();
+}
+
+function showErrorModal(message, needsRegistration = false, isNotAuthorized = false) {
+    document.getElementById('result-icon').classList.remove('success');
+    document.getElementById('result-icon').classList.add('error');
+
+    if (isNotAuthorized) {
+        document.getElementById('result-title').textContent = 'Face Not Matched';
+    } else {
+        document.getElementById('result-title').textContent = 'Verification Failed';
+    }
+
+    document.getElementById('result-message').textContent = message;
+    document.getElementById('result-details').style.display = 'none';
+
+    const btn = document.getElementById('result-action-btn');
+
+    if (needsRegistration) {
+        btn.textContent = 'Register Face';
+        btn.onclick = () => { window.location.href = '/face-registration?next=' + encodeURIComponent(window.location.href); };
+    } else {
+        // Always allow retry — student may just need better lighting or positioning
+        btn.textContent = 'Try Again';
+        btn.onclick = restartVerification;
+
+        // For "not authorized" case also show a secondary contact-admin link below
+        if (isNotAuthorized) {
+            const existingLink = document.getElementById('contact-admin-link');
+            if (!existingLink) {
+                const link = document.createElement('p');
+                link.id = 'contact-admin-link';
+                link.style.cssText = 'margin-top:0.75rem;font-size:0.8rem;color:rgba(255,255,255,0.4);';
+                link.innerHTML = 'Persistent issue? <a href="/student" style="color:rgba(255,255,255,0.6);text-decoration:underline;">Contact admin</a>';
+                btn.parentNode.appendChild(link);
+            }
+        }
+    }
+
+    document.getElementById('result-modal').classList.add('visible');
+}
+
+function closeResultModal() {
+    const btn = document.getElementById('result-action-btn');
+    if (btn.onclick) {
+        btn.onclick();
+    } else {
+        window.location.href = `/exam/{{ exam.id }}?submission={{ submission_id }}`;
+    }
+}
+
+function cancelVerification() {
+    if (confirm('Are you sure you want to cancel? You will not be able to take the exam without verification.')) {
+        window.location.href = '/student';
+    }
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+});
+</script>
+{% endblock %}

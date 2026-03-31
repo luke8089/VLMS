@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template, current_app
 from flask_jwt_extended import jwt_required
 from database.models import (
-    db, Course, Enrollment, Material, Lecture, Exam, Submission,
+    db, User, Course, Enrollment, Material, Lecture, Exam, Submission,
     Question, Answer, LearningProgress, LiveClass
 )
 from utils.security import role_required, get_identity
@@ -50,6 +50,7 @@ def read_material(material_id):
         'material_reader.html',
         material_data=material_data,
         progress_data=progress.to_dict() if progress else None,
+        show_ai_summary=False,
     )
 
 
@@ -76,30 +77,58 @@ def get_enrolled_courses():
 @role_required('student')
 def get_available_courses():
     identity = get_identity()
+    
+    # Get student's department
+    student = User.query.get(identity['id'])
+    student_department = student.department if student else None
+    
     enrolled_ids = [e.course_id for e in
                     Enrollment.query.filter_by(student_id=identity['id']).all()]
-    if enrolled_ids:
-        courses = Course.query.filter(
+    
+    # Build query filtering by department if set
+    if student_department:
+        query = Course.query.filter(
             Course.is_published == True,
-            ~Course.id.in_(enrolled_ids)
+            db.func.lower(Course.category) == db.func.lower(student_department)
         )
     else:
-        courses = Course.query.filter(Course.is_published == True)
+        query = Course.query.filter(Course.is_published == True)
+    
+    # Exclude already enrolled courses
+    if enrolled_ids:
+        query = query.filter(~Course.id.in_(enrolled_ids))
+    
     page = request.args.get('page', 1, type=int)
-    return jsonify(paginate_query(courses, page))
+    return jsonify(paginate_query(query, page))
 
 
 @student_bp.route('/api/student/courses/all', methods=['GET'])
 @jwt_required()
 @role_required('student')
 def get_all_courses():
-    """Return all published courses with an enrolled flag for the current student."""
+    """Return all published courses matching student's department with an enrolled flag."""
     identity = get_identity()
+    
+    # Get student's department
+    student = User.query.get(identity['id'])
+    student_department = student.department if student else None
+    
     enrolled_ids = set(
         e.course_id for e in
         Enrollment.query.filter_by(student_id=identity['id'], status='active').all()
     )
-    courses = Course.query.filter(Course.is_published == True).order_by(Course.title).all()
+    
+    # Filter courses by student's department (or show all if no department set)
+    if student_department:
+        # Use case-insensitive matching for department
+        courses = Course.query.filter(
+            Course.is_published == True,
+            db.func.lower(Course.category) == db.func.lower(student_department)
+        ).order_by(Course.title).all()
+    else:
+        # If student hasn't set department, show all courses
+        courses = Course.query.filter(Course.is_published == True).order_by(Course.title).all()
+    
     items = []
     for c in courses:
         d = c.to_dict()
@@ -113,9 +142,20 @@ def get_all_courses():
 @role_required('student')
 def enroll_in_course(course_id):
     identity = get_identity()
+    
+    # Get student and course
+    student = User.query.get(identity['id'])
     course = Course.query.get(course_id)
+    
     if not course or not course.is_published:
         return jsonify({'error': 'Course not found'}), 404
+    
+    # Check department match (case-insensitive)
+    if course.category and student.department:
+        if course.category.strip().lower() != student.department.strip().lower():
+            return jsonify({
+                'error': 'Cannot enroll - this course belongs to "' + course.category + '" department. You are registered under "' + student.department + '" department.'
+            }), 403
 
     existing = Enrollment.query.filter_by(
         student_id=identity['id'], course_id=course_id
@@ -322,6 +362,8 @@ def _finalize_submission(submission):
 @role_required('student')
 def get_available_exams():
     identity = get_identity()
+    print(f"Loading exams for student {identity['id']}")
+
     enrolled_ids = [e.course_id for e in
                     Enrollment.query.filter_by(student_id=identity['id'], status='active').all()]
 
@@ -343,13 +385,14 @@ def get_available_exams():
         ).first()
         ed = exam.to_dict()
         ed['submission_status'] = sub.status if sub else None
-        # Hide ALL scores until lecturer releases grades
-        if sub and exam.grades_released:
+        # Scores are visible only when the individual submission's grades_released flag is set
+        if sub and sub.grades_released and sub.is_graded:
             ed['total_score'] = sub.total_score
         else:
             ed['total_score'] = None
-            if sub and sub.status in ('submitted', 'graded') and not exam.grades_released:
-                ed['submission_status'] = 'awaiting_release'
+            # Mark as awaiting release so the student knows they've submitted but results aren't visible yet
+            if sub and sub.status in ('submitted', 'graded'):
+                ed['submission_status'] = 'awaiting_release' if not sub.grades_released else sub.status
 
         # Compute exam availability status
         if exam.start_time and now < exam.start_time:
@@ -357,6 +400,7 @@ def get_available_exams():
         elif exam.end_time and now > exam.end_time:
             ed['availability'] = 'closed'
         else:
+            # Exam is open if within time window, regardless of submission status
             ed['availability'] = 'open'
 
         # Include course name for display
@@ -519,7 +563,8 @@ def get_results():
         exam = Exam.query.get(sub.exam_id)
         if not exam:
             continue
-        if not exam.grades_released:
+        # Show results only when this individual submission's grades have been released
+        if not sub.grades_released or not sub.is_graded:
             continue
         course = Course.query.get(exam.course_id) if exam else None
         entry = {
@@ -529,6 +574,7 @@ def get_results():
             'total_marks': exam.total_marks,
             'course_title': course.title if course else None,
         }
+        print(f"Including result: score {sub.total_score}")
         results.append(entry)
     return jsonify({'results': results})
 
