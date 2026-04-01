@@ -128,12 +128,16 @@ def update_user(user_id):
     user = User.query.get_or_404(user_id)
     data = request.get_json() or {}
 
+    if 'first_name' in data:
+        user.first_name = data['first_name'].strip()
+    if 'last_name' in data:
+        user.last_name = data['last_name'].strip()
     if 'is_active' in data:
         user.is_active = bool(data['is_active'])
     if 'role' in data and data['role'] in ('admin', 'lecturer', 'student'):
         user.role = data['role']
     if 'department' in data:
-        user.department = data['department']
+        user.department = data['department'].strip() if data['department'] else None
 
     db.session.commit()
     return jsonify({'message': 'User updated', 'user': user.to_dict()})

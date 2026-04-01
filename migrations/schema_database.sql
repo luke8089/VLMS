@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 31, 2026 at 10:09 AM
+-- Generation Time: Apr 01, 2026 at 01:52 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -44,16 +44,26 @@ CREATE TABLE `answers` (
 --
 
 INSERT INTO `answers` (`id`, `submission_id`, `question_id`, `answer_text`, `selected_option`, `is_correct`, `score`, `ai_feedback`, `answered_at`) VALUES
-(154, 25, 265, NULL, 1, 1, 3, NULL, '2026-03-30 22:27:14'),
-(155, 25, 266, NULL, 2, 1, 3, NULL, '2026-03-30 22:27:16'),
-(156, 25, 267, NULL, 1, 1, 3, NULL, '2026-03-30 22:27:19'),
-(157, 25, 268, NULL, 2, 0, 0, NULL, '2026-03-30 22:27:21'),
-(158, 25, 269, NULL, 0, 1, 3, NULL, '2026-03-30 22:27:26'),
-(159, 25, 270, 'fihm', NULL, 0, NULL, NULL, '2026-03-30 22:27:31'),
-(160, 25, 271, NULL, 1, 0, 0, NULL, '2026-03-30 22:27:33'),
-(161, 25, 272, NULL, 1, 0, 0, NULL, '2026-03-30 22:27:38'),
-(162, 25, 273, 'dtux', NULL, 0, NULL, NULL, '2026-03-30 22:27:47'),
-(163, 25, 274, NULL, 1, 0, 0, NULL, '2026-03-30 22:27:50');
+(184, 36, 350, 'test', NULL, 0, NULL, NULL, '2026-03-31 22:35:57'),
+(185, 36, 351, 'test', NULL, 0, NULL, NULL, '2026-03-31 22:36:02'),
+(186, 36, 352, NULL, 1, 0, 0, NULL, '2026-03-31 22:36:05'),
+(187, 36, 353, NULL, 1, 0, 0, NULL, '2026-03-31 22:36:07'),
+(188, 36, 354, NULL, 2, 1, 3, NULL, '2026-03-31 22:36:09'),
+(189, 36, 355, NULL, 1, 1, 3, NULL, '2026-03-31 22:36:11'),
+(190, 36, 356, NULL, 2, 0, 0, NULL, '2026-03-31 22:36:30'),
+(191, 36, 357, 'test', NULL, 1, 3, NULL, '2026-03-31 22:36:35'),
+(192, 36, 358, NULL, 2, 1, 3, NULL, '2026-03-31 22:36:37'),
+(193, 36, 359, NULL, 1, 1, 3, NULL, '2026-03-31 22:36:39'),
+(194, 37, 360, 'test', NULL, 1, 3, NULL, '2026-03-31 22:47:14'),
+(195, 37, 361, 'test', NULL, 1, 3, NULL, '2026-03-31 22:47:19'),
+(196, 37, 362, NULL, 0, 1, 3, NULL, '2026-03-31 22:47:23'),
+(197, 37, 363, NULL, 2, 1, 3, NULL, '2026-03-31 22:47:27'),
+(198, 37, 364, 'test', NULL, 1, 3, NULL, '2026-03-31 22:47:38'),
+(199, 37, 365, NULL, 0, 1, 3, NULL, '2026-03-31 22:47:41'),
+(200, 37, 366, NULL, 1, 0, 0, NULL, '2026-03-31 22:47:43'),
+(201, 37, 367, 'test', NULL, 0, NULL, NULL, '2026-03-31 22:47:47'),
+(202, 37, 368, NULL, 0, 0, 0, NULL, '2026-03-31 22:47:49'),
+(203, 37, 369, NULL, 1, 0, 0, NULL, '2026-03-31 22:47:52');
 
 -- --------------------------------------------------------
 
@@ -127,7 +137,9 @@ INSERT INTO `enrollments` (`id`, `student_id`, `course_id`, `enrolled_at`, `prog
 (20, 13, 5, '2026-03-30 21:35:40', 0, 'active'),
 (21, 12, 4, '2026-03-30 22:30:14', 0, 'active'),
 (22, 12, 2, '2026-03-30 22:30:19', 0, 'active'),
-(23, 14, 6, '2026-03-31 04:48:45', 0, 'active');
+(23, 14, 6, '2026-03-31 04:48:45', 0, 'active'),
+(24, 15, 3, '2026-03-31 12:37:04', 0, 'active'),
+(25, 15, 4, '2026-03-31 12:37:25', 0, 'active');
 
 -- --------------------------------------------------------
 
@@ -160,8 +172,8 @@ CREATE TABLE `exams` (
 --
 
 INSERT INTO `exams` (`id`, `course_id`, `title`, `description`, `exam_type`, `duration_minutes`, `total_marks`, `passing_marks`, `start_time`, `end_time`, `is_proctored`, `is_published`, `shuffle_questions`, `allow_review`, `risk_threshold`, `created_at`, `grades_released`) VALUES
-(34, 3, 'Cat 1', '[assessment:cat1] Auto-generated from course materials. 10 questions pending review.', 'quiz', 60, 30, 15, '2026-03-31 01:27:00', '2026-03-31 02:27:00', 1, 1, 1, 0, 100, '2026-03-30 22:26:22', 1),
-(35, 6, 'Cat 1', '[assessment:cat1] Auto-generated from course materials. 10 questions pending review.', 'quiz', 60, 30, 15, '2026-03-31 10:39:00', '2026-03-31 11:39:00', 1, 1, 1, 0, 100, '2026-03-31 07:38:11', 0);
+(43, 3, 'Cat 1', '[assessment:cat1] Auto-generated from course materials. 10 questions pending review.', 'quiz', 60, 30, 15, NULL, NULL, 1, 1, 1, 0, 100, '2026-03-31 21:25:09', 0),
+(44, 3, 'Cat 2', '[assessment:cat2] Auto-generated from course materials. 10 questions pending review.', 'midterm', 60, 30, 15, '2026-04-01 01:46:00', '2026-04-01 02:46:00', 1, 1, 1, 0, 100, '2026-03-31 22:45:02', 1);
 
 -- --------------------------------------------------------
 
@@ -206,7 +218,47 @@ CREATE TABLE `face_verification_logs` (
 --
 
 INSERT INTO `face_verification_logs` (`id`, `user_id`, `exam_id`, `submission_id`, `verification_type`, `status`, `confidence_score`, `liveness_score`, `failure_reason`, `ip_address`, `user_agent`, `created_at`) VALUES
-(3, 14, NULL, NULL, 'pre_exam', 'failed', 0.20336, 0.833333, 'Low confidence: 0.20', NULL, NULL, '2026-03-31 08:05:09');
+(64, 15, NULL, NULL, 'pre_exam', 'success', 0.829903, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:08'),
+(65, 15, NULL, NULL, 'pre_exam', 'success', 0.940385, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:11'),
+(66, 15, NULL, NULL, 'pre_exam', 'success', 0.903326, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:15'),
+(67, 15, NULL, NULL, 'pre_exam', 'success', 0.922569, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:18'),
+(68, 15, NULL, NULL, 'pre_exam', 'success', 0.915509, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:22'),
+(69, 15, NULL, NULL, 'pre_exam', 'success', 0.916378, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:24'),
+(70, 15, NULL, NULL, 'pre_exam', 'success', 0.920551, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:29'),
+(71, 15, NULL, NULL, 'pre_exam', 'success', 0.871504, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:32'),
+(72, 15, NULL, NULL, 'pre_exam', 'success', 0.888155, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:36'),
+(73, 15, NULL, NULL, 'pre_exam', 'success', 0.864127, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:38'),
+(74, 15, NULL, NULL, 'pre_exam', 'success', 0.925679, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:48'),
+(75, 15, NULL, NULL, 'pre_exam', 'success', 0.91432, 0.8, NULL, NULL, NULL, '2026-03-31 12:43:51'),
+(76, 15, NULL, NULL, 'pre_exam', 'failed', NULL, 0, 'Liveness failed: single_face', NULL, NULL, '2026-03-31 12:44:53'),
+(77, 15, NULL, NULL, 'pre_exam', 'success', 0.877159, 0.8, NULL, NULL, NULL, '2026-03-31 12:44:55'),
+(78, 15, 43, NULL, 'pre_exam', 'success', 0.762424, 0.8, NULL, NULL, NULL, '2026-03-31 21:25:39'),
+(79, 15, 43, NULL, 'pre_exam', 'success', 0.798563, 0.8, NULL, NULL, NULL, '2026-03-31 21:25:42'),
+(80, 12, 43, NULL, 'pre_exam', 'success', 0.824663, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:06'),
+(81, 12, 43, NULL, 'pre_exam', 'success', 0.521434, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:09'),
+(82, 12, 43, NULL, 'pre_exam', 'success', 0.505668, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:12'),
+(83, 12, 43, NULL, 'pre_exam', 'success', 0.585748, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:15'),
+(84, 12, 43, NULL, 'pre_exam', 'success', 0.567657, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:18'),
+(85, 12, 43, NULL, 'pre_exam', 'success', 0.536231, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:24'),
+(86, 12, 43, NULL, 'pre_exam', 'success', 0.573352, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:27'),
+(87, 12, 43, NULL, 'pre_exam', 'success', 0.607779, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:29'),
+(88, 12, 43, NULL, 'pre_exam', 'success', 0.658193, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:32'),
+(89, 12, 43, NULL, 'pre_exam', 'success', 0.633193, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:35'),
+(90, 12, 43, NULL, 'pre_exam', 'success', 0.62649, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:39'),
+(91, 12, 43, NULL, 'pre_exam', 'success', 0.653894, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:42'),
+(92, 12, 43, NULL, 'pre_exam', 'success', 0.652974, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:45'),
+(93, 12, 43, NULL, 'pre_exam', 'success', 0.656879, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:47'),
+(94, 12, 43, NULL, 'pre_exam', 'success', 0.609524, 0.8, NULL, NULL, NULL, '2026-03-31 22:06:50'),
+(95, 12, 43, NULL, 'pre_exam', 'failed', NULL, 0, 'Liveness failed: face_present', NULL, NULL, '2026-03-31 22:06:57'),
+(96, 12, 43, NULL, 'pre_exam', 'failed', NULL, 0, 'Liveness failed: single_face', NULL, NULL, '2026-03-31 22:07:00'),
+(97, 12, 43, NULL, 'pre_exam', 'success', 0.514322, 0.8, NULL, NULL, NULL, '2026-03-31 22:07:03'),
+(98, 12, 43, NULL, 'pre_exam', 'failed', 0.487902, 0.8, 'Low confidence: 0.49', NULL, NULL, '2026-03-31 22:07:06'),
+(99, 12, 43, NULL, 'pre_exam', 'failed', 0.45601, 0.8, 'Low confidence: 0.46', NULL, NULL, '2026-03-31 22:07:09'),
+(100, 12, 43, NULL, 'pre_exam', 'success', 0.747844, 0.8, NULL, NULL, NULL, '2026-03-31 22:07:13'),
+(101, 12, 43, NULL, 'pre_exam', 'success', 0.64588, 0.8, NULL, NULL, NULL, '2026-03-31 22:07:16'),
+(102, 12, 43, NULL, 'pre_exam', 'success', 0.574796, 0.8, NULL, NULL, NULL, '2026-03-31 22:07:19'),
+(103, 12, 43, NULL, 'pre_exam', 'failed', NULL, 0, 'Liveness failed: face_present', NULL, NULL, '2026-03-31 22:07:21'),
+(104, 12, 43, NULL, 'pre_exam', 'failed', NULL, 0, 'Liveness failed: single_face', NULL, NULL, '2026-03-31 22:07:24');
 
 -- --------------------------------------------------------
 
@@ -237,7 +289,8 @@ INSERT INTO `learning_progress` (`id`, `student_id`, `material_id`, `progress_pe
 (7, 2, 10, 100, 0, '2026-03-24 19:16:35', 1, 1, '2026-03-24 19:16:35', 1, 1),
 (8, 12, 12, 100, 675, '2026-03-26 12:26:34', 1, 1, '2026-03-26 11:36:39', 1, 1),
 (9, 12, 9, 100, 15, '2026-03-26 15:24:12', 1, 1, '2026-03-26 15:23:56', 1, 1),
-(10, 14, 14, 100, 300, '2026-03-31 07:36:36', 1, 1, '2026-03-31 07:13:52', 1, 1);
+(10, 14, 14, 100, 300, '2026-03-31 07:36:36', 1, 1, '2026-03-31 07:13:52', 1, 1),
+(11, 15, 10, 100, 15, '2026-03-31 12:37:57', 1, 1, '2026-03-31 12:37:42', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -341,26 +394,26 @@ CREATE TABLE `questions` (
 --
 
 INSERT INTO `questions` (`id`, `exam_id`, `question_text`, `question_type`, `options`, `correct_answer`, `marks`, `difficulty`, `order_index`, `explanation`) VALUES
-(265, 34, 'Fill in the blank: Adaptive _____ platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention.', 'mcq', '[\"education\", \"learning\", \"algorithms\", \"world\"]', '1', 3, 'understand', 0, 'Adaptive learning platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention.'),
-(266, 34, 'Fill in the blank: The business _____ is also experiencing a major shift due to AI innovation.', 'mcq', '[\"education\", \"algorithms\", \"world\", \"learning\"]', '2', 3, 'understand', 1, 'The business world is also experiencing a major shift due to AI innovation.'),
-(267, 34, 'Fill in the blank: Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where _____al resources are \nlimited.', 'mcq', '[\"education\", \"world\", \"learning\", \"algorithms\"]', '0', 3, 'understand', 2, 'Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where educational resources are \nlimited.'),
-(268, 34, 'Fill in the blank: From healthcare to _____, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 'mcq', '[\"learning\", \"algorithms\", \"world\", \"education\"]', '3', 3, 'understand', 3, 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
-(269, 34, 'Fill in the blank: As a result, _____ is becoming more inclusive, flexible, and responsive to individual \nneeds.', 'mcq', '[\"learning\", \"world\", \"algorithms\", \"education\"]', '0', 3, 'understand', 4, 'As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.'),
-(270, 34, 'Describe learning.', 'short_answer', 'null', 'In the field of education, AI is personalizing learning experiences for students across the globe.', 3, 'understand', 5, 'Reference: In the field of education, AI is personalizing learning experiences for students across the globe.'),
-(271, 34, 'Fill in the blank: Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \n_____ of repetitive tasks.', 'mcq', '[\"education\", \"learning\", \"world\", \"automation\"]', '3', 3, 'understand', 6, 'Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \nautomation of repetitive tasks.'),
-(272, 34, 'Fill in the blank: This wave of _____ is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 'mcq', '[\"education\", \"world\", \"learning\", \"innovation\"]', '3', 3, 'understand', 7, 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
-(273, 34, 'Explain world in your own words.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 8, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(274, 34, 'Fill in the blank: In the field of education, AI is personalizing _____ experiences for students across the globe.', 'mcq', '[\"world\", \"algorithms\", \"education\", \"learning\"]', '3', 3, 'understand', 9, 'In the field of education, AI is personalizing learning experiences for students across the globe.'),
-(275, 35, 'Explain education in your own words.', 'short_answer', 'null', 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 3, 'understand', 0, 'Reference: From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
-(276, 35, 'Describe world.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 1, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(277, 35, 'Fill in the blank: The business _____ is also experiencing a major shift due to AI innovation.', 'mcq', '[\"innovation\", \"learning\", \"world\", \"education\"]', '2', 3, 'understand', 2, 'The business world is also experiencing a major shift due to AI innovation.'),
-(278, 35, 'Fill in the blank: This wave of _____ is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 'mcq', '[\"education\", \"world\", \"innovation\", \"learning\"]', '2', 3, 'understand', 3, 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
-(279, 35, 'Fill in the blank: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \n_____.', 'mcq', '[\"innovation\", \"learning\", \"world\", \"education\"]', '2', 3, 'understand', 4, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(280, 35, 'Explain Artificial in your own words.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 5, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
-(281, 35, 'Explain innovation in your own words.', 'short_answer', 'null', 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 3, 'understand', 6, 'Reference: This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
-(282, 35, 'Fill in the blank: From healthcare to _____, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 'mcq', '[\"innovation\", \"education\", \"world\", \"learning\"]', '1', 3, 'understand', 7, 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
-(283, 35, 'Fill in the blank: As a result, _____ is becoming more inclusive, flexible, and responsive to individual \nneeds.', 'mcq', '[\"world\", \"innovation\", \"education\", \"learning\"]', '3', 3, 'understand', 8, 'As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.'),
-(284, 35, 'Describe learning.', 'short_answer', 'null', 'In the field of education, AI is personalizing learning experiences for students across the globe.', 3, 'understand', 9, 'Reference: In the field of education, AI is personalizing learning experiences for students across the globe.');
+(350, 43, 'Describe data.', 'short_answer', 'null', 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 3, 'understand', 0, 'Reference: Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
+(351, 43, 'Describe education.', 'short_answer', 'null', 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 3, 'understand', 1, 'Reference: From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
+(352, 43, 'Fill in the blank: Machine learnin g _____ can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 'mcq', '[\"education\", \"learning\", \"world\", \"algorithms\"]', '3', 3, 'understand', 2, 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
+(353, 43, 'Fill in the blank: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \n_____.', 'mcq', '[\"algorithms\", \"education\", \"world\", \"learning\"]', '2', 3, 'understand', 3, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
+(354, 43, 'Fill in the blank: As a result, _____ is becoming more inclusive, flexible, and responsive to individual \nneeds.', 'mcq', '[\"world\", \"education\", \"learning\", \"algorithms\"]', '2', 3, 'understand', 4, 'As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.'),
+(355, 43, 'Fill in the blank: Adaptive _____ platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention.', 'mcq', '[\"world\", \"learning\", \"education\", \"algorithms\"]', '1', 3, 'understand', 5, 'Adaptive learning platforms can identify a student’s strengths and weaknesses, offering tailored \ncontent that improves understanding and retention.'),
+(356, 43, 'Fill in the blank: In the field of education, AI is personalizing _____ experiences for students across the globe.', 'mcq', '[\"world\", \"learning\", \"education\", \"algorithms\"]', '1', 3, 'understand', 6, 'In the field of education, AI is personalizing learning experiences for students across the globe.'),
+(357, 43, 'Describe algorithms.', 'short_answer', 'null', 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 3, 'understand', 7, 'Reference: Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
+(358, 43, 'Fill in the blank: Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where _____al resources are \nlimited.', 'mcq', '[\"world\", \"education\", \"algorithms\", \"learning\"]', '1', 3, 'understand', 8, 'Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where educational resources are \nlimited.'),
+(359, 43, 'Fill in the blank: Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \n_____ of repetitive tasks.', 'mcq', '[\"education\", \"world\", \"automation\", \"learning\"]', '2', 3, 'understand', 9, 'Companies are \nleveraging AI for customer service through chatbots, predictive analytics for market trends, and \nautomation of repetitive tasks.'),
+(360, 44, 'Explain education in your own words.', 'short_answer', 'null', 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 3, 'understand', 0, 'Reference: From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
+(361, 44, 'Describe world.', 'short_answer', 'null', 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.', 3, 'understand', 1, 'Reference: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
+(362, 44, 'Fill in the blank: Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \n_____.', 'mcq', '[\"algorithms\", \"education\", \"world\", \"learning\"]', '2', 3, 'understand', 2, 'Artificial intelligence has rapidly become one of the most transformative forces shaping today’s \nworld.'),
+(363, 44, 'Fill in the blank: As a result, _____ is becoming more inclusive, flexible, and responsive to individual \nneeds.', 'mcq', '[\"world\", \"learning\", \"algorithms\", \"education\"]', '1', 3, 'understand', 3, 'As a result, learning is becoming more inclusive, flexible, and responsive to individual \nneeds.'),
+(364, 44, 'Summarize the concept of learning.', 'short_answer', 'null', 'In the field of education, AI is personalizing learning experiences for students across the globe.', 3, 'understand', 4, 'Reference: In the field of education, AI is personalizing learning experiences for students across the globe.'),
+(365, 44, 'Fill in the blank: From healthcare to _____, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.', 'mcq', '[\"algorithms\", \"world\", \"education\", \"learning\"]', '2', 3, 'understand', 5, 'From healthcare to education, AI -driven tools are improving efficiency, accuracy, and \naccessibility in ways that were once unimaginable.'),
+(366, 44, 'Fill in the blank: The business _____ is also experiencing a major shift due to AI innovation.', 'mcq', '[\"world\", \"algorithms\", \"education\", \"learning\"]', '0', 3, 'understand', 6, 'The business world is also experiencing a major shift due to AI innovation.'),
+(367, 44, 'What is the significance of algorithms?', 'short_answer', 'null', 'Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.', 3, 'understand', 7, 'Reference: Machine learnin g algorithms can now \nanalyze vast amounts of data in seconds, helping doctors detect diseases earlier and enabling \nbusinesses to make smarter decisions.'),
+(368, 44, 'Fill in the blank: This wave of _____ is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.', 'mcq', '[\"world\", \"learning\", \"education\", \"innovation\"]', '3', 3, 'understand', 8, 'This wave of innovation is not just about automation —\nit’s about enhancing human potential and redefinin g how we approach complex problems.'),
+(369, 44, 'Fill in the blank: Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where _____al resources are \nlimited.', 'mcq', '[\"world\", \"algorithms\", \"education\", \"learning\"]', '2', 3, 'understand', 9, 'Virtual t utors and AI -powered assistants \nare making knowledge more accessible, especially in regions where educational resources are \nlimited.');
 
 -- --------------------------------------------------------
 
@@ -399,16 +452,17 @@ CREATE TABLE `submissions` (
   `status` enum('in_progress','submitted','graded') DEFAULT NULL,
   `face_verified` tinyint(1) DEFAULT NULL,
   `approval_status` enum('pending','approved','cancelled') DEFAULT 'pending',
-  `face_verified_at` datetime DEFAULT NULL
+  `face_verified_at` datetime DEFAULT NULL,
+  `grades_released` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `submissions`
 --
 
-INSERT INTO `submissions` (`id`, `exam_id`, `student_id`, `started_at`, `submitted_at`, `total_score`, `is_graded`, `is_flagged`, `risk_score`, `status`, `face_verified`, `approval_status`, `face_verified_at`) VALUES
-(25, 34, 12, '2026-03-30 22:27:02', '2026-03-30 22:27:50', 12, 1, 0, 35, 'graded', 1, 'approved', NULL),
-(26, 35, 14, '2026-03-31 07:39:09', NULL, NULL, 0, 0, 20, 'in_progress', 1, 'pending', NULL);
+INSERT INTO `submissions` (`id`, `exam_id`, `student_id`, `started_at`, `submitted_at`, `total_score`, `is_graded`, `is_flagged`, `risk_score`, `status`, `face_verified`, `approval_status`, `face_verified_at`, `grades_released`) VALUES
+(36, 43, 15, '2026-03-31 22:35:48', '2026-03-31 22:36:39', 15, 1, 0, 30, 'submitted', 0, 'pending', NULL, 0),
+(37, 44, 15, '2026-03-31 22:47:07', '2026-03-31 22:47:52', 18, 1, 0, 15, 'submitted', 0, 'pending', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -452,7 +506,8 @@ INSERT INTO `users` (`id`, `email`, `password_hash`, `first_name`, `last_name`, 
 (11, 'janny@gmail.com', '$2b$12$v/D/yHUFQyKpFb7T4Vqq6u6Q.EcKqcAm9b47/7oyRiLHnFARQY8Za', 'janny', 'dae', 'student', NULL, NULL, NULL, 1, '2026-03-26 11:18:24', '2026-03-26 11:18:24', NULL, NULL, NULL, NULL, 0),
 (12, 'Jane@gmail.com', '$2b$12$7UiQPnSKvH1A6EmPOXdr5eXC9GUpaxwVFJN11n3oY4PwzZmgH2fy6', 'jane', 'Doe', 'student', 'Computer Science', 'profiles/_92bafaff.jpg', 0x8004958c040000000000008c156e756d70792e636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b00749462894200040000000000000000000000000000000000000000000000000000000000000000000000000000ae3b383a00000000ae3b383aae3b383ac22c8a3bae3b383b3834a13b24434f3c2443cf3b7db0153c8bfdbd3c24434f3cae3b383c8bfdbd3ce56a843c4681c93c4681c93c7db0953ce56a043d5b721b3dbc88e03c69bf433db10d0d3d8bfdbd3c4681493d6c91183d2443cf3c35624c3d7db0153d7ade403dcda75d3dbc88603ddfc65a3dd2e29c3df520973d58a0c63d3562cc3d66edee3d54cef13d30d9173ec1c31f3e850b1f3ef520173ebf5a353e37cb363e95c1313e6a282e3e95c1313e1fba1a3e7ade403e2f702d3ec7b53e3e8fcf123ed179323e4a531e3ea0ee0f3e8fcf123e2123053eba1ff63d9893063e6756d93d882be93d009cea3d7975d63df3b7ac3d22dae43ddfc6da3d8bfdbd3d8a94d33dbef1ca3d6c91983dae3bb83d8d66a83d0105d53d69bfc33d37cbb63d4bbc883d3834a13d7db0953dd179b23d0640943d6c91983df689813d0f527d3d66ed6e3dc22c8a3d21717a3de56a843db10d8d3d5b729b3d3290773d3290773dd44b873da0ee8f3d54ce713d7f19803dd44b873d6c91983d0105553d21717a3d4bbc883ddfc65a3d770c6c3d43af743dae3b383d7ade403d2715243d58a0463d0f52fd3c8bfd3d3d0105d53c2715243df3b72c3d2715243df689013df3b72c3d2715243dd44b073d04d7293d58a0463dae3bb83ca0ee0f3da0ee0f3ddfc6da3ce56a043dc22c0a3dc22c8a3c7db0153d2443cf3c0f52fd3ca0ee0f3d5b721b3d0105d53cd44b073dbc88e03c54cef13cf689013d3290f73cd44b073dc22c0a3d7db0953cc22c0a3d4681c93cae3bb83c6c91183d6c91183d54cef13c54cef13c7db0953c770cec3c9a4ae63c770cec3cc22c0a3d2443cf3c3290f73ce56a043d3290f73cdfc6da3cae3bb83c2443cf3c3834a13c2443cf3cf3b7ac3cdfc6da3c0f527d3cdfc6da3c54ce713c0f527d3c0105d53c16f6a63c5b729b3cd179b23c3834a13c0105d53c7db0953c0f527d3c69bfc33c5b729b3c54ce713c54ce713c54ce713c0f527d3c0f527d3c9a4a663c24434f3c69bf433cae3b383c24434f3c7db0153c54ce713c3834213cf3b72c3cdfc65a3c9a4a663c7db0953c54ce713ca0ee8f3cdfc65a3c3834213c69bf433cae3b383c7db0153c3834213cdfc65a3cae3b383c24434f3c0f527d3c69bf433c24434f3cae3b383c2443cf3b69bf433cdfc65a3cae3b383c24434f3c9a4a663c69bf433c3834213cc22c8a3c0f527d3cae3bb83b54ce713c9a4a663cdfc65a3c0f527d3c7db0953c24434f3cae3bb83c54ce713cbc88e03c16f6a63c5b721b3d8fcf123d175f913d8bfd3d3ddfc65a3d58a0463df0e5573d8fcf123d3290f73ce56a843c5b729b3c0f52fd3b24434f3c9a4ae63b7db0153cc22c0a3b947494622e, 1, '2026-03-26 11:19:54', '2026-03-31 04:48:08', '+254797242328', 'i am a computer science student intrested in improving my academic performance', NULL, NULL, 0),
 (13, 'test@student.com', '$2b$12$tZJOslM7p2cIVnuS6FqgsOMYC6oMd0R4Wr4sPo0RfEym4Sjew5Ftu', 'Test', 'Student', 'student', NULL, NULL, NULL, 1, '2026-03-30 21:35:22', '2026-03-30 21:35:22', NULL, NULL, NULL, NULL, 0),
-(14, 'student@gmail.com', '$2b$12$S81MD6168BT28Y.pvHDzbu6tgDfdR7cDVeo0I/1Oni69r.Fy6qQDG', 'student', 'student ', 'student', 'Biology', 'profiles/_4aea87bd.jpg', 0x8004958c040000000000008c156e756d70792e636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b007494628942000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000850d813980f8ff397d5b403ab5bffe3980f8ff39f7d57d393ca39f3af7d57d394f66203bbecf0f3b6d8b0f3b15e30f3ba54a3f3be3a97f3b0fe1873b7d8aaf3b94be5f3b15b8c73b80ded73b34e8333c071d283c5012483cdffa273cb43b243c0e3d203cb0ed473c599e4b3c27f7ab3c5b97673c5d257c3c500b823c7d028a3cfd1f683cd556ae3c89bea53cb539bc3c4cecb93c75f9d73c99efc53cf51a083d1814dc3cf1db0d3dcbfc1a3df0eb313d57ca333dd3ed4c3d6fd24a3daddc893dfcbc743d674c923d1340973de453b43dbb58973dccaebf3dd4b7c33d8cc6e83d7464e43d302d013e5dcbfe3dc6530c3e35fee43df7e2213eb82d083e2970153e3f080b3e6302183ebbef0e3e00b8153e40730a3ea942123e29b9083e43a7053e25bd0c3e99b30a3ea04df63d08dbfb3d24c10b3ea7a7023edb1f033e7819073e3373f43dd56a053e09defc3d1f63f03d585aef3db5f3fc3d0564f13de3d1f13dd873f33d7800063e8fd9ef3d3b5ef13dd3efd13d05cae33d07c6db3d10dbd13d4dd1d13ddb5fd03defc6be3d3d3dd53de356c03d2b4fb93d6de0ae3da562b03d84cd7f3dc1e69c3d316e8a3d036b993de3b6743de7629e3db0da683da3f8823d41ac4d3d98ff3f3d38c94c3defcf4c3d93e32b3da305393d59dc323d80cd2d3d11ef2d3dd4f1563d7bd9373d85f7283ddcf93e3d7dde313d0fbd2f3db8c2583d7bb82e3d14f2263dede92c3d60e1373d9d00343d48f7393d7403313d1040533d58ec2c3df1f31b3d1bef223dd31b3c3de409133d70f72a3d7015133ddb562e3df00c083d27ec3d3db815143d2b132c3d640a013d3042fa3c8fe60e3d4fcfeb3c93f10e3da1f2143d59db0d3d59000b3dd6d20d3d05b7f93cdbafe33c11e6013d04e9033d30d7db3cb9c1dd3c78f2f33cccc8e53cf0f1db3c01faeb3c58dce53c60f3e93c3ddf053d980cbc3c4411063dd500d43c93fcf93ccba2ff3ca323f63c31d0133d77ec0b3d4fe1083decdc293dc0e9153d85ef0b3db4c3073d13e73a3d9bd0193d69c91e3ddee7173d4f19333deeea173d89f71d3d1bc3fd3c38010c3d4761e63cebd2123d6d12fe3cc9fa0c3d0554e23c0bef103de13de63ca7ee0a3d2b1be43c44ff043de3fec33c54d9113da5dde13c47c8f53c07f4d13cd1e2d93cc0a3c93c3fd2db3c90b6cf3ca7a4c33cbf12a63c00d2bb3c30e59f3c3dd8b73c540ec23ccef9a33c09f4973c6bdf933c710a9e3cb58dd13c17cb873c65aab93c8117823cbdefab3cf038843c960a843c34359a3c5d2a963cc039a23c3105023d9a37113d7022333d0df82c3dad97c53cb4eebd3cb70b303c4e1e003c947494622e, 1, '2026-03-30 22:39:49', '2026-03-31 08:01:46', '0746075436', 'the best', NULL, NULL, 0);
+(14, 'student@gmail.com', '$2b$12$S81MD6168BT28Y.pvHDzbu6tgDfdR7cDVeo0I/1Oni69r.Fy6qQDG', 'student', 'student ', 'student', 'Biology', 'profiles/_4aea87bd.jpg', 0x8004958c040000000000008c156e756d70792e636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b0074946289420004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d13bc63900000000c96d473a6151163aa719083b18a5f73a147ac83ae1ff213be0afdf3a9ddd5e3b276ab43bcd7bd33ba2d9a13b7c51063ca72a123ca3ca2d3c93221f3cdf5c4d3cc01a513cc5c18b3c892d8c3c2cf5d93ca5dcba3c7f56f43c5347e33cdbd41d3d45be1e3d6312363de528393dc59c6c3dd094563dc0a79b3d0a288a3d4cb8a43d2542ae3d8f4ad13d88b1cf3d7df8ee3d358e013e0cc2033eff9b0c3e5f29123ef9b1123ec94b1b3e9fe90f3e1c7b193ea93f143eabaf2e3e4c681b3e73ba2a3e5379273e2b882d3ef84b2e3e9bbd343e118e1f3eafaf2e3ea5a2263ecb3d313e27e0203efd01333ee5092f3e914f303ec4291d3e74ef2e3e92bb1d3e55c4283e2902113e3fb0103e90a1fb3d4d08013ee3b8f13daf7d003ef3d2cd3d1703da3da03cc23de981af3dac3f963d9357943dd39d8f3dca3e8e3d3029753dfdc26c3d850e533d1b4b553dcfb13a3de12d453db87b243d56992a3d3d9ff73c2c770e3d40a0f23c9d47043d587bf73ce14bf13c8859e03c9499093d7d03da3ca3ffea3c5803d83c8999de3cb3bdba3cfc89cb3c8830bb3c0b50ca3ccc2ec43c34eed93ce146b63c687ec53ce072c73cf335d43cb4f5d33c8dc5d93c4d9dcb3ccbf1ec3cc6b4a63cef94d83c47dfc23ce580d53c275bb93cc9fed13c8388b13ce868e33c6986a33cf482a03cfa6aa03c13dca93c3b219a3c0feaa73c4d3aa53c4137c13c4ab6853cfbfaa13ca6998d3cc51b7f3c43a59b3c8f64c73c68cf903c590cc13cdbcd6c3ce370a33cc177a93c13dca93c3354663ccb6c6f3c4664843cfb8d4a3ced42473c80766f3cb3c5593ca32c443cb9f1463c6dd6533cd02f373c5c9a593ca0fff23b8011763c9e7c1b3c3d8f373c86a8243c8f844a3c3afa083c388a533c54f5083cdb332e3c0f12093c63ba373c056b283ca345313c75c3023cf435443ce8a6123ce015313c13dcec3b20a4083cd603093c737b2e3c1f3dff3be5da0e3c1ffdf83b53122e3c13f40b3c1b7a313cdd61cd3b5750ff3b3cd5053c958fec3beb10f23b8d940b3c2b50df3b1f25da3b1f25da3beb6ee03b835be03bb097ba3bbb47c73b104ed43bec46ff3b65f6f23be474cd3b1812da3bd140c13b53c2e63b5f4ca23b855ff33beb96c13b4f66a83bb1ce8f3b3994473b48ba473b95ad543b9178af3a7c71893b3958773ac7b8153bb892953ad5de953aad21c73a7dfaad3ae352483a80fdf83ac96d473a00000000096dae3a0d70f93aa8ba473a4dd3943a496c953a2466083bec20ae3a752caf3a95dfae3a003b7b3a0dd4ad3a90d5c639f994e03a99e2f93a496c153a947494622e, 1, '2026-03-30 22:39:49', '2026-03-31 08:18:13', '0746075436', 'the best', NULL, NULL, 0),
+(15, 'ever@gmail.com', '$2b$12$sbEgKYaTmwhZnmKcZqIUvOAYSPVcDOjUoNdS/wsYk51dKEK/3hnlm', 'Ever', 'Ever', 'student', 'Information Technology', 'profiles/_a997e23b.jpg', 0x8004958c040000000000008c156e756d70792e636f72652e6d756c74696172726179948c0c5f7265636f6e7374727563749493948c056e756d7079948c076e6461727261799493944b0085944301629487945294284b014d0001859468038c0564747970659493948c02663494898887945294284b038c013c944e4e4e4affffffff4affffffff4b007494628942000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4fb413ad9ed813ad9ed013a05a1423ad9ed013ab9f9a13a5053c23ac3dee33af9cb013b57f0013b3579323b3f83013b5743633b28f7523bc4f8913b1ea5813bdd4fb23bae48a23ba1f9153c53cbd23b6732e33b1d8dba3bf9cb013c33a6da3bb3241e3cd552ba3b0f5a3a3c62bd093ce52f223c3ff9193ccfae523cad5f7b3c17245f3c9700633c1470ef3cb5cb4e3c1a209a3c91782d3dcdb8c43c833ef13cdbbe403d5b31f73cb90f1a3d41aa473db17f3c3dbb32223d13cf863dd8f05d3d63687e3d1f9e9c3d70079c3df5608d3d9c09bc3d1c19a23d1c38c73d6092ba3d3c2aee3d29beca3d6f86e03dcfc4d03ddf0be43db536c93d3f89e23dc455d53d8b17e13dd080df3d2c5ef83d8f55d03d6541e83df82ce53dd845eb3d1b7d023e785dfa3df0c0f63d0a0c033e5585013e4011053e0bd8f73dd96c0f3e7058f93d5c41043ebdbaeb3d5987043efca6e63d0a82053ee164f83d3901023e480fdf3d6508053ec59ced3dabd2f73dad65d83ddbaeee3dd1e0d63d5cdcd83d0b36c73d4d15e73d7d5ad23d9bdcd93de463b53d2554d63d6d55b03da51fc53da776ae3dcb2cc93d60eaaa3da425c43da58ebe3de8c2c43d7d5aa83d611fa23d6e0c983d62788f3d30688c3de174903dd5e78a3d5486973d2866883dc1a5a03d59f7913d4ab9823d5ff6913db1e48e3d6881983dcfafa13d23d88b3de16a933d435e893d17ce883de631823dcd86953da8727e3d9173913d4c52863de430803d6991473df537773d4be9583dadee583def045d3d54f4603d713b6a3d83f4623db490433d20dc583d30c7513dcd27683dd57d373d9bc94a3d90b3473d15d2513da576363d63d04c3d13061a3db0ec4b3d7319153db56d2b3d396c273dd8b93f3de419133d9f76333d27f00d3d11b5373d85fb463df86c343d79de0b3d2b18533da60b193db7a7433d12fa123da8b2493d256c393d5bb1483dbb44f33c2b39253dd33ef13c8e131a3d9bd2d63cea51263dd023a43c2d231d3d2da4ca3c9434e53c7365bc3ccb1ffb3cc0c0ce3cf9aac63c5d59be3ccda9c23c01db913c8f4bb63c2cd3523cf0c3833c1d31733c185fa23c3bf1913cd10c923ce9db833c2d0d983c03fa113cb350a83c1cff953cc456633c93b1463c63f4623c69fa4e3c4114673c9bf9663c8b82363cb3b5423c53de873ca9882e3cbd156b3c377b2e3c4c62773c096a2a3c512a983c18e4113c307f323cdd92773cb7065b3c9d87423cec276b3c2cf5093c91ae4e3c5d8e3a3c05a87f3ce37ab43c887cc23c45321e3ddff70f3dd5b8463dbc56643dcbcfbe3cf0bd7f3c03306f3c947494622e, 1, '2026-03-31 12:35:16', '2026-03-31 12:41:12', '07123456767', 'very hardworking', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -494,11 +549,12 @@ CREATE TABLE `violations` (
 --
 
 INSERT INTO `violations` (`id`, `submission_id`, `violation_type`, `severity`, `description`, `screenshot_path`, `timestamp`, `video_path`, `video_format`, `video_duration`) VALUES
-(445, 25, 'no_face', 15, 'No face detected in frame', NULL, '2026-03-30 22:27:41', 'clip_445_20260330_222749.webm', 'video/webm', 8),
-(446, 25, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-30 22:27:50', NULL, NULL, NULL),
-(447, 25, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-30 22:27:51', NULL, NULL, NULL),
-(448, 26, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-31 07:39:23', NULL, NULL, NULL),
-(449, 26, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-31 07:39:24', NULL, NULL, NULL);
+(541, 36, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-31 22:36:01', 'clip_541_20260331_223609.webm', 'video/webm', 8),
+(542, 36, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-31 22:36:16', NULL, NULL, NULL),
+(543, 36, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-31 22:36:32', 'clip_543_20260331_223640.webm', 'video/webm', 8),
+(544, 36, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-31 22:36:42', NULL, NULL, NULL),
+(545, 37, 'eye_gaze', 5, 'Looking away: unknown', NULL, '2026-03-31 22:47:50', 'clip_545_20260331_224752.webm', 'video/webm', 8),
+(546, 37, 'tab_switch', 10, 'Student switched browser tab/window', NULL, '2026-03-31 22:47:54', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -642,7 +698,7 @@ ALTER TABLE `violations`
 -- AUTO_INCREMENT for table `answers`
 --
 ALTER TABLE `answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=164;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
 
 --
 -- AUTO_INCREMENT for table `courses`
@@ -654,13 +710,13 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `enrollments`
 --
 ALTER TABLE `enrollments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `exams`
 --
 ALTER TABLE `exams`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `face_admin_actions`
@@ -672,13 +728,13 @@ ALTER TABLE `face_admin_actions`
 -- AUTO_INCREMENT for table `face_verification_logs`
 --
 ALTER TABLE `face_verification_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
 
 --
 -- AUTO_INCREMENT for table `learning_progress`
 --
 ALTER TABLE `learning_progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `lectures`
@@ -702,19 +758,19 @@ ALTER TABLE `materials`
 -- AUTO_INCREMENT for table `questions`
 --
 ALTER TABLE `questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=285;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=370;
 
 --
 -- AUTO_INCREMENT for table `submissions`
 --
 ALTER TABLE `submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `user_analytics`
@@ -726,7 +782,7 @@ ALTER TABLE `user_analytics`
 -- AUTO_INCREMENT for table `violations`
 --
 ALTER TABLE `violations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=450;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=549;
 
 --
 -- Constraints for dumped tables

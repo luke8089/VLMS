@@ -116,7 +116,7 @@
 
     <main class="px-4 sm:px-6 lg:px-10 py-10">
         <section class="max-w-7xl mx-auto admin-shell rounded-[32px] px-6 sm:px-10 py-10 slide-up">
-            <div class="grid lg:grid-cols-[1.2fr_0.8fr] gap-8">
+            <div class="grid lg:grid-cols-[1.2fr_0.8fr] gap-8" id="dashboard-overview">
                 <div class="space-y-6">
                     <div>
                         <span class="uppercase text-xs tracking-[0.4em] text-black/40">System Pulse</span>
@@ -255,6 +255,111 @@
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-black/60">Queue length</span>
                             <span class="text-sm font-semibold" id="stat-queue">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Management Section -->
+            <div class="mt-10 hidden" id="users-section">
+                <div class="ghost-card rounded-3xl p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-2xl font-semibold">Users Management</h3>
+                            <p class="text-sm text-black/60 mt-1">View and manage all users in the system</p>
+                        </div>
+                        <a href="/admin/dashboard" class="text-sm text-black/60 hover:text-black">&larr; Back to Dashboard</a>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card rounded-2xl p-4">
+                            <p class="text-xs text-white/60 uppercase tracking-wider">Total Users</p>
+                            <p class="text-2xl font-semibold mt-1 text-white" id="users-total">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4">
+                            <p class="text-xs text-white/60 uppercase tracking-wider">Students</p>
+                            <p class="text-2xl font-semibold mt-1 text-blue-400" id="users-students">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4">
+                            <p class="text-xs text-white/60 uppercase tracking-wider">Lecturers</p>
+                            <p class="text-2xl font-semibold mt-1 text-green-400" id="users-lecturers">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4">
+                            <p class="text-xs text-white/60 uppercase tracking-wider">Admins</p>
+                            <p class="text-2xl font-semibold mt-1 text-purple-400" id="users-admins">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <input type="text" id="users-search" placeholder="Search users..." 
+                               class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30 w-64">
+                        <select id="users-role-filter" class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30">
+                            <option value="all">All Roles</option>
+                            <option value="student">Students</option>
+                            <option value="lecturer">Lecturers</option>
+                            <option value="admin">Admins</option>
+                        </select>
+                        <select id="users-status-filter" class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        <button onclick="loadUsersData()" class="px-4 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-black/80">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="ghost-card rounded-3xl p-6 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-black/10">
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">User</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Role</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Department</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Status</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Joined</th>
+                                    <th class="py-3 px-4 text-xs font-medium text-black/50 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table">
+                                <tr>
+                                    <td colspan="6" class="py-8 text-center text-black/50">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-sm text-black/60" id="users-pagination-info">Showing 0 of 0 users</div>
+                        <div class="flex gap-2" id="users-pagination-controls"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Detail Modal -->
+            <div id="user-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeUserModalOnBackdrop(event)" style="overflow-y: auto;">
+                <div class="bg-white rounded-[32px] shadow-2xl max-w-4xl w-full my-8" onclick="event.stopPropagation()" style="max-height: calc(100vh - 4rem);">
+                    <!-- Modal Header -->
+                    <div class="bg-gradient-to-br from-black to-black/90 text-white px-8 py-6 rounded-t-[32px]">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-2xl font-bold" id="user-modal-title">User Details</h3>
+                                <p class="text-white/70 text-sm mt-1" id="user-modal-subtitle">Manage user information and permissions</p>
+                            </div>
+                            <button onclick="closeUserModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal Content -->
+                    <div class="overflow-y-auto rounded-b-[32px]" style="max-height: calc(100vh - 12rem);">
+                        <div id="user-modal-content" class="p-8">
+                            <!-- Content loaded dynamically -->
                         </div>
                     </div>
                 </div>
@@ -436,19 +541,473 @@
             }
         });
 
+        // Users Management Functions
+        let allUsers = [];
+        let currentPage = 1;
+        let totalUsers = 0;
+        const perPage = 20;
+
+        function showUsersSection() {
+            document.getElementById('dashboard-overview').classList.add('hidden');
+            document.getElementById('overview-section').classList.add('hidden');
+            document.getElementById('face-verification-section').classList.add('hidden');
+            document.getElementById('users-section').classList.remove('hidden');
+            loadUsersData();
+        }
+
+        async function loadUsersData() {
+            const roleFilter = document.getElementById('users-role-filter').value;
+            const statusFilter = document.getElementById('users-status-filter').value;
+            const search = document.getElementById('users-search').value;
+            
+            try {
+                const params = new URLSearchParams({ 
+                    role: roleFilter,
+                    status: statusFilter,
+                    page: currentPage,
+                    per_page: perPage
+                });
+                if (search) params.append('search', search);
+                
+                const response = await fetch(`/api/admin/users?${params}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load users');
+                
+                const data = await response.json();
+                allUsers = data.users;
+                totalUsers = data.total;
+                
+                // Update stats
+                const students = allUsers.filter(u => u.role === 'student').length;
+                const lecturers = allUsers.filter(u => u.role === 'lecturer').length;
+                const admins = allUsers.filter(u => u.role === 'admin').length;
+                
+                document.getElementById('users-total').textContent = totalUsers;
+                document.getElementById('users-students').textContent = students;
+                document.getElementById('users-lecturers').textContent = lecturers;
+                document.getElementById('users-admins').textContent = admins;
+                
+                // Render table
+                renderUsersTable();
+                renderPagination();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('users-table').innerHTML = `
+                    <tr><td colspan="6" class="py-8 text-center text-red-500">Failed to load users</td></tr>
+                `;
+            }
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-table');
+            
+            if (allUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-black/50">No users found</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = allUsers.map(user => {
+                const roleBadge = {
+                    'student': '<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Student</span>',
+                    'lecturer': '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Lecturer</span>',
+                    'admin': '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Admin</span>'
+                }[user.role] || '<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Unknown</span>';
+                
+                const statusBadge = user.is_active
+                    ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Active</span>'
+                    : '<span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">Inactive</span>';
+                
+                const joinedDate = user.created_at ? new Date(user.created_at).toLocaleDateString() : '-';
+                
+                return `
+                    <tr class="border-b border-black/5 hover:bg-black/5">
+                        <td class="py-3 px-4">
+                            <div class="font-medium">${user.first_name} ${user.last_name}</div>
+                            <div class="text-sm text-black/50">${user.email}</div>
+                        </td>
+                        <td class="py-3 px-4">${roleBadge}</td>
+                        <td class="py-3 px-4 text-sm">${user.department || '-'}</td>
+                        <td class="py-3 px-4">${statusBadge}</td>
+                        <td class="py-3 px-4 text-sm">${joinedDate}</td>
+                        <td class="py-3 px-4">
+                            <button onclick="viewUserDetails(${user.id})" class="text-blue-600 hover:text-blue-800 text-sm">View</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(totalUsers / perPage);
+            const start = (currentPage - 1) * perPage + 1;
+            const end = Math.min(currentPage * perPage, totalUsers);
+            
+            document.getElementById('users-pagination-info').textContent = `Showing ${start}-${end} of ${totalUsers} users`;
+            
+            const controls = document.getElementById('users-pagination-controls');
+            if (totalPages <= 1) {
+                controls.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            if (currentPage > 1) {
+                html += `<button onclick="changePage(${currentPage - 1})" class="px-3 py-1 bg-white border border-black/10 rounded-lg text-sm hover:bg-black/5">Previous</button>`;
+            }
+            if (currentPage < totalPages) {
+                html += `<button onclick="changePage(${currentPage + 1})" class="px-3 py-1 bg-white border border-black/10 rounded-lg text-sm hover:bg-black/5">Next</button>`;
+            }
+            controls.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadUsersData();
+        }
+
+        function viewUserDetails(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            document.getElementById('user-modal-title').textContent = `${user.first_name} ${user.last_name}`;
+            document.getElementById('user-modal-subtitle').textContent = `${user.email} • ID: #${user.id}`;
+            
+            const faceImageHtml = user.face_registered 
+                ? `<div class="relative group">
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 text-center border-2 border-green-200 transition-all group-hover:shadow-lg">
+                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-xl">
+                            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-4">
+                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full text-sm font-semibold shadow-lg">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Face Registered
+                            </div>
+                            <p class="text-sm text-green-700 mt-3 font-medium">Biometric authentication enabled</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteFaceData(${user.id})" class="mt-4 w-full px-4 py-3 bg-red-50 text-red-700 rounded-2xl text-sm font-semibold hover:bg-red-100 transition-all border border-red-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Delete Face Data
+                    </button>
+                   </div>`
+                : `<div class="relative group">
+                    <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-3xl p-8 text-center border-2 border-yellow-200 transition-all group-hover:shadow-lg">
+                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center shadow-xl">
+                            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-4">
+                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-full text-sm font-semibold shadow-lg">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                Not Registered
+                            </div>
+                            <p class="text-sm text-yellow-700 mt-3 font-medium">User needs to register face for exams</p>
+                        </div>
+                    </div>
+                   </div>`;
+            
+            const roleColors = {
+                'student': 'bg-blue-100 text-blue-700 border-blue-200',
+                'lecturer': 'bg-green-100 text-green-700 border-green-200',
+                'admin': 'bg-purple-100 text-purple-700 border-purple-200'
+            };
+            
+            const statusColor = user.is_active ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200';
+            
+            document.getElementById('user-modal-content').innerHTML = `
+                <div class="grid lg:grid-cols-5 gap-6">
+                    <!-- Left Column: Face & Quick Info -->
+                    <div class="lg:col-span-2 space-y-4">
+                        ${faceImageHtml}
+                        
+                        <div class="bg-gradient-to-br from-black/5 to-black/10 rounded-3xl p-6 border border-black/10">
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Quick Info
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
+                                    <span class="text-sm text-black/60 font-medium">Role</span>
+                                    <span class="px-3 py-1 ${roleColors[user.role]} rounded-full text-xs font-bold uppercase tracking-wider border">${user.role}</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
+                                    <span class="text-sm text-black/60 font-medium">Status</span>
+                                    <span class="px-3 py-1 ${statusColor} rounded-full text-xs font-bold uppercase tracking-wider border">${user.is_active ? 'Active' : 'Inactive'}</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
+                                    <span class="text-sm text-black/60 font-medium">Phone</span>
+                                    <span class="text-sm font-semibold">${user.phone_number || 'Not provided'}</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
+                                    <span class="text-sm text-black/60 font-medium">Joined</span>
+                                    <span class="text-sm font-semibold">${user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}</span>
+                                </div>
+                                ${user.role === 'student' && user.enrollment_count !== undefined ? `
+                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
+                                    <span class="text-sm text-black/60 font-medium">Enrollments</span>
+                                    <span class="text-sm font-bold text-blue-600">${user.enrollment_count} courses</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        ${user.bio ? `
+                        <div class="bg-white rounded-3xl p-6 border border-black/10">
+                            <h4 class="font-bold text-sm uppercase tracking-wider text-black/50 mb-3">Bio</h4>
+                            <p class="text-sm text-black/80 leading-relaxed">${user.bio}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Right Column: Edit Form -->
+                    <div class="lg:col-span-3 space-y-4">
+                        <div class="bg-white rounded-3xl p-6 border border-black/10 shadow-lg">
+                            <h4 class="font-bold text-lg mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Edit User Details
+                            </h4>
+                            <form id="edit-user-form" class="space-y-4">
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">First Name *</label>
+                                        <input type="text" id="edit-first-name" value="${user.first_name}" required
+                                               class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">Last Name *</label>
+                                        <input type="text" id="edit-last-name" value="${user.last_name}" required
+                                               class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
+                                    </div>
+                                </div>
+                                
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">Role *</label>
+                                        <select id="edit-role" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
+                                            <option value="student" ${user.role === 'student' ? 'selected' : ''}>👨‍🎓 Student</option>
+                                            <option value="lecturer" ${user.role === 'lecturer' ? 'selected' : ''}>👨‍🏫 Lecturer</option>
+                                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Admin</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">Status *</label>
+                                        <select id="edit-status" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
+                                            <option value="true" ${user.is_active ? 'selected' : ''}>✅ Active</option>
+                                            <option value="false" ${!user.is_active ? 'selected' : ''}>❌ Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">Department</label>
+                                    <input type="text" id="edit-department" value="${user.department || ''}" placeholder="e.g., Computer Science"
+                                           class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
+                                </div>
+                                
+                                <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 flex gap-3">
+                                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div class="text-xs text-blue-800">
+                                        <p class="font-bold mb-1">Important Note</p>
+                                        <p>Changes to user role and status will take effect immediately. Make sure to verify before saving.</p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex items-center justify-between gap-4">
+                            <button onclick="confirmDeleteUser(${user.id})" class="flex-1 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl text-sm font-bold hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Delete User
+                            </button>
+                            <button onclick="closeUserModal()" class="flex-1 px-6 py-4 bg-black/5 text-black rounded-2xl text-sm font-bold hover:bg-black/10 transition-all">
+                                Cancel
+                            </button>
+                            <button onclick="saveUserChanges(${user.id})" class="flex-1 px-6 py-4 bg-gradient-to-r from-black to-black/90 text-white rounded-2xl text-sm font-bold hover:from-black/90 hover:to-black transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('user-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function closeUserModalOnBackdrop(event) {
+            if (event.target.id === 'user-modal') {
+                closeUserModal();
+            }
+        }
+
+        async function saveUserChanges(userId) {
+            const firstName = document.getElementById('edit-first-name').value.trim();
+            const lastName = document.getElementById('edit-last-name').value.trim();
+            const role = document.getElementById('edit-role').value;
+            const department = document.getElementById('edit-department').value.trim();
+            const isActive = document.getElementById('edit-status').value === 'true';
+            
+            if (!firstName || !lastName) {
+                alert('First name and last name are required');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: lastName,
+                        role: role,
+                        department: department,
+                        is_active: isActive
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update user');
+                }
+                
+                alert('User updated successfully');
+                closeUserModal();
+                loadUsersData();
+                
+            } catch (error) {
+                console.error('Error updating user:', error);
+                alert(error.message || 'Failed to update user');
+            }
+        }
+
+        async function confirmDeleteUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const confirmed = confirm(`Are you sure you want to delete ${user.first_name} ${user.last_name}?\n\nThis action cannot be undone and will remove all associated data.`);
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete user');
+                }
+                
+                alert('User deleted successfully');
+                closeUserModal();
+                loadUsersData();
+                
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert(error.message || 'Failed to delete user');
+            }
+        }
+
+        async function deleteFaceData(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const confirmed = confirm(`Delete face registration for ${user.first_name} ${user.last_name}?\n\nThis will remove their biometric data and they will need to re-register.`);
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch(`/api/admin/face-verification/${userId}/reset`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ reason: 'Admin deleted face data' })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete face data');
+                }
+                
+                alert('Face data deleted successfully');
+                closeUserModal();
+                loadUsersData();
+                
+            } catch (error) {
+                console.error('Error deleting face data:', error);
+                alert(error.message || 'Failed to delete face data');
+            }
+        }
+
+        // Search and filter handlers for users
+        document.getElementById('users-search')?.addEventListener('input', debounce(() => {
+            currentPage = 1;
+            loadUsersData();
+        }, 300));
+
+        document.getElementById('users-role-filter')?.addEventListener('change', () => {
+            currentPage = 1;
+            loadUsersData();
+        });
+
+        document.getElementById('users-status-filter')?.addEventListener('change', () => {
+            currentPage = 1;
+            loadUsersData();
+        });
+
         // Face Verification Management Functions
         let fvStudents = [];
         let selectedStudentId = null;
 
         function showFaceVerificationSection() {
+            document.getElementById('dashboard-overview').classList.add('hidden');
             document.getElementById('overview-section').classList.add('hidden');
+            document.getElementById('users-section').classList.add('hidden');
             document.getElementById('face-verification-section').classList.remove('hidden');
             loadFaceVerificationData();
         }
 
         function showOverviewSection() {
+            document.getElementById('dashboard-overview').classList.remove('hidden');
             document.getElementById('overview-section').classList.remove('hidden');
             document.getElementById('face-verification-section').classList.add('hidden');
+            document.getElementById('users-section').classList.add('hidden');
         }
 
         async function loadFaceVerificationData() {
@@ -628,7 +1187,9 @@
 
         // Initialize page based on active section
         const activePage = '{{ admin_active_page }}';
-        if (activePage === 'face_verification') {
+        if (activePage === 'users') {
+            showUsersSection();
+        } else if (activePage === 'face_verification') {
             showFaceVerificationSection();
         } else {
             showOverviewSection();
