@@ -391,33 +391,6 @@
                 </div>
             </div>
 
-            <!-- User Detail Modal -->
-            <div id="user-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-50 overflow-y-auto" onclick="closeUserModalOnBackdrop(event)">
-                <div class="flex min-h-full items-center justify-center p-4">
-                <div class="modal-glass rounded-[28px] shadow-2xl max-w-4xl w-full border border-white/60" onclick="event.stopPropagation()">
-                    <!-- Modal Header -->
-                    <div class="bg-black text-white px-8 py-5 rounded-t-[28px]">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="text-2xl font-bold" id="user-modal-title">User Details</h3>
-                                <p class="text-white/70 text-sm mt-1" id="user-modal-subtitle">Manage user information and permissions</p>
-                            </div>
-                            <button onclick="closeUserModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Modal Content -->
-                    <div class="rounded-b-[28px]">
-                        <div id="user-modal-content" class="p-8">
-                            <!-- Content loaded dynamically -->
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-
             <!-- Face Verification Management Section -->
             <div class="mt-10 hidden" id="face-verification-section">
                 <div class="ghost-card rounded-3xl p-6 mb-6">
@@ -487,19 +460,6 @@
                 </div>
             </div>
 
-            <!-- Student Face Detail Modal -->
-            <div id="fv-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-                <div class="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-semibold" id="fv-modal-title">Student Details</h3>
-                        <button onclick="closeFvModal()" class="text-black/50 hover:text-black">
-                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                    <div id="fv-modal-content" class="space-y-4"></div>
-                </div>
-            </div>
-
             <!-- ═══════════════ COURSES SECTION ═══════════════ -->
             <div class="mt-10 hidden" id="courses-section">
                 <!-- Header + Stats -->
@@ -564,24 +524,6 @@
                                 <tr><td colspan="7" class="py-10 text-center text-black/40">Loading courses…</td></tr>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Course Detail Modal -->
-            <div id="course-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto" onclick="closeCourseModal(event)">
-                <div class="bg-white rounded-[28px] shadow-2xl max-w-3xl w-full my-8" onclick="event.stopPropagation()" style="max-height:90vh;">
-                    <div class="bg-gradient-to-br from-black to-black/90 text-white px-8 py-6 rounded-t-[28px] flex items-start justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold" id="cm-title">Course Details</h3>
-                            <p class="text-white/60 text-sm mt-0.5" id="cm-subtitle"></p>
-                        </div>
-                        <button onclick="document.getElementById('course-modal').classList.add('hidden');document.body.style.overflow='auto'" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition ml-4 flex-shrink-0">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                    <div class="overflow-y-auto rounded-b-[28px]" style="max-height:calc(90vh - 100px);">
-                        <div id="cm-content" class="p-8"></div>
                     </div>
                 </div>
             </div>
@@ -667,23 +609,6 @@
                 </div>
             </div>
 
-            <!-- Exam Detail Modal -->
-            <div id="exam-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto" onclick="closeExamModal(event)">
-                <div class="bg-white rounded-[28px] shadow-2xl max-w-4xl w-full my-8" onclick="event.stopPropagation()" style="max-height:90vh;">
-                    <div class="bg-gradient-to-br from-black to-black/90 text-white px-8 py-6 rounded-t-[28px] flex items-start justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold" id="em-title">Exam Details</h3>
-                            <p class="text-white/60 text-sm mt-0.5" id="em-subtitle"></p>
-                        </div>
-                        <button onclick="document.getElementById('exam-modal').classList.add('hidden');document.body.style.overflow='auto'" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition ml-4 flex-shrink-0">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                    <div class="overflow-y-auto rounded-b-[28px]" style="max-height:calc(90vh - 100px);">
-                        <div id="em-content" class="p-8"></div>
-                    </div>
-                </div>
-            </div>
 
             <!-- ═══════════════ SYSTEM SECTION ═══════════════ -->
             <div class="mt-10 hidden" id="system-section">
@@ -805,6 +730,81 @@
     <div class="fixed -z-10 inset-0 pointer-events-none">
         <div class="absolute top-0 right-0 w-80 h-80 bg-black/5 rounded-full blur-[90px]"></div>
         <div class="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <!-- ═══ MODALS — outside section/main so backdrop-filter doesn't trap fixed positioning ═══ -->
+
+    <!-- User Detail Modal -->
+    <div id="user-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-6" onclick="if(event.target===this)closeUserModal()">
+            <div class="modal-glass rounded-[28px] shadow-2xl max-w-4xl w-full border border-white/60">
+                <div class="bg-black text-white px-8 py-5 rounded-t-[28px]">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold" id="user-modal-title">User Details</h3>
+                            <p class="text-white/60 text-sm mt-0.5" id="user-modal-subtitle"></p>
+                        </div>
+                        <button onclick="closeUserModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all flex-shrink-0">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="rounded-b-[28px]">
+                    <div id="user-modal-content" class="p-8"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Face Verification Logs Modal -->
+    <div id="fv-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-6">
+            <div class="modal-glass rounded-[28px] shadow-2xl max-w-lg w-full border border-white/60">
+                <div class="bg-black text-white px-6 py-5 rounded-t-[28px] flex items-center justify-between">
+                    <h3 class="text-lg font-bold" id="fv-modal-title">Verification Logs</h3>
+                    <button onclick="closeFvModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition flex-shrink-0">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div id="fv-modal-content" class="p-6 space-y-3 rounded-b-[28px]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Detail Modal -->
+    <div id="course-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-6" onclick="if(event.target===this)closeCourseModal()">
+            <div class="modal-glass rounded-[28px] shadow-2xl max-w-3xl w-full border border-white/60">
+                <div class="bg-black text-white px-8 py-5 rounded-t-[28px] flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold" id="cm-title">Course Details</h3>
+                        <p class="text-white/60 text-sm mt-0.5" id="cm-subtitle"></p>
+                    </div>
+                    <button onclick="closeCourseModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition ml-4 flex-shrink-0">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div id="cm-content" class="p-8 rounded-b-[28px]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Detail Modal -->
+    <div id="exam-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-6" onclick="if(event.target===this)closeExamModal()">
+            <div class="modal-glass rounded-[28px] shadow-2xl max-w-4xl w-full border border-white/60">
+                <div class="bg-black text-white px-8 py-5 rounded-t-[28px] flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold" id="em-title">Exam Details</h3>
+                        <p class="text-white/60 text-sm mt-0.5" id="em-subtitle"></p>
+                    </div>
+                    <button onclick="closeExamModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition ml-4 flex-shrink-0">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div id="em-content" class="p-8 rounded-b-[28px]"></div>
+            </div>
+        </div>
     </div>
 
     <script>
