@@ -30,84 +30,135 @@
             font-family: 'Unbounded', sans-serif;
         }
 
+        body {
+            background:
+                radial-gradient(ellipse at 15% 10%, rgba(10,10,10,0.055), transparent 50%),
+                radial-gradient(ellipse at 85% 5%,  rgba(10,10,10,0.04),  transparent 55%),
+                radial-gradient(ellipse at 50% 90%, rgba(10,10,10,0.03),  transparent 60%),
+                linear-gradient(180deg, #ffffff 0%, #f7f7f5 55%, #efefec 100%);
+        }
+
         .admin-shell {
-            background: rgba(255, 255, 255, 0.86);
-            border: 1px solid var(--line);
-            box-shadow: 0 30px 80px rgba(10, 10, 10, 0.08);
+            background: rgba(255,255,255,0.78);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.82);
+            box-shadow:
+                0 32px 80px rgba(10,10,10,0.07),
+                0 2px 0 rgba(255,255,255,0.95) inset;
         }
 
         .nav-pill.active {
             background: var(--ink);
             color: white !important;
-            box-shadow: 0 12px 22px rgba(10, 10, 10, 0.18);
+            box-shadow: 0 8px 20px rgba(10,10,10,0.22);
         }
 
         .dashboard-card {
-            background: linear-gradient(140deg, rgba(10, 10, 10, 0.96), rgba(26, 26, 26, 0.92));
+            background: linear-gradient(145deg, rgba(12,12,12,0.95), rgba(28,28,28,0.90));
             color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
         }
 
         .ghost-card {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid var(--line);
-            box-shadow: 0 20px 50px rgba(10, 10, 10, 0.08);
+            background: rgba(255,255,255,0.62);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.80);
+            box-shadow:
+                0 20px 50px rgba(10,10,10,0.06),
+                inset 0 1px 0 rgba(255,255,255,0.95);
         }
 
         .stat-chip {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.22);
         }
 
         .grid-line {
-            border-top: 1px dashed rgba(10, 10, 10, 0.16);
+            border-top: 1px dashed rgba(10,10,10,0.14);
         }
 
         .callout {
-            background: #ffffff;
-            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.75);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .badge {
-            background: rgba(10, 10, 10, 0.08);
+            background: rgba(10,10,10,0.07);
         }
 
         .shadow-sheen {
-            box-shadow: 0 16px 40px rgba(10, 10, 10, 0.12);
+            box-shadow: 0 12px 32px rgba(10,10,10,0.14), inset 0 1px 0 rgba(255,255,255,0.10);
         }
 
+        /* Glossy modal surface */
+        .modal-glass {
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(40px) saturate(200%);
+            -webkit-backdrop-filter: blur(40px) saturate(200%);
+        }
+
+        /* Glossy info row */
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(10,10,10,0.06);
+        }
+        .info-row:last-child { border-bottom: none; }
+
         .fade-in {
-            animation: fadeIn 0.8s ease forwards;
+            animation: fadeIn 0.7s ease forwards;
             opacity: 0;
         }
 
         .slide-up {
-            animation: slideUp 0.8s ease forwards;
+            animation: slideUp 0.7s ease forwards;
             opacity: 0;
         }
 
         .glow {
-            box-shadow: 0 20px 40px rgba(10, 10, 10, 0.12), 0 0 0 1px rgba(10, 10, 10, 0.08);
+            box-shadow: 0 20px 40px rgba(10,10,10,0.12), 0 0 0 1px rgba(10,10,10,0.07);
         }
 
         @keyframes fadeIn {
             from { opacity: 0; }
-            to { opacity: 1; }
+            to   { opacity: 1; }
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes pulseSoft {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
+            0%,100% { transform: scale(1); }
+            50%      { transform: scale(1.02); }
         }
 
-        .pulse-soft {
-            animation: pulseSoft 4s ease-in-out infinite;
+        .pulse-soft { animation: pulseSoft 4s ease-in-out infinite; }
+
+        /* Glossy nav bar */
+        .admin-nav {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.65);
+            box-shadow: 0 1px 0 rgba(10,10,10,0.06), 0 4px 20px rgba(10,10,10,0.04);
+        }
+
+        /* Glossy dropdown panel */
+        .dropdown-panel {
+            background: rgba(255,255,255,0.92) !important;
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.80) !important;
+            box-shadow: 0 16px 48px rgba(10,10,10,0.10), 0 1px 0 rgba(255,255,255,0.9) inset !important;
         }
     </style>
 </head>
@@ -274,20 +325,20 @@
                     <!-- Stats Cards -->
                     <div class="grid sm:grid-cols-4 gap-4 mb-6">
                         <div class="dashboard-card rounded-2xl p-4">
-                            <p class="text-xs text-white/60 uppercase tracking-wider">Total Users</p>
+                            <p class="text-xs text-white/50 uppercase tracking-wider">Total Users</p>
                             <p class="text-2xl font-semibold mt-1 text-white" id="users-total">0</p>
                         </div>
                         <div class="dashboard-card rounded-2xl p-4">
-                            <p class="text-xs text-white/60 uppercase tracking-wider">Students</p>
-                            <p class="text-2xl font-semibold mt-1 text-blue-400" id="users-students">0</p>
+                            <p class="text-xs text-white/50 uppercase tracking-wider">Students</p>
+                            <p class="text-2xl font-semibold mt-1 text-white/80" id="users-students">0</p>
                         </div>
                         <div class="dashboard-card rounded-2xl p-4">
-                            <p class="text-xs text-white/60 uppercase tracking-wider">Lecturers</p>
-                            <p class="text-2xl font-semibold mt-1 text-green-400" id="users-lecturers">0</p>
+                            <p class="text-xs text-white/50 uppercase tracking-wider">Lecturers</p>
+                            <p class="text-2xl font-semibold mt-1 text-white/80" id="users-lecturers">0</p>
                         </div>
                         <div class="dashboard-card rounded-2xl p-4">
-                            <p class="text-xs text-white/60 uppercase tracking-wider">Admins</p>
-                            <p class="text-2xl font-semibold mt-1 text-purple-400" id="users-admins">0</p>
+                            <p class="text-xs text-white/50 uppercase tracking-wider">Admins</p>
+                            <p class="text-2xl font-semibold mt-1 text-white/80" id="users-admins">0</p>
                         </div>
                     </div>
 
@@ -341,10 +392,10 @@
             </div>
 
             <!-- User Detail Modal -->
-            <div id="user-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeUserModalOnBackdrop(event)" style="overflow-y: auto;">
-                <div class="bg-white rounded-[32px] shadow-2xl max-w-4xl w-full my-8" onclick="event.stopPropagation()" style="max-height: calc(100vh - 4rem);">
+            <div id="user-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-50 flex items-center justify-center p-4" onclick="closeUserModalOnBackdrop(event)" style="overflow-y: auto;">
+                <div class="modal-glass rounded-[28px] shadow-2xl max-w-4xl w-full my-8 border border-white/60" onclick="event.stopPropagation()" style="max-height: calc(100vh - 4rem);">
                     <!-- Modal Header -->
-                    <div class="bg-gradient-to-br from-black to-black/90 text-white px-8 py-6 rounded-t-[32px]">
+                    <div class="bg-black text-white px-8 py-5 rounded-t-[28px]">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-2xl font-bold" id="user-modal-title">User Details</h3>
@@ -357,7 +408,7 @@
                     </div>
                     
                     <!-- Modal Content -->
-                    <div class="overflow-y-auto rounded-b-[32px]" style="max-height: calc(100vh - 12rem);">
+                    <div class="overflow-y-auto rounded-b-[28px]" style="max-height: calc(100vh - 12rem);">
                         <div id="user-modal-content" class="p-8">
                             <!-- Content loaded dynamically -->
                         </div>
@@ -379,19 +430,19 @@
                     <!-- Stats Cards -->
                     <div class="grid sm:grid-cols-4 gap-4 mb-6">
                         <div class="dashboard-card rounded-2xl p-4">
-                            <p class="text-xs text-white/60 uppercase tracking-wider">Total Students</p>
+                            <p class="text-xs text-white/50 uppercase tracking-wider">Total Students</p>
                             <p class="text-2xl font-semibold mt-1 text-white" id="fv-total-students">0</p>
                         </div>
                         <div class="dashboard-card rounded-2xl p-4">
-                            <p class="text-xs text-white/60 uppercase tracking-wider">Registered</p>
-                            <p class="text-2xl font-semibold mt-1 text-green-400" id="fv-registered">0</p>
+                            <p class="text-xs text-white/50 uppercase tracking-wider">Registered</p>
+                            <p class="text-2xl font-semibold mt-1 text-white" id="fv-registered">0</p>
                         </div>
                         <div class="dashboard-card rounded-2xl p-4">
-                            <p class="text-xs text-white/60 uppercase tracking-wider">Not Registered</p>
-                            <p class="text-2xl font-semibold mt-1 text-yellow-400" id="fv-not-registered">0</p>
+                            <p class="text-xs text-white/50 uppercase tracking-wider">Not Registered</p>
+                            <p class="text-2xl font-semibold mt-1 text-white/50" id="fv-not-registered">0</p>
                         </div>
                         <div class="dashboard-card rounded-2xl p-4">
-                            <p class="text-xs text-white/60 uppercase tracking-wider">Registration Rate</p>
+                            <p class="text-xs text-white/50 uppercase tracking-wider">Registration Rate</p>
                             <p class="text-2xl font-semibold mt-1 text-white" id="fv-rate">0%</p>
                         </div>
                     </div>
@@ -443,11 +494,309 @@
                             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
-                    <div id="fv-modal-content" class="space-y-4">
-                        <!-- Content loaded dynamically -->
+                    <div id="fv-modal-content" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ COURSES SECTION ═══════════════ -->
+            <div class="mt-10 hidden" id="courses-section">
+                <!-- Header + Stats -->
+                <div class="ghost-card rounded-3xl p-6 mb-6 slide-up">
+                    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                        <div>
+                            <span class="text-xs uppercase tracking-[0.35em] text-black/40">Catalog</span>
+                            <h3 class="text-2xl font-bold tracking-tight mt-1">Courses Management</h3>
+                            <p class="text-sm text-black/50 mt-1">Browse, publish and manage all courses on the platform</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Total</p>
+                            <p class="text-3xl font-bold mt-1 text-white" id="c-total">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Published</p>
+                            <p class="text-3xl font-bold mt-1 text-white" id="c-published">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Drafts</p>
+                            <p class="text-3xl font-bold mt-1 text-white/50" id="c-draft">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Enrollments</p>
+                            <p class="text-3xl font-bold mt-1 text-white" id="c-enrollments">0</p>
+                        </div>
+                    </div>
+                    <!-- Filters -->
+                    <div class="flex flex-wrap gap-3">
+                        <div class="relative flex-1 min-w-[200px]">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                            <input type="text" id="c-search" placeholder="Search by title, code or category…"
+                                   class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30 transition">
+                        </div>
+                        <select id="c-status-filter" class="px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30">
+                            <option value="all">All Status</option>
+                            <option value="published">Published</option>
+                            <option value="unpublished">Unpublished</option>
+                        </select>
+                        <button onclick="loadCoursesData()" class="px-5 py-2.5 bg-black text-white rounded-xl text-sm font-semibold hover:bg-black/80 transition">Refresh</button>
+                    </div>
+                </div>
+
+                <!-- Courses Table -->
+                <div class="ghost-card rounded-3xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-black/10 bg-black/[0.02]">
+                                    <th class="py-3.5 px-5 font-semibold text-xs uppercase tracking-wider text-black/40">Course</th>
+                                    <th class="py-3.5 px-5 font-semibold text-xs uppercase tracking-wider text-black/40">Lecturer</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40 text-center">Students</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40 text-center">Exams</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40 text-center">Status</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40">Created</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="courses-table-body">
+                                <tr><td colspan="7" class="py-10 text-center text-black/40">Loading courses…</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+
+            <!-- Course Detail Modal -->
+            <div id="course-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto" onclick="closeCourseModal(event)">
+                <div class="bg-white rounded-[28px] shadow-2xl max-w-3xl w-full my-8" onclick="event.stopPropagation()" style="max-height:90vh;">
+                    <div class="bg-gradient-to-br from-black to-black/90 text-white px-8 py-6 rounded-t-[28px] flex items-start justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold" id="cm-title">Course Details</h3>
+                            <p class="text-white/60 text-sm mt-0.5" id="cm-subtitle"></p>
+                        </div>
+                        <button onclick="document.getElementById('course-modal').classList.add('hidden');document.body.style.overflow='auto'" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition ml-4 flex-shrink-0">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto rounded-b-[28px]" style="max-height:calc(90vh - 100px);">
+                        <div id="cm-content" class="p-8"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ EXAMS SECTION ═══════════════ -->
+            <div class="mt-10 hidden" id="exams-section">
+                <!-- Header + Stats -->
+                <div class="ghost-card rounded-3xl p-6 mb-6 slide-up">
+                    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                        <div>
+                            <span class="text-xs uppercase tracking-[0.35em] text-black/40">Assessment</span>
+                            <h3 class="text-2xl font-bold tracking-tight mt-1">Exams Management</h3>
+                            <p class="text-sm text-black/50 mt-1">Monitor all assessments, submissions and integrity flags</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Total</p>
+                            <p class="text-3xl font-bold mt-1 text-white" id="e-total">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Active</p>
+                            <p class="text-3xl font-bold mt-1 text-white" id="e-active">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Upcoming</p>
+                            <p class="text-3xl font-bold mt-1 text-white/70" id="e-upcoming">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Ended</p>
+                            <p class="text-3xl font-bold mt-1 text-white/40" id="e-ended">0</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Flagged</p>
+                            <p class="text-3xl font-bold mt-1 text-white/80" id="e-flagged">0</p>
+                        </div>
+                    </div>
+                    <!-- Filters -->
+                    <div class="flex flex-wrap gap-3">
+                        <div class="relative flex-1 min-w-[200px]">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                            <input type="text" id="e-search" placeholder="Search by exam title…"
+                                   class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30 transition">
+                        </div>
+                        <select id="e-type-filter" class="px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30">
+                            <option value="all">All Types</option>
+                            <option value="quiz">CAT / Quiz</option>
+                            <option value="midterm">Midterm</option>
+                            <option value="final">Final Exam</option>
+                            <option value="assignment">Assignment</option>
+                        </select>
+                        <select id="e-status-filter" class="px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="ended">Ended</option>
+                            <option value="draft">Draft</option>
+                        </select>
+                        <button onclick="loadExamsData()" class="px-5 py-2.5 bg-black text-white rounded-xl text-sm font-semibold hover:bg-black/80 transition">Refresh</button>
+                    </div>
+                </div>
+
+                <!-- Exams Table -->
+                <div class="ghost-card rounded-3xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-black/10 bg-black/[0.02]">
+                                    <th class="py-3.5 px-5 font-semibold text-xs uppercase tracking-wider text-black/40">Exam</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40">Course</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40 text-center">Type</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40 text-center">Status</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40 text-center">Submissions</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40 text-center">Flags</th>
+                                    <th class="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-black/40">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="exams-table-body">
+                                <tr><td colspan="7" class="py-10 text-center text-black/40">Loading exams…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Detail Modal -->
+            <div id="exam-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto" onclick="closeExamModal(event)">
+                <div class="bg-white rounded-[28px] shadow-2xl max-w-4xl w-full my-8" onclick="event.stopPropagation()" style="max-height:90vh;">
+                    <div class="bg-gradient-to-br from-black to-black/90 text-white px-8 py-6 rounded-t-[28px] flex items-start justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold" id="em-title">Exam Details</h3>
+                            <p class="text-white/60 text-sm mt-0.5" id="em-subtitle"></p>
+                        </div>
+                        <button onclick="document.getElementById('exam-modal').classList.add('hidden');document.body.style.overflow='auto'" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition ml-4 flex-shrink-0">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto rounded-b-[28px]" style="max-height:calc(90vh - 100px);">
+                        <div id="em-content" class="p-8"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ SYSTEM SECTION ═══════════════ -->
+            <div class="mt-10 hidden" id="system-section">
+                <!-- Server info cards -->
+                <div class="ghost-card rounded-3xl p-6 mb-6 slide-up">
+                    <div class="mb-6">
+                        <span class="text-xs uppercase tracking-[0.35em] text-black/40">Infrastructure</span>
+                        <h3 class="text-2xl font-bold tracking-tight mt-1">System Health</h3>
+                        <p class="text-sm text-black/50 mt-1">Live server stats, database record counts and storage overview</p>
+                    </div>
+
+                    <!-- Status banner -->
+                    <div id="sys-status-banner" class="flex items-center gap-3 bg-black text-white px-5 py-3.5 rounded-2xl mb-6">
+                        <span class="w-2.5 h-2.5 rounded-full bg-white animate-pulse flex-shrink-0"></span>
+                        <span class="text-sm font-semibold" id="sys-status-text">All systems operational</span>
+                        <span class="ml-auto text-xs text-white/50" id="sys-refresh-time"></span>
+                    </div>
+
+                    <!-- Server + Storage cards -->
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="callout rounded-2xl p-5">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-black/40 mb-2">Python</p>
+                            <p class="text-xl font-bold" id="sys-python">—</p>
+                        </div>
+                        <div class="callout rounded-2xl p-5">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-black/40 mb-2">Flask</p>
+                            <p class="text-xl font-bold" id="sys-flask">—</p>
+                        </div>
+                        <div class="callout rounded-2xl p-5">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-black/40 mb-2">Platform</p>
+                            <p class="text-xl font-bold truncate" id="sys-platform">—</p>
+                        </div>
+                        <div class="callout rounded-2xl p-5">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-black/40 mb-2">Server Time</p>
+                            <p class="text-xl font-bold" id="sys-time">—</p>
+                        </div>
+                    </div>
+
+                    <!-- Storage row -->
+                    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Total Storage</p>
+                            <p class="text-2xl font-bold mt-1 text-white" id="sys-storage-total">—</p>
+                            <p class="text-xs text-white/40 mt-1">MB used</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Uploads</p>
+                            <p class="text-2xl font-bold mt-1 text-white" id="sys-storage-uploads">—</p>
+                            <p class="text-xs text-white/40 mt-1">MB</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Screenshots</p>
+                            <p class="text-2xl font-bold mt-1 text-white" id="sys-storage-screenshots">—</p>
+                            <p class="text-xs text-white/40 mt-1">MB</p>
+                        </div>
+                        <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Recordings</p>
+                            <p class="text-2xl font-bold mt-1 text-white" id="sys-storage-recordings">—</p>
+                            <p class="text-xs text-white/40 mt-1">MB</p>
+                        </div>
+                    </div>
+
+                    <!-- Platform health row -->
+                    <div class="grid sm:grid-cols-3 gap-4">
+                        <div class="callout rounded-2xl p-4 flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-black flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-black/40 font-semibold uppercase tracking-wider">Active Exams</p>
+                                <p class="text-2xl font-bold text-black" id="sys-active-exams">0</p>
+                            </div>
+                        </div>
+                        <div class="callout rounded-2xl p-4 flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-black flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-black/40 font-semibold uppercase tracking-wider">Flagged Submissions</p>
+                                <p class="text-2xl font-bold text-black" id="sys-flagged">0</p>
+                            </div>
+                        </div>
+                        <div class="callout rounded-2xl p-4 flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-black/80 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-black/40 font-semibold uppercase tracking-wider">Unverified Students</p>
+                                <p class="text-2xl font-bold text-black" id="sys-unverified">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database table counts -->
+                <div class="ghost-card rounded-3xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h4 class="text-lg font-bold">Database Record Counts</h4>
+                            <p class="text-sm text-black/50 mt-0.5">Row counts across all tables</p>
+                        </div>
+                        <button onclick="loadSystemData()" class="px-4 py-2 bg-black text-white rounded-xl text-sm font-semibold hover:bg-black/80 transition">
+                            Refresh
+                        </button>
+                    </div>
+                    <div id="sys-table-counts" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <!-- rendered by JS -->
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-black/10 flex items-center justify-between">
+                        <span class="text-sm text-black/50">Total records across all tables</span>
+                        <span class="text-lg font-bold" id="sys-total-records">0</span>
+                    </div>
+                </div>
+            </div>
+
         </section>
     </main>
 
@@ -548,9 +897,7 @@
         const perPage = 20;
 
         function showUsersSection() {
-            document.getElementById('dashboard-overview').classList.add('hidden');
-            document.getElementById('overview-section').classList.add('hidden');
-            document.getElementById('face-verification-section').classList.add('hidden');
+            hideAllSections();
             document.getElementById('users-section').classList.remove('hidden');
             loadUsersData();
         }
@@ -596,47 +943,44 @@
             } catch (error) {
                 console.error('Error loading users:', error);
                 document.getElementById('users-table').innerHTML = `
-                    <tr><td colspan="6" class="py-8 text-center text-red-500">Failed to load users</td></tr>
+                    <tr><td colspan="6" class="py-8 text-center text-black/40">Failed to load users</td></tr>
                 `;
             }
         }
 
         function renderUsersTable() {
             const tbody = document.getElementById('users-table');
-            
+
             if (allUsers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-black/50">No users found</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-black/40">No users found</td></tr>`;
                 return;
             }
-            
+
             tbody.innerHTML = allUsers.map(user => {
-                const roleBadge = {
-                    'student': '<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Student</span>',
-                    'lecturer': '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Lecturer</span>',
-                    'admin': '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Admin</span>'
-                }[user.role] || '<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Unknown</span>';
-                
+                const roleBadge = user.role === 'admin'
+                    ? `<span class="px-2.5 py-0.5 bg-black text-white rounded-full text-xs font-semibold capitalize">${user.role}</span>`
+                    : `<span class="px-2.5 py-0.5 border border-black/15 text-black/60 rounded-full text-xs font-semibold capitalize">${user.role}</span>`;
+
                 const statusBadge = user.is_active
-                    ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Active</span>'
-                    : '<span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">Inactive</span>';
-                
-                const joinedDate = user.created_at ? new Date(user.created_at).toLocaleDateString() : '-';
-                
+                    ? `<span class="px-2.5 py-0.5 bg-black text-white rounded-full text-xs font-semibold">Active</span>`
+                    : `<span class="px-2.5 py-0.5 border border-black/15 text-black/40 rounded-full text-xs font-semibold">Inactive</span>`;
+
+                const joinedDate = user.created_at ? new Date(user.created_at).toLocaleDateString() : '—';
+
                 return `
-                    <tr class="border-b border-black/5 hover:bg-black/5">
-                        <td class="py-3 px-4">
-                            <div class="font-medium">${user.first_name} ${user.last_name}</div>
-                            <div class="text-sm text-black/50">${user.email}</div>
+                    <tr class="border-b border-black/5 hover:bg-black/[0.02] transition">
+                        <td class="py-3.5 px-4">
+                            <div class="font-semibold">${user.first_name} ${user.last_name}</div>
+                            <div class="text-xs text-black/40 mt-0.5">${user.email}</div>
                         </td>
-                        <td class="py-3 px-4">${roleBadge}</td>
-                        <td class="py-3 px-4 text-sm">${user.department || '-'}</td>
-                        <td class="py-3 px-4">${statusBadge}</td>
-                        <td class="py-3 px-4 text-sm">${joinedDate}</td>
-                        <td class="py-3 px-4">
-                            <button onclick="viewUserDetails(${user.id})" class="text-blue-600 hover:text-blue-800 text-sm">View</button>
+                        <td class="py-3.5 px-4">${roleBadge}</td>
+                        <td class="py-3.5 px-4 text-sm text-black/60">${user.department || '—'}</td>
+                        <td class="py-3.5 px-4">${statusBadge}</td>
+                        <td class="py-3.5 px-4 text-sm text-black/50">${joinedDate}</td>
+                        <td class="py-3.5 px-4">
+                            <button onclick="viewUserDetails(${user.id})" class="text-sm font-semibold text-black hover:underline underline-offset-2">View</button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             }).join('');
         }
 
@@ -671,190 +1015,137 @@
         function viewUserDetails(userId) {
             const user = allUsers.find(u => u.id === userId);
             if (!user) return;
-            
+
             document.getElementById('user-modal-title').textContent = `${user.first_name} ${user.last_name}`;
-            document.getElementById('user-modal-subtitle').textContent = `${user.email} • ID: #${user.id}`;
-            
-            const faceImageHtml = user.face_registered 
-                ? `<div class="relative group">
-                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 text-center border-2 border-green-200 transition-all group-hover:shadow-lg">
-                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-xl">
-                            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="mt-4">
-                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full text-sm font-semibold shadow-lg">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                                Face Registered
-                            </div>
-                            <p class="text-sm text-green-700 mt-3 font-medium">Biometric authentication enabled</p>
-                        </div>
-                    </div>
-                    <button onclick="deleteFaceData(${user.id})" class="mt-4 w-full px-4 py-3 bg-red-50 text-red-700 rounded-2xl text-sm font-semibold hover:bg-red-100 transition-all border border-red-200 flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                        Delete Face Data
-                    </button>
+            document.getElementById('user-modal-subtitle').textContent = `${user.email} · ID #${user.id}`;
+
+            const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase();
+
+            const faceRow = user.face_registered
+                ? `<div class="info-row">
+                       <span class="text-sm text-black/50 font-medium">Face Auth</span>
+                       <div class="flex items-center gap-2">
+                           <span class="w-2 h-2 rounded-full bg-black inline-block flex-shrink-0"></span>
+                           <span class="text-sm font-semibold">Registered</span>
+                           <button onclick="deleteFaceData(${user.id})" class="ml-1 text-xs text-black/30 hover:text-black underline underline-offset-2 transition">Reset</button>
+                       </div>
                    </div>`
-                : `<div class="relative group">
-                    <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-3xl p-8 text-center border-2 border-yellow-200 transition-all group-hover:shadow-lg">
-                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center shadow-xl">
-                            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                            </svg>
-                        </div>
-                        <div class="mt-4">
-                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-full text-sm font-semibold shadow-lg">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                                Not Registered
-                            </div>
-                            <p class="text-sm text-yellow-700 mt-3 font-medium">User needs to register face for exams</p>
-                        </div>
-                    </div>
+                : `<div class="info-row">
+                       <span class="text-sm text-black/50 font-medium">Face Auth</span>
+                       <div class="flex items-center gap-2">
+                           <span class="w-2 h-2 rounded-full border-2 border-black/25 inline-block flex-shrink-0"></span>
+                           <span class="text-sm font-medium text-black/35">Not Registered</span>
+                       </div>
                    </div>`;
-            
-            const roleColors = {
-                'student': 'bg-blue-100 text-blue-700 border-blue-200',
-                'lecturer': 'bg-green-100 text-green-700 border-green-200',
-                'admin': 'bg-purple-100 text-purple-700 border-purple-200'
-            };
-            
-            const statusColor = user.is_active ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200';
-            
+
             document.getElementById('user-modal-content').innerHTML = `
-                <div class="grid lg:grid-cols-5 gap-6">
-                    <!-- Left Column: Face & Quick Info -->
+                <div class="grid lg:grid-cols-5 gap-7">
+                    <!-- Left: Profile card -->
                     <div class="lg:col-span-2 space-y-4">
-                        ${faceImageHtml}
-                        
-                        <div class="bg-gradient-to-br from-black/5 to-black/10 rounded-3xl p-6 border border-black/10">
-                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Quick Info
-                            </h4>
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
-                                    <span class="text-sm text-black/60 font-medium">Role</span>
-                                    <span class="px-3 py-1 ${roleColors[user.role]} rounded-full text-xs font-bold uppercase tracking-wider border">${user.role}</span>
-                                </div>
-                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
-                                    <span class="text-sm text-black/60 font-medium">Status</span>
-                                    <span class="px-3 py-1 ${statusColor} rounded-full text-xs font-bold uppercase tracking-wider border">${user.is_active ? 'Active' : 'Inactive'}</span>
-                                </div>
-                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
-                                    <span class="text-sm text-black/60 font-medium">Phone</span>
-                                    <span class="text-sm font-semibold">${user.phone_number || 'Not provided'}</span>
-                                </div>
-                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
-                                    <span class="text-sm text-black/60 font-medium">Joined</span>
-                                    <span class="text-sm font-semibold">${user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}</span>
-                                </div>
-                                ${user.role === 'student' && user.enrollment_count !== undefined ? `
-                                <div class="flex items-center justify-between p-3 bg-white rounded-xl">
-                                    <span class="text-sm text-black/60 font-medium">Enrollments</span>
-                                    <span class="text-sm font-bold text-blue-600">${user.enrollment_count} courses</span>
-                                </div>
-                                ` : ''}
+                        <!-- Avatar + name -->
+                        <div class="rounded-2xl border border-black/8 bg-black/[0.015] px-6 py-7 text-center">
+                            <div class="w-16 h-16 mx-auto rounded-2xl bg-black text-white flex items-center justify-center text-xl font-bold tracking-tight shadow-md">
+                                ${initials}
+                            </div>
+                            <p class="mt-4 font-bold text-lg tracking-tight">${user.first_name} ${user.last_name}</p>
+                            <p class="text-xs text-black/40 mt-0.5 break-all">${user.email}</p>
+                            <div class="flex items-center justify-center gap-2 mt-3">
+                                ${user.role === 'admin'
+                                    ? `<span class="px-3 py-1 bg-black text-white rounded-full text-xs font-bold capitalize">${user.role}</span>`
+                                    : `<span class="px-3 py-1 border border-black/15 text-black/55 rounded-full text-xs font-bold capitalize">${user.role}</span>`}
+                                ${user.is_active
+                                    ? `<span class="px-3 py-1 bg-black text-white rounded-full text-xs font-bold">Active</span>`
+                                    : `<span class="px-3 py-1 border border-black/15 text-black/35 rounded-full text-xs font-bold">Inactive</span>`}
                             </div>
                         </div>
-                        
-                        ${user.bio ? `
-                        <div class="bg-white rounded-3xl p-6 border border-black/10">
-                            <h4 class="font-bold text-sm uppercase tracking-wider text-black/50 mb-3">Bio</h4>
-                            <p class="text-sm text-black/80 leading-relaxed">${user.bio}</p>
+
+                        <!-- Info rows -->
+                        <div class="rounded-2xl border border-black/8 overflow-hidden">
+                            ${faceRow}
+                            <div class="info-row">
+                                <span class="text-sm text-black/50 font-medium">Phone</span>
+                                <span class="text-sm font-semibold">${user.phone_number || '—'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-sm text-black/50 font-medium">Department</span>
+                                <span class="text-sm font-semibold">${user.department || '—'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-sm text-black/50 font-medium">Joined</span>
+                                <span class="text-sm font-semibold">${user.created_at ? new Date(user.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</span>
+                            </div>
+                            ${user.role === 'student' && user.enrollment_count !== undefined ? `
+                            <div class="info-row">
+                                <span class="text-sm text-black/50 font-medium">Enrollments</span>
+                                <span class="text-sm font-bold">${user.enrollment_count} courses</span>
+                            </div>` : ''}
+                            ${user.bio ? `
+                            <div class="px-4 py-4">
+                                <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-black/30 mb-2">Bio</p>
+                                <p class="text-sm text-black/65 leading-relaxed">${user.bio}</p>
+                            </div>` : ''}
                         </div>
-                        ` : ''}
                     </div>
-                    
-                    <!-- Right Column: Edit Form -->
-                    <div class="lg:col-span-3 space-y-4">
-                        <div class="bg-white rounded-3xl p-6 border border-black/10 shadow-lg">
-                            <h4 class="font-bold text-lg mb-6 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                                Edit User Details
-                            </h4>
+
+                    <!-- Right: Edit form -->
+                    <div class="lg:col-span-3 flex flex-col gap-4">
+                        <div class="rounded-2xl border border-black/8 p-6 flex-1">
+                            <h4 class="font-bold text-sm uppercase tracking-[0.25em] text-black/40 mb-5">Edit Details</h4>
                             <form id="edit-user-form" class="space-y-4">
                                 <div class="grid sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">First Name *</label>
+                                        <label class="text-[10px] font-bold text-black/35 uppercase tracking-[0.25em] mb-1.5 block">First Name</label>
                                         <input type="text" id="edit-first-name" value="${user.first_name}" required
-                                               class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
+                                               class="w-full px-4 py-3 rounded-xl border border-black/10 bg-black/[0.02] text-sm font-semibold focus:outline-none focus:border-black/25 focus:bg-white transition">
                                     </div>
                                     <div>
-                                        <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">Last Name *</label>
+                                        <label class="text-[10px] font-bold text-black/35 uppercase tracking-[0.25em] mb-1.5 block">Last Name</label>
                                         <input type="text" id="edit-last-name" value="${user.last_name}" required
-                                               class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
+                                               class="w-full px-4 py-3 rounded-xl border border-black/10 bg-black/[0.02] text-sm font-semibold focus:outline-none focus:border-black/25 focus:bg-white transition">
                                     </div>
                                 </div>
-                                
                                 <div class="grid sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">Role *</label>
-                                        <select id="edit-role" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
-                                            <option value="student" ${user.role === 'student' ? 'selected' : ''}>👨‍🎓 Student</option>
-                                            <option value="lecturer" ${user.role === 'lecturer' ? 'selected' : ''}>👨‍🏫 Lecturer</option>
-                                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Admin</option>
+                                        <label class="text-[10px] font-bold text-black/35 uppercase tracking-[0.25em] mb-1.5 block">Role</label>
+                                        <select id="edit-role" class="w-full px-4 py-3 rounded-xl border border-black/10 bg-black/[0.02] text-sm font-semibold focus:outline-none focus:border-black/25 focus:bg-white transition">
+                                            <option value="student"  ${user.role==='student'  ? 'selected':''}>Student</option>
+                                            <option value="lecturer" ${user.role==='lecturer' ? 'selected':''}>Lecturer</option>
+                                            <option value="admin"    ${user.role==='admin'    ? 'selected':''}>Admin</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">Status *</label>
-                                        <select id="edit-status" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
-                                            <option value="true" ${user.is_active ? 'selected' : ''}>✅ Active</option>
-                                            <option value="false" ${!user.is_active ? 'selected' : ''}>❌ Inactive</option>
+                                        <label class="text-[10px] font-bold text-black/35 uppercase tracking-[0.25em] mb-1.5 block">Status</label>
+                                        <select id="edit-status" class="w-full px-4 py-3 rounded-xl border border-black/10 bg-black/[0.02] text-sm font-semibold focus:outline-none focus:border-black/25 focus:bg-white transition">
+                                            <option value="true"  ${user.is_active  ? 'selected':''}>Active</option>
+                                            <option value="false" ${!user.is_active ? 'selected':''}>Inactive</option>
                                         </select>
                                     </div>
                                 </div>
-                                
                                 <div>
-                                    <label class="text-xs font-bold text-black/60 uppercase tracking-wider mb-2 block">Department</label>
-                                    <input type="text" id="edit-department" value="${user.department || ''}" placeholder="e.g., Computer Science"
-                                           class="w-full px-4 py-3 rounded-xl border-2 border-black/10 bg-white text-sm font-medium focus:outline-none focus:border-black/30 transition-all">
+                                    <label class="text-[10px] font-bold text-black/35 uppercase tracking-[0.25em] mb-1.5 block">Department</label>
+                                    <input type="text" id="edit-department" value="${user.department || ''}" placeholder="e.g. Computer Science"
+                                           class="w-full px-4 py-3 rounded-xl border border-black/10 bg-black/[0.02] text-sm font-semibold focus:outline-none focus:border-black/25 focus:bg-white transition">
                                 </div>
-                                
-                                <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 flex gap-3">
-                                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <div class="text-xs text-blue-800">
-                                        <p class="font-bold mb-1">Important Note</p>
-                                        <p>Changes to user role and status will take effect immediately. Make sure to verify before saving.</p>
-                                    </div>
-                                </div>
+                                <p class="text-xs text-black/30 pt-1">Role and status changes take effect immediately.</p>
                             </form>
                         </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="flex items-center justify-between gap-4">
-                            <button onclick="confirmDeleteUser(${user.id})" class="flex-1 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl text-sm font-bold hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                                Delete User
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-3">
+                            <button onclick="confirmDeleteUser(${user.id})"
+                                class="px-5 py-3 border border-black/12 text-black/40 rounded-xl text-sm font-semibold hover:border-black/30 hover:text-black/70 transition">
+                                Delete
                             </button>
-                            <button onclick="closeUserModal()" class="flex-1 px-6 py-4 bg-black/5 text-black rounded-2xl text-sm font-bold hover:bg-black/10 transition-all">
+                            <button onclick="closeUserModal()" class="flex-1 px-5 py-3 bg-black/5 text-black/70 rounded-xl text-sm font-semibold hover:bg-black/8 transition">
                                 Cancel
                             </button>
-                            <button onclick="saveUserChanges(${user.id})" class="flex-1 px-6 py-4 bg-gradient-to-r from-black to-black/90 text-white rounded-2xl text-sm font-bold hover:from-black/90 hover:to-black transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
+                            <button onclick="saveUserChanges(${user.id})" class="flex-1 px-5 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-black/85 transition shadow-lg">
                                 Save Changes
                             </button>
                         </div>
                     </div>
-                </div>
-            `;
-            
+                </div>`;
+
             document.getElementById('user-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -995,19 +1286,24 @@
         let fvStudents = [];
         let selectedStudentId = null;
 
+        function hideAllSections() {
+            ['dashboard-overview','overview-section','users-section','face-verification-section',
+             'courses-section','exams-section','system-section'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
         function showFaceVerificationSection() {
-            document.getElementById('dashboard-overview').classList.add('hidden');
-            document.getElementById('overview-section').classList.add('hidden');
-            document.getElementById('users-section').classList.add('hidden');
+            hideAllSections();
             document.getElementById('face-verification-section').classList.remove('hidden');
             loadFaceVerificationData();
         }
 
         function showOverviewSection() {
+            hideAllSections();
             document.getElementById('dashboard-overview').classList.remove('hidden');
             document.getElementById('overview-section').classList.remove('hidden');
-            document.getElementById('face-verification-section').classList.add('hidden');
-            document.getElementById('users-section').classList.add('hidden');
         }
 
         async function loadFaceVerificationData() {
@@ -1040,7 +1336,7 @@
             } catch (error) {
                 console.error('Error loading face verification data:', error);
                 document.getElementById('fv-students-table').innerHTML = `
-                    <tr><td colspan="5" class="py-8 text-center text-red-500">Failed to load data</td></tr>
+                    <tr><td colspan="5" class="py-8 text-center text-black/40">Failed to load data</td></tr>
                 `;
             }
         }
@@ -1054,13 +1350,13 @@
             }
             
             tbody.innerHTML = fvStudents.map(student => {
-                const statusBadge = student.face_status === 'registered' 
-                    ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Registered</span>'
-                    : '<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">Not Registered</span>';
-                
+                const statusBadge = student.face_status === 'registered'
+                    ? '<span class="px-2.5 py-0.5 bg-black text-white rounded-full text-xs font-semibold">Registered</span>'
+                    : '<span class="px-2.5 py-0.5 border border-black/15 text-black/40 rounded-full text-xs font-semibold">Not Registered</span>';
+
                 const actions = student.face_status === 'registered'
-                    ? `<button onclick="resetStudentFace(${student.id})" class="text-red-600 hover:text-red-800 text-sm">Reset</button>`
-                    : `<span class="text-black/30 text-sm">-</span>`;
+                    ? `<button onclick="resetStudentFace(${student.id})" class="text-sm font-medium text-black/50 hover:text-black hover:underline underline-offset-2 transition">Reset</button>`
+                    : `<span class="text-black/20 text-sm">—</span>`;
                 
                 return `
                     <tr class="border-b border-black/5 hover:bg-black/5">
@@ -1072,7 +1368,7 @@
                         <td class="py-3 px-4">${statusBadge}</td>
                         <td class="py-3 px-4 text-sm">${student.verified_exams}/${student.total_exams} verified</td>
                         <td class="py-3 px-4">
-                            <button onclick="viewStudentLogs(${student.id})" class="text-blue-600 hover:text-blue-800 text-sm mr-3">Logs</button>
+                            <button onclick="viewStudentLogs(${student.id})" class="text-sm font-medium text-black/50 hover:text-black hover:underline underline-offset-2 transition mr-3">Logs</button>
                             ${actions}
                         </td>
                     </tr>
@@ -1103,7 +1399,7 @@
                     document.getElementById('fv-modal-content').innerHTML = `
                         <div class="space-y-3 max-h-96 overflow-y-auto">
                             ${data.logs.map(log => {
-                                const statusColor = log.status === 'success' ? 'text-green-600' : 'text-red-600';
+                                const statusColor = log.status === 'success' ? 'text-black font-semibold' : 'text-black/40';
                                 const date = new Date(log.created_at).toLocaleString();
                                 return `
                                     <div class="p-3 bg-black/5 rounded-xl">
@@ -1113,7 +1409,7 @@
                                         </div>
                                         <div class="text-sm text-black/50 mt-1">${date}</div>
                                         ${log.confidence_score ? `<div class="text-sm text-black/60 mt-1">Confidence: ${(log.confidence_score * 100).toFixed(1)}%</div>` : ''}
-                                        ${log.failure_reason ? `<div class="text-sm text-red-600 mt-1">${log.failure_reason}</div>` : ''}
+                                        ${log.failure_reason ? `<div class="text-sm text-black/50 mt-1">${log.failure_reason}</div>` : ''}
                                     </div>
                                 `;
                             }).join('')}
@@ -1185,12 +1481,445 @@
             };
         }
 
-        // Initialize page based on active section
+        // ═══════════════ COURSES SECTION ═══════════════
+        let allCourses = [];
+
+        function showCoursesSection() {
+            hideAllSections();
+            document.getElementById('courses-section').classList.remove('hidden');
+            loadCoursesData();
+        }
+
+        async function loadCoursesData() {
+            const search = document.getElementById('c-search').value;
+            const status = document.getElementById('c-status-filter').value;
+            try {
+                const params = new URLSearchParams({ status });
+                if (search) params.append('search', search);
+                const res = await fetch(`/api/admin/courses?${params}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                allCourses = data.courses;
+
+                const published = allCourses.filter(c => c.is_published).length;
+                const draft = allCourses.length - published;
+                const enrollments = allCourses.reduce((s, c) => s + (c.enrollment_count || 0), 0);
+                document.getElementById('c-total').textContent = data.total;
+                document.getElementById('c-published').textContent = published;
+                document.getElementById('c-draft').textContent = draft;
+                document.getElementById('c-enrollments').textContent = enrollments;
+
+                renderCoursesTable();
+            } catch (e) {
+                document.getElementById('courses-table-body').innerHTML =
+                    `<tr><td colspan="7" class="py-10 text-center text-black/40">Failed to load courses</td></tr>`;
+            }
+        }
+
+        function renderCoursesTable() {
+            const tbody = document.getElementById('courses-table-body');
+            if (!allCourses.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-black/40">No courses found</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = allCourses.map(c => {
+                const statusBadge = c.is_published
+                    ? '<span class="px-2.5 py-0.5 bg-black text-white rounded-full text-xs font-semibold">Published</span>'
+                    : '<span class="px-2.5 py-0.5 border border-black/15 text-black/40 rounded-full text-xs font-semibold">Draft</span>';
+                const date = c.created_at ? new Date(c.created_at).toLocaleDateString() : '-';
+                return `
+                    <tr class="border-b border-black/5 hover:bg-black/[0.02] transition">
+                        <td class="py-3.5 px-5">
+                            <div class="font-semibold">${c.title}</div>
+                            <div class="text-xs text-black/40 mt-0.5">${c.code || ''} ${c.category ? '· ' + c.category : ''}</div>
+                        </td>
+                        <td class="py-3.5 px-4 text-sm text-black/70">${c.lecturer_name}</td>
+                        <td class="py-3.5 px-4 text-center font-semibold">${c.enrollment_count ?? 0}</td>
+                        <td class="py-3.5 px-4 text-center font-semibold">${c.exam_count ?? 0}</td>
+                        <td class="py-3.5 px-4 text-center">${statusBadge}</td>
+                        <td class="py-3.5 px-4 text-sm text-black/50">${date}</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <button onclick="openCourseModal(${c.id})" class="text-sm font-medium text-black hover:underline">View</button>
+                                <button onclick="toggleCoursePublish(${c.id}, ${!c.is_published})"
+                                    class="text-xs px-2.5 py-1 rounded-lg border border-black/15 text-black/55 hover:bg-black/5 transition">
+                                    ${c.is_published ? 'Unpublish' : 'Publish'}
+                                </button>
+                                <button onclick="confirmDeleteCourse(${c.id})" class="text-xs px-2.5 py-1 rounded-lg border border-black/12 text-black/35 hover:border-black/25 hover:text-black/60 transition">Delete</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        async function openCourseModal(courseId) {
+            document.getElementById('cm-title').textContent = 'Loading…';
+            document.getElementById('cm-subtitle').textContent = '';
+            document.getElementById('cm-content').innerHTML = '<p class="text-center text-black/40 py-10">Loading…</p>';
+            document.getElementById('course-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const res = await fetch(`/api/admin/courses/${courseId}/detail`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed');
+                const c = await res.json();
+                document.getElementById('cm-title').textContent = c.title;
+                document.getElementById('cm-subtitle').textContent = `${c.code || ''} · ${c.lecturer_name}`;
+                document.getElementById('cm-content').innerHTML = `
+                    <div class="grid sm:grid-cols-3 gap-4 mb-6">
+                        <div class="callout rounded-2xl p-4 text-center">
+                            <p class="text-xs text-black/40 uppercase tracking-wider mb-1">Enrolled</p>
+                            <p class="text-3xl font-bold">${c.enrollment_count}</p>
+                        </div>
+                        <div class="callout rounded-2xl p-4 text-center">
+                            <p class="text-xs text-black/40 uppercase tracking-wider mb-1">Exams</p>
+                            <p class="text-3xl font-bold">${c.exam_count}</p>
+                        </div>
+                        <div class="callout rounded-2xl p-4 text-center">
+                            <p class="text-xs text-black/40 uppercase tracking-wider mb-1">Status</p>
+                            <p class="text-xl font-bold mt-1">${c.is_published ? '✅ Published' : '📝 Draft'}</p>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <p class="text-xs uppercase tracking-[0.3em] text-black/40 mb-1">Lecturer</p>
+                        <p class="font-semibold">${c.lecturer_name} <span class="text-black/40 text-sm font-normal">&lt;${c.lecturer_email}&gt;</span></p>
+                    </div>
+                    ${c.description ? `<div class="mb-6"><p class="text-xs uppercase tracking-[0.3em] text-black/40 mb-1">Description</p><p class="text-sm text-black/70">${c.description}</p></div>` : ''}
+                    <div class="mb-4">
+                        <p class="text-xs uppercase tracking-[0.3em] text-black/40 mb-3">Enrolled Students (${c.enrolled_students.length})</p>
+                        ${c.enrolled_students.length === 0 ? '<p class="text-sm text-black/40">No students enrolled</p>' : `
+                        <div class="overflow-x-auto rounded-2xl border border-black/10">
+                            <table class="w-full text-sm text-left">
+                                <thead><tr class="bg-black/[0.02] border-b border-black/10">
+                                    <th class="py-2.5 px-4 text-xs text-black/40 font-semibold uppercase tracking-wider">Name</th>
+                                    <th class="py-2.5 px-4 text-xs text-black/40 font-semibold uppercase tracking-wider">Email</th>
+                                    <th class="py-2.5 px-4 text-xs text-black/40 font-semibold uppercase tracking-wider">Progress</th>
+                                    <th class="py-2.5 px-4 text-xs text-black/40 font-semibold uppercase tracking-wider">Status</th>
+                                </tr></thead>
+                                <tbody>
+                                    ${c.enrolled_students.map(s => `
+                                        <tr class="border-b border-black/5 hover:bg-black/[0.02]">
+                                            <td class="py-2.5 px-4 font-medium">${s.name}</td>
+                                            <td class="py-2.5 px-4 text-black/50">${s.email}</td>
+                                            <td class="py-2.5 px-4">${s.progress ?? 0}%</td>
+                                            <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${s.status === 'active' ? 'bg-black text-white' : 'border border-black/12 text-black/35'}">${s.status || '—'}</span></td>
+                                        </tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>`}
+                    </div>
+                    ${c.exams && c.exams.length ? `
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-black/40 mb-3">Exams (${c.exams.length})</p>
+                        <div class="space-y-2">
+                            ${c.exams.map(e => `
+                                <div class="flex items-center justify-between p-3 rounded-xl border border-black/10 bg-white">
+                                    <span class="font-medium text-sm">${e.title}</span>
+                                    <span class="text-xs text-black/40">${e.exam_type || 'exam'}</span>
+                                </div>`).join('')}
+                        </div>
+                    </div>` : ''}
+                `;
+            } catch (e) {
+                document.getElementById('cm-content').innerHTML = '<p class="text-center text-black/40 py-10">Failed to load course details</p>';
+            }
+        }
+
+        function closeCourseModal(event) {
+            if (!event || event.target === document.getElementById('course-modal')) {
+                document.getElementById('course-modal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        async function toggleCoursePublish(courseId, publish) {
+            try {
+                const res = await fetch(`/api/admin/courses/${courseId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ is_published: publish })
+                });
+                if (!res.ok) throw new Error('Failed');
+                loadCoursesData();
+            } catch (e) { alert('Failed to update course'); }
+        }
+
+        async function confirmDeleteCourse(courseId) {
+            const course = allCourses.find(c => c.id === courseId);
+            if (!confirm(`Delete "${course?.title}"?\n\nThis cannot be undone.`)) return;
+            try {
+                const res = await fetch(`/api/admin/courses/${courseId}`, {
+                    method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed');
+                loadCoursesData();
+            } catch (e) { alert('Failed to delete course'); }
+        }
+
+        document.getElementById('c-search')?.addEventListener('input', debounce(() => loadCoursesData(), 300));
+        document.getElementById('c-status-filter')?.addEventListener('change', () => loadCoursesData());
+
+        // ═══════════════ EXAMS SECTION ═══════════════
+        let allExams = [];
+
+        function showExamsSection() {
+            hideAllSections();
+            document.getElementById('exams-section').classList.remove('hidden');
+            loadExamsData();
+        }
+
+        async function loadExamsData() {
+            const search = document.getElementById('e-search').value.toLowerCase();
+            const typeFilter = document.getElementById('e-type-filter').value;
+            const statusFilter = document.getElementById('e-status-filter').value;
+            try {
+                const params = new URLSearchParams();
+                if (search) params.append('search', search);
+                const res = await fetch(`/api/admin/exams?${params}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                allExams = data.exams;
+
+                // Client-side filter by type & status
+                let filtered = allExams;
+                if (typeFilter !== 'all') filtered = filtered.filter(e => (e.exam_type || '') === typeFilter);
+                if (statusFilter !== 'all') filtered = filtered.filter(e => e.exam_status === statusFilter);
+
+                document.getElementById('e-total').textContent = filtered.length;
+                document.getElementById('e-active').textContent = filtered.filter(e => e.exam_status === 'active').length;
+                document.getElementById('e-upcoming').textContent = filtered.filter(e => e.exam_status === 'upcoming').length;
+                document.getElementById('e-ended').textContent = filtered.filter(e => e.exam_status === 'ended').length;
+                document.getElementById('e-flagged').textContent = filtered.reduce((s, e) => s + (e.flagged_count || 0), 0);
+
+                renderExamsTable(filtered);
+            } catch (e) {
+                document.getElementById('exams-table-body').innerHTML =
+                    `<tr><td colspan="7" class="py-10 text-center text-black/40">Failed to load exams</td></tr>`;
+            }
+        }
+
+        function renderExamsTable(exams) {
+            const tbody = document.getElementById('exams-table-body');
+            if (!exams.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-black/40">No exams found</td></tr>`;
+                return;
+            }
+            const statusBadgeMap = {
+                active:   'bg-black text-white',
+                upcoming: 'border border-black/20 text-black/60',
+                ended:    'bg-black/6 text-black/35',
+                draft:    'border border-black/10 text-black/30'
+            };
+            tbody.innerHTML = exams.map(e => {
+                const sb = statusBadgeMap[e.exam_status] || 'bg-gray-100 text-gray-600';
+                const typeBadge = e.exam_type
+                    ? `<span class="px-2 py-0.5 rounded-full text-xs bg-black/[0.06] text-black/60 font-medium capitalize">${e.exam_type}</span>`
+                    : '-';
+                const flagsHtml = e.flagged_count > 0
+                    ? `<span class="px-2 py-0.5 bg-black text-white rounded-full text-xs font-semibold">${e.flagged_count}</span>`
+                    : `<span class="text-black/25">0</span>`;
+                return `
+                    <tr class="border-b border-black/5 hover:bg-black/[0.02] transition">
+                        <td class="py-3.5 px-5">
+                            <div class="font-semibold">${e.title}</div>
+                            <div class="text-xs text-black/40 mt-0.5">${e.lecturer_name}</div>
+                        </td>
+                        <td class="py-3.5 px-4 text-sm text-black/70">
+                            <div>${e.course_title}</div>
+                            <div class="text-xs text-black/40">${e.course_code || ''}</div>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">${typeBadge}</td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${sb} capitalize">${e.exam_status}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center font-semibold">${e.submission_count ?? 0}</td>
+                        <td class="py-3.5 px-4 text-center">${flagsHtml}</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <button onclick="openExamModal(${e.id})" class="text-sm font-medium text-black hover:underline">View</button>
+                                <button onclick="confirmDeleteExam(${e.id})" class="text-xs px-2.5 py-1 rounded-lg border border-black/12 text-black/35 hover:border-black/25 hover:text-black/60 transition">Delete</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        async function openExamModal(examId) {
+            document.getElementById('em-title').textContent = 'Loading…';
+            document.getElementById('em-subtitle').textContent = '';
+            document.getElementById('em-content').innerHTML = '<p class="text-center text-black/40 py-10">Loading…</p>';
+            document.getElementById('exam-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const res = await fetch(`/api/admin/exams/${examId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed');
+                const e = await res.json();
+                document.getElementById('em-title').textContent = e.title;
+                document.getElementById('em-subtitle').textContent = `${e.course_title} · ${e.lecturer_name}`;
+
+                const statusColors = { active: 'text-black font-bold', upcoming: 'text-black/60', ended: 'text-black/35', draft: 'text-black/40' };
+                const startStr = e.start_time ? new Date(e.start_time).toLocaleString() : 'Not set';
+                const endStr   = e.end_time   ? new Date(e.end_time).toLocaleString()   : 'Not set';
+
+                document.getElementById('em-content').innerHTML = `
+                    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+                        <div class="callout rounded-2xl p-4 text-center">
+                            <p class="text-xs text-black/40 uppercase tracking-wider mb-1">Status</p>
+                            <p class="text-lg font-bold capitalize ${statusColors[e.exam_status] || ''}">${e.exam_status}</p>
+                        </div>
+                        <div class="callout rounded-2xl p-4 text-center">
+                            <p class="text-xs text-black/40 uppercase tracking-wider mb-1">Submissions</p>
+                            <p class="text-3xl font-bold">${e.submission_count}</p>
+                        </div>
+                        <div class="callout rounded-2xl p-4 text-center">
+                            <p class="text-xs text-black/40 uppercase tracking-wider mb-1">Flagged</p>
+                            <p class="text-3xl font-bold">${e.flagged_count}</p>
+                        </div>
+                        <div class="callout rounded-2xl p-4 text-center">
+                            <p class="text-xs text-black/40 uppercase tracking-wider mb-1">Avg Score</p>
+                            <p class="text-3xl font-bold">${e.avg_score ?? '—'}</p>
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4 mb-6 text-sm">
+                        <div class="p-4 bg-black/[0.03] rounded-2xl">
+                            <p class="text-black/40 text-xs mb-1 uppercase tracking-wider">Start Time</p>
+                            <p class="font-semibold">${startStr}</p>
+                        </div>
+                        <div class="p-4 bg-black/[0.03] rounded-2xl">
+                            <p class="text-black/40 text-xs mb-1 uppercase tracking-wider">End Time</p>
+                            <p class="font-semibold">${endStr}</p>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <p class="text-xs uppercase tracking-[0.3em] text-black/40 mb-3">Submissions (${e.submissions.length})</p>
+                        ${e.submissions.length === 0 ? '<p class="text-sm text-black/40">No submissions yet</p>' : `
+                        <div class="overflow-x-auto rounded-2xl border border-black/10">
+                            <table class="w-full text-sm text-left">
+                                <thead><tr class="bg-black/[0.02] border-b border-black/10">
+                                    <th class="py-2.5 px-4 text-xs text-black/40 font-semibold uppercase tracking-wider">Student</th>
+                                    <th class="py-2.5 px-4 text-xs text-black/40 font-semibold uppercase tracking-wider">Score</th>
+                                    <th class="py-2.5 px-4 text-xs text-black/40 font-semibold uppercase tracking-wider">Violations</th>
+                                    <th class="py-2.5 px-4 text-xs text-black/40 font-semibold uppercase tracking-wider">Flagged</th>
+                                </tr></thead>
+                                <tbody>
+                                    ${e.submissions.map(s => `
+                                        <tr class="border-b border-black/5 hover:bg-black/[0.02]">
+                                            <td class="py-2.5 px-4">
+                                                <div class="font-medium">${s.student_name}</div>
+                                                <div class="text-xs text-black/40">${s.student_email}</div>
+                                            </td>
+                                            <td class="py-2.5 px-4 font-semibold">${s.total_score ?? '—'}</td>
+                                            <td class="py-2.5 px-4">${s.violation_count}</td>
+                                            <td class="py-2.5 px-4">${s.is_flagged ? '<span class="px-2 py-0.5 bg-black text-white rounded-full text-xs font-semibold">Yes</span>' : '<span class="text-black/25 text-xs">No</span>'}</td>
+                                        </tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>`}
+                    </div>
+                `;
+            } catch (err) {
+                document.getElementById('em-content').innerHTML = '<p class="text-center text-black/40 py-10">Failed to load exam details</p>';
+            }
+        }
+
+        function closeExamModal(event) {
+            if (!event || event.target === document.getElementById('exam-modal')) {
+                document.getElementById('exam-modal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        async function confirmDeleteExam(examId) {
+            const exam = allExams.find(e => e.id === examId);
+            if (!confirm(`Delete "${exam?.title}"?\n\nAll submissions and violations will be deleted too.`)) return;
+            try {
+                const res = await fetch(`/api/admin/exams/${examId}`, {
+                    method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed');
+                loadExamsData();
+            } catch (e) { alert('Failed to delete exam'); }
+        }
+
+        document.getElementById('e-search')?.addEventListener('input', debounce(() => loadExamsData(), 300));
+        document.getElementById('e-type-filter')?.addEventListener('change', () => loadExamsData());
+        document.getElementById('e-status-filter')?.addEventListener('change', () => loadExamsData());
+
+        // ═══════════════ SYSTEM SECTION ═══════════════
+        function showSystemSection() {
+            hideAllSections();
+            document.getElementById('system-section').classList.remove('hidden');
+            loadSystemData();
+        }
+
+        async function loadSystemData() {
+            try {
+                const res = await fetch('/api/admin/system', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed');
+                const d = await res.json();
+
+                document.getElementById('sys-python').textContent    = d.python_version;
+                document.getElementById('sys-flask').textContent     = d.flask_version;
+                document.getElementById('sys-platform').textContent  = d.platform;
+                document.getElementById('sys-time').textContent      = new Date(d.server_time).toLocaleTimeString();
+                document.getElementById('sys-refresh-time').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+                document.getElementById('sys-storage-total').textContent       = d.storage.total_mb + ' MB';
+                document.getElementById('sys-storage-uploads').textContent     = d.storage.uploads_mb;
+                document.getElementById('sys-storage-screenshots').textContent = d.storage.screenshots_mb;
+                document.getElementById('sys-storage-recordings').textContent  = d.storage.recordings_mb;
+
+                document.getElementById('sys-active-exams').textContent = d.platform_health.active_exams;
+                document.getElementById('sys-flagged').textContent       = d.platform_health.flagged_submissions;
+                document.getElementById('sys-unverified').textContent    = d.platform_health.unverified_students;
+                document.getElementById('sys-total-records').textContent = d.total_records;
+
+                const banner = document.getElementById('sys-status-banner');
+                const statusText = document.getElementById('sys-status-text');
+                if (d.status === 'healthy') {
+                    banner.className = 'flex items-center gap-3 bg-black text-white px-5 py-3.5 rounded-2xl mb-6';
+                    statusText.textContent = 'All systems operational';
+                } else {
+                    banner.className = 'flex items-center gap-3 bg-black/80 text-white px-5 py-3.5 rounded-2xl mb-6';
+                    statusText.textContent = 'System issue detected';
+                }
+
+                // Render table counts
+                const countsEl = document.getElementById('sys-table-counts');
+                countsEl.innerHTML = Object.entries(d.table_counts).map(([table, count]) => `
+                    <div class="callout rounded-2xl p-4 text-center">
+                        <p class="text-[11px] uppercase tracking-[0.25em] text-black/40 mb-1">${table.replace('_', ' ')}</p>
+                        <p class="text-2xl font-bold">${count}</p>
+                    </div>`).join('');
+
+            } catch (err) {
+                document.getElementById('sys-status-text').textContent = 'Failed to load system data';
+            }
+        }
+
+        // ═══════════════ INITIALIZE ═══════════════
         const activePage = '{{ admin_active_page }}';
         if (activePage === 'users') {
             showUsersSection();
         } else if (activePage === 'face_verification') {
             showFaceVerificationSection();
+        } else if (activePage === 'courses') {
+            showCoursesSection();
+        } else if (activePage === 'exams') {
+            showExamsSection();
+        } else if (activePage === 'system') {
+            showSystemSection();
         } else {
             showOverviewSection();
         }

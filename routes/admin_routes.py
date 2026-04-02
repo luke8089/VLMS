@@ -276,6 +276,112 @@ def list_exams():
     return jsonify({'exams': result, 'total': len(result)})
 
 
+# ──────────────── EXAMS MANAGEMENT ────────────────
+
+@admin_bp.route('/api/admin/exams/<int:exam_id>', methods=['DELETE'])
+@jwt_required()
+@role_required('admin')
+def delete_exam(exam_id):
+    from database.models import Exam, db
+    exam = Exam.query.get_or_404(exam_id)
+    db.session.delete(exam)
+    db.session.commit()
+    return jsonify({'message': 'Exam deleted'})
+
+
+@admin_bp.route('/api/admin/exams/<int:exam_id>', methods=['GET'])
+@jwt_required()
+@role_required('admin')
+def get_exam_detail(exam_id):
+    from database.models import Exam, Course, User, Submission, Violation, Answer, Question, db
+    from sqlalchemy import func
+
+    exam = Exam.query.get_or_404(exam_id)
+    course = Course.query.get(exam.course_id)
+    lecturer = User.query.get(course.lecturer_id) if course else None
+
+    submissions = Submission.query.filter_by(exam_id=exam_id).all()
+    sub_list = []
+    for s in submissions:
+        student = User.query.get(s.student_id)
+        viol_count = Violation.query.filter_by(submission_id=s.id).count()
+        sub_list.append({
+            **s.to_dict(),
+            'student_name': f"{student.first_name} {student.last_name}" if student else 'Unknown',
+            'student_email': student.email if student else '',
+            'violation_count': viol_count,
+        })
+
+    question_count = Question.query.filter_by(exam_id=exam_id).count()
+    flagged_count = sum(1 for s in sub_list if s['is_flagged'])
+    avg_score = None
+    graded = [s['total_score'] for s in sub_list if s['total_score'] is not None]
+    if graded:
+        avg_score = round(sum(graded) / len(graded), 1)
+
+    now = datetime.utcnow()
+    if exam.start_time and exam.end_time:
+        if now < exam.start_time:
+            status = 'upcoming'
+        elif exam.start_time <= now <= exam.end_time:
+            status = 'active'
+        else:
+            status = 'ended'
+    else:
+        status = 'draft'
+
+    return jsonify({
+        **exam.to_dict(),
+        'course_title': course.title if course else 'Unknown',
+        'course_code': course.code if course else '',
+        'lecturer_name': f"{lecturer.first_name} {lecturer.last_name}" if lecturer else 'Unknown',
+        'question_count': question_count,
+        'submission_count': len(sub_list),
+        'flagged_count': flagged_count,
+        'avg_score': avg_score,
+        'exam_status': status,
+        'submissions': sub_list,
+    })
+
+
+# ──────────────── COURSES DETAIL ────────────────
+
+@admin_bp.route('/api/admin/courses/<int:course_id>/detail', methods=['GET'])
+@jwt_required()
+@role_required('admin')
+def get_course_detail(course_id):
+    from database.models import Course, User, Enrollment, Exam, db
+
+    course = Course.query.get_or_404(course_id)
+    lecturer = User.query.get(course.lecturer_id)
+    enrollments = Enrollment.query.filter_by(course_id=course_id).all()
+    exams = Exam.query.filter_by(course_id=course_id).all()
+
+    enrolled_students = []
+    for e in enrollments:
+        student = User.query.get(e.student_id)
+        if student:
+            enrolled_students.append({
+                'id': student.id,
+                'name': f"{student.first_name} {student.last_name}",
+                'email': student.email,
+                'department': student.department,
+                'enrolled_at': e.enrolled_at.isoformat() if e.enrolled_at else None,
+                'progress': e.progress,
+                'status': e.status,
+            })
+
+    return jsonify({
+        **course.to_dict(),
+        'lecturer_name': f"{lecturer.first_name} {lecturer.last_name}" if lecturer else 'Unknown',
+        'lecturer_email': lecturer.email if lecturer else '',
+        'enrollment_count': len(enrollments),
+        'exam_count': len(exams),
+        'enrolled_students': enrolled_students,
+        'exams': [e.to_dict() for e in exams],
+    })
+
+
 # ──────────────── SYSTEM HEALTH ────────────────
 
 @admin_bp.route('/api/admin/system', methods=['GET'])
@@ -284,23 +390,54 @@ def list_exams():
 def system_health():
     from database.models import (User, Course, Exam, Submission, Violation,
                                   Enrollment, Material, LearningProgress,
-                                  FaceVerificationLog, db)
+                                  FaceVerificationLog, LiveClass, db)
     import sys
     import platform
+    import os
+    import flask
+
+    def _folder_size_mb(path):
+        total = 0
+        try:
+            for dirpath, _, filenames in os.walk(path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    if os.path.exists(fp):
+                        total += os.path.getsize(fp)
+        except Exception:
+            pass
+        return round(total / (1024 * 1024), 2)
+
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    uploads_mb     = _folder_size_mb(os.path.join(base, 'uploads'))
+    screenshots_mb = _folder_size_mb(os.path.join(base, 'screenshots'))
+    recordings_mb  = _folder_size_mb(os.path.join(base, 'recordings'))
 
     table_counts = {
-        'users': User.query.count(),
-        'courses': Course.query.count(),
-        'exams': Exam.query.count(),
-        'submissions': Submission.query.count(),
-        'violations': Violation.query.count(),
-        'enrollments': Enrollment.query.count(),
-        'materials': Material.query.count(),
-        'learning_progress': LearningProgress.query.count(),
-        'face_logs': FaceVerificationLog.query.count(),
+        'users':            User.query.count(),
+        'courses':          Course.query.count(),
+        'exams':            Exam.query.count(),
+        'submissions':      Submission.query.count(),
+        'violations':       Violation.query.count(),
+        'enrollments':      Enrollment.query.count(),
+        'materials':        Material.query.count(),
+        'learning_progress':LearningProgress.query.count(),
+        'face_logs':        FaceVerificationLog.query.count(),
+        'live_classes':     LiveClass.query.count(),
     }
 
     total_records = sum(table_counts.values())
+
+    # Role breakdown
+    students  = User.query.filter_by(role='student').count()
+    lecturers = User.query.filter_by(role='lecturer').count()
+    admins    = User.query.filter_by(role='admin').count()
+
+    # Exam health
+    now = datetime.utcnow()
+    active_exams  = Exam.query.filter(Exam.is_published==True, Exam.start_time<=now, Exam.end_time>=now).count()
+    flagged_subs  = Submission.query.filter_by(is_flagged=True).count()
+    unverified    = User.query.filter_by(role='student', email_verified=False).count()
 
     return jsonify({
         'status': 'healthy',
@@ -308,8 +445,25 @@ def system_health():
         'table_counts': table_counts,
         'total_records': total_records,
         'python_version': sys.version.split(' ')[0],
-        'platform': platform.system(),
+        'flask_version': flask.__version__,
+        'platform': platform.system() + ' ' + platform.release(),
         'server_time': datetime.utcnow().isoformat(),
+        'storage': {
+            'uploads_mb': uploads_mb,
+            'screenshots_mb': screenshots_mb,
+            'recordings_mb': recordings_mb,
+            'total_mb': round(uploads_mb + screenshots_mb + recordings_mb, 2),
+        },
+        'user_breakdown': {
+            'students': students,
+            'lecturers': lecturers,
+            'admins': admins,
+        },
+        'platform_health': {
+            'active_exams': active_exams,
+            'flagged_submissions': flagged_subs,
+            'unverified_students': unverified,
+        },
     })
 
 
