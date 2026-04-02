@@ -332,6 +332,170 @@ def record_copy_attempt(submission_id):
     return jsonify({'risk_score': submission.risk_score, 'is_flagged': submission.is_flagged})
 
 
+# ──────────────── ENHANCED PROCTORING ENDPOINTS ────────────────
+
+def _save_screenshot(image_data, prefix, submission_id, app):
+    """Save a base64 image and return the filename, or None on failure."""
+    try:
+        screenshot_dir = app.config.get('SCREENSHOT_FOLDER', 'screenshots')
+        os.makedirs(screenshot_dir, exist_ok=True)
+        filename = f"{prefix}_{submission_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.png"
+        filepath = os.path.join(screenshot_dir, filename)
+        img_bytes = base64.b64decode(image_data.split(',')[-1])
+        with open(filepath, 'wb') as f:
+            f.write(img_bytes)
+        return filename
+    except Exception:
+        return None
+
+
+def _record_violation(submission, violation_type, severity, description, screenshot_filename=None):
+    """Create a Violation record and bump the submission risk score."""
+    violation = Violation(
+        submission_id=submission.id,
+        violation_type=violation_type,
+        severity=severity,
+        description=description,
+        screenshot_path=screenshot_filename,
+    )
+    db.session.add(violation)
+    submission.risk_score = (submission.risk_score or 0) + severity
+    exam = Exam.query.get(submission.exam_id)
+    if submission.risk_score >= (exam.risk_threshold or 100):
+        submission.is_flagged = True
+    return violation
+
+
+@exam_bp.route('/api/exam/<int:submission_id>/fullscreen-exit', methods=['POST'])
+@jwt_required()
+@role_required('student')
+def record_fullscreen_exit(submission_id):
+    """Record when a student exits fullscreen during the exam."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission or submission.student_id != identity['id']:
+        return jsonify({'error': 'Submission not found'}), 404
+    if submission.status != 'in_progress':
+        return jsonify({'error': 'Exam not in progress'}), 400
+
+    data = request.get_json(silent=True) or {}
+    image_data = data.get('image')
+    screenshot = _save_screenshot(image_data, 'fs', submission_id, current_app) if image_data else None
+
+    violation = _record_violation(
+        submission, 'fullscreen_exit', 15,
+        'Student exited fullscreen mode during exam',
+        screenshot,
+    )
+    db.session.commit()
+    return jsonify({'risk_score': submission.risk_score, 'is_flagged': submission.is_flagged,
+                    'violation_id': violation.id})
+
+
+@exam_bp.route('/api/exam/<int:submission_id>/noise-detected', methods=['POST'])
+@jwt_required()
+@role_required('student')
+def record_noise(submission_id):
+    """Record a noise / voice detection event during the exam."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission or submission.student_id != identity['id']:
+        return jsonify({'error': 'Submission not found'}), 404
+    if submission.status != 'in_progress':
+        return jsonify({'error': 'Exam not in progress'}), 400
+
+    data = request.get_json(silent=True) or {}
+    noise_level = data.get('noise_level', 0)
+
+    # No screenshot saved here — the client uploads an audio+video clip via
+    # POST /api/exam/violations/<violation_id>/clip immediately after this call.
+    violation = _record_violation(
+        submission, 'noise_detected', 10,
+        f'Noise/voice detected during exam (audio level: {noise_level})',
+    )
+    db.session.commit()
+    return jsonify({'risk_score': submission.risk_score, 'is_flagged': submission.is_flagged,
+                    'violation_id': violation.id})
+
+
+@exam_bp.route('/api/exam/<int:submission_id>/window-blur', methods=['POST'])
+@jwt_required()
+@role_required('student')
+def record_window_blur(submission_id):
+    """Record when the exam window loses focus (student switched away)."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission or submission.student_id != identity['id']:
+        return jsonify({'error': 'Submission not found'}), 404
+    if submission.status != 'in_progress':
+        return jsonify({'error': 'Exam not in progress'}), 400
+
+    data = request.get_json(silent=True) or {}
+    image_data = data.get('image')
+    blur_type = data.get('type', 'window_blur')
+    screenshot = _save_screenshot(image_data, 'blur', submission_id, current_app) if image_data else None
+
+    violation = _record_violation(
+        submission, 'window_blur', 10,
+        f'Exam window lost focus ({blur_type})',
+        screenshot,
+    )
+    db.session.commit()
+    return jsonify({'risk_score': submission.risk_score, 'is_flagged': submission.is_flagged,
+                    'violation_id': violation.id})
+
+
+@exam_bp.route('/api/exam/<int:submission_id>/keyboard-shortcut', methods=['POST'])
+@jwt_required()
+@role_required('student')
+def record_keyboard_shortcut(submission_id):
+    """Record a suspicious keyboard shortcut used during the exam."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission or submission.student_id != identity['id']:
+        return jsonify({'error': 'Submission not found'}), 404
+    if submission.status != 'in_progress':
+        return jsonify({'error': 'Exam not in progress'}), 400
+
+    data = request.get_json(silent=True) or {}
+    key = data.get('key', 'unknown')
+    combo = ' + '.join(filter(None, [
+        'Ctrl' if data.get('ctrl') else '',
+        'Alt' if data.get('alt') else '',
+        'Meta' if data.get('meta') else '',
+        key,
+    ]))
+
+    violation = _record_violation(
+        submission, 'keyboard_shortcut', 8,
+        f'Suspicious keyboard shortcut detected: {combo}',
+    )
+    db.session.commit()
+    return jsonify({'risk_score': submission.risk_score, 'is_flagged': submission.is_flagged,
+                    'violation_id': violation.id})
+
+
+@exam_bp.route('/api/exam/<int:submission_id>/periodic-screenshot', methods=['POST'])
+@jwt_required()
+@role_required('student')
+def save_periodic_screenshot(submission_id):
+    """Save a periodic proctoring screenshot (no violation, evidence only)."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission or submission.student_id != identity['id']:
+        return jsonify({'error': 'Submission not found'}), 404
+    if submission.status != 'in_progress':
+        return jsonify({'error': 'Exam not in progress'}), 400
+
+    data = request.get_json(silent=True) or {}
+    image_data = data.get('image')
+    if not image_data:
+        return jsonify({'error': 'No image provided'}), 400
+
+    filename = _save_screenshot(image_data, 'snap', submission_id, current_app)
+    return jsonify({'saved': bool(filename), 'filename': filename})
+
+
 # ──────────────── VIOLATION REPORTS ────────────────
 
 @exam_bp.route('/api/exam/<int:submission_id>/violations', methods=['GET'])

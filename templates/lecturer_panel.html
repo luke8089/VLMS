@@ -2630,25 +2630,30 @@ async function openViolations(submissionId, studentName) {
     const recommendation = generateAIRecommendation(violations.length, violations.map(v => v.violation_type));
 
     const labelMap = {
-        multiple_faces: 'Multiple Faces',
-        no_face: 'No Face Detected',
-        eye_gaze: 'Eye Gaze',
-        head_pose: 'Head Pose',
-        lip_movement: 'Lip Movement',
-        phone_detected: 'Phone Detected',
-        tab_switch: 'Tab Switch',
+        multiple_faces:    'Multiple Faces',
+        no_face:           'No Face Detected',
+        eye_gaze:          'Eye Gaze',
+        head_pose:         'Head Pose',
+        lip_movement:      'Lip Movement',
+        phone_detected:    'Phone Detected',
+        tab_switch:        'Tab Switch',
         background_person: 'Background Person',
-        other: 'Other'
+        other:             'Other',
+        fullscreen_exit:   'Fullscreen Exit',
+        noise_detected:    'Noise / Voice Detected',
+        window_blur:       'Window Left Focus',
+        keyboard_shortcut: 'Suspicious Shortcut',
     };
 
     contentEl.innerHTML = `
         <div class="space-y-4">
             ${recommendation ? `
-                <div class="border border-black/[0.06] rounded-xl p-4 bg-black/[0.02]">
-                    <div class="flex items-center gap-2 mb-2">
+                <div class="border border-black/[0.08] rounded-xl p-5 bg-black/[0.02]">
+                    <div class="flex items-center gap-2 mb-3">
                         <span class="text-sm font-semibold text-black">AI Recommendation</span>
+                        <span class="text-[10px] text-black/30 uppercase tracking-wide">Automated analysis</span>
                     </div>
-                    <div>${recommendation}</div>
+                    ${recommendation}
                 </div>
             ` : ''}
             ${violations.map(v => {
@@ -2670,7 +2675,7 @@ async function openViolations(submissionId, studentName) {
                             <div class="min-w-[140px]">
                                 ${video
                                     ? `<video src="${video}" controls class="w-full h-28 object-cover rounded-lg border border-black/[0.06]"></video>
-                                       <span class="text-[11px] text-black/40 mt-1 block">Recorded clip</span>`
+                                       <span class="text-[11px] text-black/40 mt-1 block">${v.violation_type === 'noise_detected' ? '🎙 Audio+video recording' : 'Recorded clip'}</span>`
                                     : screenshot
                                     ? `<a href="${screenshot}" target="_blank" rel="noopener" class="block">
                                             <img src="${screenshot}" alt="Violation screenshot" class="w-full h-24 object-cover rounded-lg border border-black/[0.06]" />
@@ -3304,33 +3309,208 @@ function updateSubmissionRow(submissionId, newScore, submissionData) {
 
 function generateAIRecommendation(violationsCount, violationTypes) {
     if (!violationTypes || violationTypes.length === 0) return '';
-    
-    const types = violationTypes.map(v => v.violation_type || v);
-    const hasEyeGaze = types.includes('Eye Gaze');
-    const hasMultipleFaces = types.includes('Multiple Faces');
-    const hasBackgroundPerson = types.includes('Background Person');
-    const hasTabSwitch = types.includes('Tab Switch');
-    
-    let recommendation = '';
-    
-    if (violationsCount >= 8) {
-        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-medium">Recommend: Cancel exam</span>';
-    } else if (violationsCount >= 5) {
-        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">Recommend: Repeat CAT</span>';
-    } else if (violationsCount >= 3) {
-        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium">Recommend: Manual review</span>';
+
+    // ── Count each type ───────────────────────────────────────────────────────
+    const counts = {};
+    violationTypes.forEach(t => { counts[t] = (counts[t] || 0) + 1; });
+
+    const n = (type) => counts[type] || 0;
+    const totalSeverity = violationsCount * 10; // approximate; real data has per-violation severity
+
+    const noFace          = n('no_face');
+    const multipleFaces   = n('multiple_faces');
+    const backgroundPerson= n('background_person');
+    const tabSwitch       = n('tab_switch');
+    const windowBlur      = n('window_blur');
+    const noiseDetected   = n('noise_detected');
+    const fullscreenExit  = n('fullscreen_exit');
+    const eyeGaze         = n('eye_gaze');
+    const headPose        = n('head_pose');
+    const lipMovement     = n('lip_movement');
+    const phoneDetected   = n('phone_detected');
+    const keyboardShortcut= n('keyboard_shortcut');
+
+    // ── Determine overall risk level ─────────────────────────────────────────
+    let riskLevel = 'low';      // low | medium | high | critical
+    const criticalFlags = [];
+    const warningFlags  = [];
+    const infoFlags     = [];
+
+    // Critical signals
+    if (noFace >= 4)
+        criticalFlags.push(`Face absent from camera in <strong>${noFace} consecutive checks</strong> — student may have left the seat or covered the camera.`);
+    else if (noFace >= 2)
+        warningFlags.push(`Face not detected in <strong>${noFace} checks</strong> — student may have moved away from the camera.`);
+
+    if (multipleFaces >= 1)
+        criticalFlags.push(`<strong>${multipleFaces} instance${multipleFaces>1?'s':''} of multiple faces</strong> detected — another person may be assisting the student.`);
+
+    if (backgroundPerson >= 1)
+        criticalFlags.push(`<strong>Background person detected</strong> in ${backgroundPerson} frame${backgroundPerson>1?'s':''} — possible unauthorised assistance.`);
+
+    if (phoneDetected >= 1)
+        criticalFlags.push(`<strong>Phone/device detected</strong> in ${phoneDetected} frame${phoneDetected>1?'s':''} — student may be using a mobile device to look up answers.`);
+
+    if (tabSwitch >= 2)
+        criticalFlags.push(`<strong>${tabSwitch} tab/window switches</strong> recorded — repeated switching strongly suggests external resource access.`);
+    else if (tabSwitch === 1)
+        warningFlags.push(`<strong>1 tab switch</strong> recorded — student briefly navigated away from the exam window.`);
+
+    if (keyboardShortcut >= 1)
+        warningFlags.push(`<strong>${keyboardShortcut} suspicious keyboard shortcut${keyboardShortcut>1?'s':''}</strong> detected (e.g. Alt+Tab, PrintScreen) — student may have attempted to screenshot or switch applications.`);
+
+    // Warning signals
+    if (noiseDetected >= 3)
+        warningFlags.push(`<strong>${noiseDetected} noise/voice events</strong> captured with audio recordings — student may be communicating with someone or reading answers aloud.`);
+    else if (noiseDetected >= 1)
+        infoFlags.push(`<strong>${noiseDetected} audio noise event${noiseDetected>1?'s':''}</strong> recorded — review the audio clips to determine if communication occurred.`);
+
+    if (fullscreenExit >= 2)
+        warningFlags.push(`Student exited fullscreen <strong>${fullscreenExit} times</strong> — repeated exits suggest deliberate attempts to access other applications.`);
+    else if (fullscreenExit === 1)
+        infoFlags.push(`<strong>1 fullscreen exit</strong> recorded — may be accidental, but a screenshot was captured.`);
+
+    if (windowBlur >= 2)
+        warningFlags.push(`Exam window lost focus <strong>${windowBlur} times</strong> — student repeatedly switched away from the exam.`);
+    else if (windowBlur === 1)
+        infoFlags.push(`<strong>1 window focus loss</strong> recorded (e.g. mouse moved outside browser).`);
+
+    if (eyeGaze >= 3)
+        warningFlags.push(`<strong>${eyeGaze} eye-gaze violations</strong> — student was frequently looking away from the screen, possibly at notes or a second screen.`);
+    else if (eyeGaze >= 1)
+        infoFlags.push(`<strong>${eyeGaze} eye-gaze flag${eyeGaze>1?'s':''}</strong> — student's gaze drifted off-screen.`);
+
+    if (headPose >= 2)
+        warningFlags.push(`<strong>${headPose} head-pose flags</strong> — unusual head positioning may indicate reading from off-screen material.`);
+
+    if (lipMovement >= 2)
+        infoFlags.push(`<strong>${lipMovement} lip-movement events</strong> — student may have been reading answers aloud or communicating.`);
+
+    // ── Compute risk level ───────────────────────────────────────────────────
+    if (criticalFlags.length >= 2 || (criticalFlags.length >= 1 && warningFlags.length >= 2)) {
+        riskLevel = 'critical';
+    } else if (criticalFlags.length >= 1 || warningFlags.length >= 3) {
+        riskLevel = 'high';
+    } else if (warningFlags.length >= 1 || infoFlags.length >= 3) {
+        riskLevel = 'medium';
+    } else {
+        riskLevel = 'low';
     }
-    
-    // Specific recommendations based on violation types
-    if (hasTabSwitch && violationsCount >= 2) {
-        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-medium">Recommend: Cancel (tab switching)</span>';
-    } else if (hasMultipleFaces || hasBackgroundPerson) {
-        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">Recommend: Repeat CAT</span>';
-    } else if (hasEyeGaze && violationsCount >= 4) {
-        recommendation = '<span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium">Recommend: Manual review</span>';
+
+    // ── Risk badge & verdict ─────────────────────────────────────────────────
+    const riskConfig = {
+        critical: { badge: 'bg-red-100 text-red-700',    label: 'Critical Risk',  verdict: 'Invalidate & investigate',   color: '#b91c1c' },
+        high:     { badge: 'bg-orange-100 text-orange-700', label: 'High Risk',   verdict: 'Schedule repeat under supervision', color: '#c2410c' },
+        medium:   { badge: 'bg-yellow-100 text-yellow-800', label: 'Medium Risk', verdict: 'Manual review required',      color: '#92400e' },
+        low:      { badge: 'bg-green-100 text-green-700',   label: 'Low Risk',    verdict: 'Accept with minor note',      color: '#166534' },
+    };
+    const cfg = riskConfig[riskLevel];
+
+    // ── Written summary ──────────────────────────────────────────────────────
+    const totalFlags = criticalFlags.length + warningFlags.length + infoFlags.length;
+    const uniqueTypes = Object.keys(counts).length;
+
+    let summaryText = '';
+    if (riskLevel === 'critical') {
+        summaryText = `This submission has <strong>multiple critical integrity indicators</strong>. The proctoring system recorded ${violationsCount} flag${violationsCount>1?'s':''} across ${uniqueTypes} distinct violation categories. The combination of signals below constitutes strong grounds for investigation before any grade is accepted.`;
+    } else if (riskLevel === 'high') {
+        summaryText = `This submission raises <strong>significant integrity concerns</strong>. ${violationsCount} violation${violationsCount>1?'s were':' was'} recorded during the session. At least one critical signal was detected; the evidence (clips and screenshots) should be reviewed before a final grade decision is made.`;
+    } else if (riskLevel === 'medium') {
+        summaryText = `This submission has <strong>some suspicious activity</strong> that warrants closer inspection. ${violationsCount} flag${violationsCount>1?'s':''} were captured during the exam. None individually constitute definitive proof of misconduct, but the pattern should be reviewed.`;
+    } else {
+        summaryText = `This submission shows <strong>minor anomalies</strong> that are likely accidental. ${violationsCount} flag${violationsCount>1?'s':''} were recorded, none of which individually indicate deliberate misconduct. A brief review of the evidence is recommended before releasing grades.`;
     }
-    
-    return recommendation;
+
+    // ── Build flag lists ─────────────────────────────────────────────────────
+    const renderFlags = (flags, dotColor) => flags.map(f =>
+        `<li class="flex items-start gap-2 text-xs text-black/65">
+            <span class="mt-1 flex-shrink-0 w-2 h-2 rounded-full ${dotColor}"></span>
+            <span>${f}</span>
+         </li>`
+    ).join('');
+
+    const evidenceLine = (noiseDetected > 0 || tabSwitch > 0 || fullscreenExit > 0)
+        ? `<p class="text-[11px] text-black/40 mt-3 border-t border-black/[0.06] pt-3">
+               📎 Evidence available:
+               ${noiseDetected > 0 ? `${noiseDetected} audio+video noise clip${noiseDetected>1?'s':''}` : ''}
+               ${tabSwitch > 0 ? ` · ${tabSwitch} tab-switch log${tabSwitch>1?'s':''}` : ''}
+               ${fullscreenExit > 0 ? ` · ${fullscreenExit} fullscreen-exit screenshot${fullscreenExit>1?'s':''}` : ''}
+               — playable in the violation cards below.
+           </p>`
+        : '';
+
+    // ── Suggested actions ────────────────────────────────────────────────────
+    const actionMap = {
+        critical: [
+            'Do <strong>not</strong> release grades until a full investigation is completed.',
+            'Listen to all audio recordings and watch video clips captured during the exam.',
+            'Cross-reference submission timestamps with violation timestamps.',
+            'Consider reporting to the Academic Integrity Committee if evidence is conclusive.',
+        ],
+        high: [
+            'Hold grades pending a manual review of all captured evidence.',
+            'Review the video/audio clips for the noise and face-absence violations.',
+            'Schedule a viva voce or supplementary assessment to confirm the student\'s understanding.',
+        ],
+        medium: [
+            'Review the violation clips and screenshots before awarding a final grade.',
+            'If evidence is inconclusive, consider a brief oral follow-up with the student.',
+            'Document your findings regardless of the final decision.',
+        ],
+        low: [
+            'A quick scan of the evidence is sufficient — no formal action likely needed.',
+            'Note the flags in the student\'s record for future reference.',
+        ],
+    };
+
+    const actions = actionMap[riskLevel].map(a =>
+        `<li class="flex items-start gap-2 text-xs text-black/65">
+            <span class="flex-shrink-0 text-black/30">→</span>
+            <span>${a}</span>
+         </li>`
+    ).join('');
+
+    return `
+        <div class="space-y-4">
+            <!-- Verdict header -->
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <span class="text-xs px-3 py-1.5 rounded-full font-semibold ${cfg.badge}">${cfg.label}</span>
+                <span class="text-xs font-medium text-black/50">Suggested action: <strong class="text-black/70">${cfg.verdict}</strong></span>
+            </div>
+
+            <!-- Summary -->
+            <p class="text-sm text-black/65 leading-relaxed">${summaryText}</p>
+
+            ${criticalFlags.length > 0 ? `
+            <!-- Critical signals -->
+            <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-red-600 mb-1.5">Critical signals</p>
+                <ul class="space-y-1.5">${renderFlags(criticalFlags, 'bg-red-500')}</ul>
+            </div>` : ''}
+
+            ${warningFlags.length > 0 ? `
+            <!-- Warning signals -->
+            <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-orange-600 mb-1.5">Warning signals</p>
+                <ul class="space-y-1.5">${renderFlags(warningFlags, 'bg-orange-400')}</ul>
+            </div>` : ''}
+
+            ${infoFlags.length > 0 ? `
+            <!-- Info signals -->
+            <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-black/35 mb-1.5">Minor / informational</p>
+                <ul class="space-y-1.5">${renderFlags(infoFlags, 'bg-black/20')}</ul>
+            </div>` : ''}
+
+            <!-- Suggested actions -->
+            <div class="bg-black/[0.025] rounded-lg p-3">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-black/40 mb-1.5">Suggested actions</p>
+                <ul class="space-y-1.5">${actions}</ul>
+            </div>
+
+            ${evidenceLine}
+        </div>
+    `;
 }
 
 function autoCalcEndTime() {

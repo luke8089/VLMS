@@ -21,87 +21,96 @@
         -webkit-backdrop-filter: blur(14px);
         backdrop-filter: blur(14px);
     }
-    .fade-up {
-        animation: fadeUp .45s cubic-bezier(.4,0,.2,1) both;
-    }
-    .slide-in {
-        animation: slideIn .5s cubic-bezier(.4,0,.2,1) both;
-    }
-    .question-card {
-        transition: transform .28s cubic-bezier(.4,0,.2,1), border-color .2s ease, box-shadow .28s ease;
-    }
-    .question-card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(255, 255, 255, 0.28);
-        box-shadow: 0 14px 30px rgba(2, 6, 23, 0.35);
-    }
-    .no-copy {
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
-    .option-row {
-        transition: all .22s ease;
-    }
-    .option-row:hover {
-        transform: translateX(4px);
-    }
-    .answer-nav {
-        transition: all .2s ease;
-    }
-    .answer-nav:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(2, 6, 23, 0.35);
-    }
-    .answer-nav.current {
-        border-color: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14);
-    }
-    .sticky-side {
-        position: sticky;
-        top: 5.5rem;
-    }
-    .anim-delay-80 {
-        animation-delay: 80ms;
-    }
+    .fade-up { animation: fadeUp .45s cubic-bezier(.4,0,.2,1) both; }
+    .slide-in { animation: slideIn .5s cubic-bezier(.4,0,.2,1) both; }
+    .question-card { transition: transform .28s cubic-bezier(.4,0,.2,1), border-color .2s ease, box-shadow .28s ease; }
+    .question-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.28); box-shadow: 0 14px 30px rgba(2,6,23,.35); }
+    .no-copy { -webkit-user-select:none; -ms-user-select:none; user-select:none; }
+    .option-row { transition: all .22s ease; }
+    .option-row:hover { transform: translateX(4px); }
+    .answer-nav { transition: all .2s ease; }
+    .answer-nav:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(2,6,23,.35); }
+    .answer-nav.current { border-color: rgba(255,255,255,.8); box-shadow: 0 0 0 3px rgba(255,255,255,.14); }
+    .sticky-side { position: sticky; top: 5.5rem; }
+    .anim-delay-80 { animation-delay: 80ms; }
     .risk-safe { color: #4ade80; }
-    .risk-mid { color: #facc15; }
+    .risk-mid  { color: #facc15; }
     .risk-high { color: #f87171; }
-    .modal-pop {
-        animation: modalPop .25s cubic-bezier(.4,0,.2,1) both;
+    .modal-pop   { animation: modalPop   .25s cubic-bezier(.4,0,.2,1) both; }
+    .modal-slide { animation: modalSlide .35s cubic-bezier(.4,0,.2,1) both; }
+    @keyframes fadeUp    { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideIn   { from{opacity:0;transform:translateX(-16px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes modalPop  { from{opacity:0;transform:translateY(10px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes modalSlide{ from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Fullscreen warning overlay */
+    #fs-warning-overlay {
+        position: fixed; inset: 0; z-index: 9999;
+        background: rgba(0,0,0,0.96);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 1.5rem;
     }
-    .modal-slide {
-        animation: modalSlide .35s cubic-bezier(.4,0,.2,1) both;
+    #fs-warning-overlay.hidden { display: none; }
+
+    /* Audio meter bar */
+    #audio-meter-bar {
+        transition: width 0.15s ease;
+        background: linear-gradient(90deg, #4ade80, #facc15, #f87171);
     }
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(12px); }
-        to { opacity: 1; transform: translateY(0); }
+
+    /* Proctoring status row */
+    .proctor-badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        font-size: 10px; padding: 2px 7px; border-radius: 9999px;
+        border: 1px solid rgba(255,255,255,.15);
     }
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(-16px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes modalPop {
-        from { opacity: 0; transform: translateY(10px) scale(.98); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    @keyframes modalSlide {
-        from { opacity: 0; transform: translateY(18px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    .proctor-badge.ok   { color:#4ade80; border-color:rgba(74,222,128,.35); }
+    .proctor-badge.warn { color:#f87171; border-color:rgba(248,113,113,.35); }
+    .dot-pulse { width:6px; height:6px; border-radius:9999px; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 </style>
 {% endblock %}
 
 {% block body %}
-<div id="exam-root" data-exam-id="{{ exam_id }}" data-submission-verified="{% if submission and submission.face_verified %}true{% else %}false{% endif %}" data-submission-id="{% if submission %}{{ submission.id }}{% endif %}" class="exam-bg min-h-screen text-white">
-    <!-- Exam Header -->
+<div id="exam-root"
+     data-exam-id="{{ exam_id }}"
+     data-submission-verified="{% if submission and submission.face_verified %}true{% else %}false{% endif %}"
+     data-submission-id="{% if submission %}{{ submission.id }}{% endif %}"
+     class="exam-bg min-h-screen text-white">
+
+    <!-- ─── Fullscreen Exit Warning Overlay ─── -->
+    <div id="fs-warning-overlay" class="hidden">
+        <div class="text-6xl">⚠️</div>
+        <h2 class="text-2xl font-bold text-red-400 text-center">You exited fullscreen!</h2>
+        <p class="text-slate-300 text-center max-w-sm">This has been recorded as a violation. Return to fullscreen immediately to continue your exam.</p>
+        <div class="text-slate-400 text-sm">Returning automatically in <span id="fs-countdown">10</span>s…</div>
+        <button onclick="reEnterFullscreen()"
+                class="bg-white text-black font-bold px-8 py-3 rounded-xl hover:bg-neutral-200 transition text-lg">
+            Return to Fullscreen
+        </button>
+    </div>
+
+    <!-- ─── Exam Header ─── -->
     <nav class="glass-nav sticky top-0 z-30 px-4 py-3">
-        <div class="max-w-6xl mx-auto flex justify-between items-center gap-3">
+        <div class="max-w-6xl mx-auto flex justify-between items-center gap-3 flex-wrap">
             <div class="flex items-center space-x-4">
                 <h1 class="text-lg font-bold text-white">MindStack Exam</h1>
                 <span id="exam-title" class="text-sm text-slate-300"></span>
             </div>
-            <div class="flex items-center space-x-3 sm:space-x-6">
+            <div class="flex items-center space-x-3 sm:space-x-4 flex-wrap gap-y-2">
+                <!-- Proctor status badges -->
+                <div class="flex items-center gap-2">
+                    <span id="badge-camera" class="proctor-badge warn">
+                        <span class="dot-pulse bg-slate-500"></span>Camera
+                    </span>
+                    <span id="badge-audio" class="proctor-badge warn">
+                        <span class="dot-pulse bg-slate-500"></span>Audio
+                    </span>
+                    <span id="badge-fs" class="proctor-badge warn">
+                        <span class="dot-pulse bg-slate-500"></span>Fullscreen
+                    </span>
+                </div>
                 <div class="text-center glass-card rounded-xl px-3 py-2">
                     <div class="text-[11px] uppercase tracking-wide text-slate-400">Time Left</div>
                     <div id="timer" class="text-lg font-mono font-bold text-yellow-400">--:--</div>
@@ -119,29 +128,43 @@
     </nav>
 
     <div class="max-w-6xl mx-auto py-6 px-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Questions Panel -->
+        <!-- ─── Questions Panel ─── -->
         <div class="lg:col-span-3 space-y-6" id="questions-panel">
-            <!-- Questions (exam content) -->
             <div id="questions-container" class="space-y-6">
                 <div class="glass-card rounded-2xl p-8 text-center">
                     <div class="inline-flex items-center gap-2 text-slate-300">
                         <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                        Loading exam...
+                        Loading exam…
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar: Camera & Question Nav -->
+        <!-- ─── Sidebar ─── -->
         <div class="space-y-4 sticky-side">
             <!-- Proctoring Camera -->
             <div class="glass-card rounded-2xl p-4 slide-in">
-                <div class="text-xs text-slate-300 mb-2 flex items-center space-x-1">
-                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                    <span>Camera Active</span>
+                <div class="text-xs text-slate-300 mb-2 flex items-center justify-between">
+                    <div class="flex items-center space-x-1">
+                        <span id="cam-dot" class="w-2 h-2 bg-slate-500 rounded-full"></span>
+                        <span id="cam-label">Camera initialising…</span>
+                    </div>
+                    <span id="snap-count" class="text-slate-500 text-[10px]">0 snapshots</span>
                 </div>
-                <video id="proctor-video" autoplay muted class="w-full rounded-xl bg-black aspect-video border border-slate-700"></video>
+                <video id="proctor-video" autoplay muted playsinline
+                       class="w-full rounded-xl bg-black aspect-video border border-slate-700"></video>
                 <canvas id="proctor-canvas" class="hidden"></canvas>
+
+                <!-- Audio meter -->
+                <div class="mt-2">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wide">Noise Level</span>
+                        <span id="noise-label" class="text-[10px] text-slate-500">—</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div id="audio-meter-bar" class="h-1.5 rounded-full" style="width:0%"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Question Navigator -->
@@ -152,44 +175,49 @@
 
             <!-- Violation Alert -->
             <div id="violation-alert" class="hidden bg-red-900/40 border border-red-500/60 rounded-2xl p-4 slide-in">
-                <div class="text-sm font-medium text-red-400">Warning</div>
+                <div class="text-sm font-medium text-red-400">⚠ Violation Detected</div>
                 <p id="violation-msg" class="text-xs text-red-300 mt-1"></p>
             </div>
         </div>
-    <div id="submit-confirm-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4">
-    <div class="max-w-md mx-auto mt-24 glass-card rounded-2xl p-5 modal-pop border border-white/20">
-        <h3 class="text-lg font-semibold text-white">Submit Exam?</h3>
-        <p class="text-sm text-slate-300 mt-2">Are you sure you want to submit? You cannot change answers after submission.</p>
-        <div class="mt-5 flex items-center justify-end gap-3">
-            <button onclick="closeSubmitModal()" class="px-4 py-2 rounded-lg border border-white/20 text-slate-200 hover:bg-white/10 transition">Cancel</button>
-            <button onclick="confirmSubmitExam()" class="px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition">Submit</button>
-        </div>
-    </div>
     </div>
 
-    <div id="submit-success-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4">
-    <div class="max-w-md mx-auto mt-24 glass-card rounded-2xl p-6 modal-slide border border-white/20">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold">OK</div>
-            <div>
-                <h3 class="text-lg font-semibold text-white">Exam Submitted</h3>
-                <p class="text-sm text-slate-300 mt-1">Your submission was received. Results will appear after release.</p>
+    <!-- ─── Submit Confirm Modal ─── -->
+    <div id="submit-confirm-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4">
+        <div class="max-w-md mx-auto mt-24 glass-card rounded-2xl p-5 modal-pop border border-white/20">
+            <h3 class="text-lg font-semibold text-white">Submit Exam?</h3>
+            <p class="text-sm text-slate-300 mt-2">Are you sure you want to submit? You cannot change answers after submission.</p>
+            <div class="mt-5 flex items-center justify-end gap-3">
+                <button onclick="closeSubmitModal()" class="px-4 py-2 rounded-lg border border-white/20 text-slate-200 hover:bg-white/10 transition">Cancel</button>
+                <button onclick="confirmSubmitExam()" class="px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition">Submit</button>
             </div>
         </div>
-        <div class="mt-5 flex justify-end">
-            <button onclick="closeSubmitSuccess()" class="px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition">Continue</button>
-        </div>
-    </div>
     </div>
 
-    <div id="exam-notice-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4">
-    <div class="max-w-md mx-auto mt-24 glass-card rounded-2xl p-6 modal-slide border border-white/20">
-        <h3 id="exam-notice-title" class="text-lg font-semibold text-white">Notice</h3>
-        <p id="exam-notice-message" class="text-sm text-slate-300 mt-2">Message</p>
-        <div class="mt-5 flex justify-end">
-            <button onclick="closeExamNotice()" class="px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition">OK</button>
+    <!-- ─── Submit Success Modal ─── -->
+    <div id="submit-success-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4">
+        <div class="max-w-md mx-auto mt-24 glass-card rounded-2xl p-6 modal-slide border border-white/20">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold">OK</div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white">Exam Submitted</h3>
+                    <p class="text-sm text-slate-300 mt-1">Your submission was received. Results will appear after release.</p>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end">
+                <button onclick="closeSubmitSuccess()" class="px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition">Continue</button>
+            </div>
         </div>
     </div>
+
+    <!-- ─── Exam Notice Modal ─── -->
+    <div id="exam-notice-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4">
+        <div class="max-w-md mx-auto mt-24 glass-card rounded-2xl p-6 modal-slide border border-white/20">
+            <h3 id="exam-notice-title" class="text-lg font-semibold text-white">Notice</h3>
+            <p id="exam-notice-message" class="text-sm text-slate-300 mt-2">Message</p>
+            <div class="mt-5 flex justify-end">
+                <button onclick="closeExamNotice()" class="px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition">OK</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -199,115 +227,506 @@
 const user = AUTH.getUser();
 if (!user || user.role !== 'student') { window.location.href = '/login'; }
 
-const examId = Number(document.getElementById('exam-root')?.dataset?.examId || 0);
-let submissionId = null;
-let questions = [];
+const examId   = Number(document.getElementById('exam-root')?.dataset?.examId || 0);
+let submissionId  = null;
+let questions     = [];
 let currentQuestionIndex = 0;
-let currentAnswerValue = null;
-let answersByQuestion = {};
-let timerInterval = null;
-let proctorInterval = null;
-let stream = null;
+let currentAnswerValue   = null;
+let answersByQuestion    = {};
+let timerInterval     = null;
+let proctorInterval   = null;
+let screenshotInterval = null;
+let stream            = null;
+let audioStream       = null;
+let audioContext      = null;
+let audioAnalyser     = null;
 let warnedFiveMinutes = false;
-let warnedTwoMinutes = false;
+let warnedTwoMinutes  = false;
 let examNoticeTimeout = null;
-let proctorRecordingEnabled = false;
+let proctorRecordingEnabled  = false;
 let violationRecordingInProgress = false;
+let snapCount = 0;
 
-// ─── Initialize Camera ───
+// ── debounce helpers ──────────────────────────────────────────────────────────
+let lastWindowBlur   = 0;
+let lastNoise        = 0;
+let lastFsExit       = 0;
+let fsCountdownTimer = null;
+let examSubmitted    = false;
+
+// ─── Camera Init ─────────────────────────────────────────────────────────────
 async function initCamera() {
     const root = document.getElementById('exam-root');
     const preloadedSubmissionId = root.dataset.submissionId;
+    if (!preloadedSubmissionId) { showExamNotice('No valid submission found.'); return; }
 
-    if (!preloadedSubmissionId) {
-        showExamNotice('No valid submission found.');
-        return;
-    }
-
-    // Try to start camera for proctoring, but don't block exam if unavailable
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const proctorVideo = document.getElementById('proctor-video');
-        proctorVideo.setAttribute('playsinline', '');
-        proctorVideo.srcObject = stream;
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        const vid = document.getElementById('proctor-video');
+        vid.setAttribute('playsinline', '');
+        vid.srcObject = stream;
+        setBadge('badge-camera', true);
+        setCamStatus(true);
     } catch (err) {
-        console.warn('Camera unavailable — proctoring disabled:', err);
-        // Disable proctoring silently; exam continues normally
-        proctorRecordingEnabled = false;
+        console.warn('Camera unavailable:', err);
+        setCamStatus(false);
     }
 
-    // Load exam regardless of camera access
+    // Separate audio stream so we don't mix audio into the video track
+    try {
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        startAudioMonitoring();
+        setBadge('badge-audio', true);
+    } catch (err) {
+        console.warn('Audio monitoring unavailable:', err);
+    }
+
     setTimeout(() => loadVerifiedExam(preloadedSubmissionId), 500);
 }
 
-// ─── Load Verified Exam (pre-verified submissions only) ───
+function setCamStatus(active) {
+    const dot   = document.getElementById('cam-dot');
+    const label = document.getElementById('cam-label');
+    if (active) {
+        dot.className   = 'w-2 h-2 bg-red-500 rounded-full animate-pulse';
+        label.textContent = 'Camera Active';
+    } else {
+        dot.className   = 'w-2 h-2 bg-slate-600 rounded-full';
+        label.textContent = 'Camera Unavailable';
+    }
+}
+
+function setBadge(id, active) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (active) {
+        el.className = 'proctor-badge ok';
+        el.querySelector('.dot-pulse').className = 'dot-pulse bg-green-500';
+    } else {
+        el.className = 'proctor-badge warn';
+        el.querySelector('.dot-pulse').className = 'dot-pulse bg-red-500';
+    }
+}
+
+// ─── Audio Noise Monitoring ───────────────────────────────────────────────────
+function startAudioMonitoring() {
+    if (!audioStream) return;
+    try {
+        audioContext  = new (window.AudioContext || window.webkitAudioContext)();
+        const source  = audioContext.createMediaStreamSource(audioStream);
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 256;
+        source.connect(audioAnalyser);
+        monitorAudio();
+    } catch (e) {
+        console.warn('AudioContext error:', e);
+    }
+}
+
+function monitorAudio() {
+    if (!audioAnalyser) return;
+    const data = new Uint8Array(audioAnalyser.frequencyBinCount);
+    const bar  = document.getElementById('audio-meter-bar');
+    const lbl  = document.getElementById('noise-label');
+
+    const tick = () => {
+        if (examSubmitted || !audioAnalyser) return;
+        audioAnalyser.getByteFrequencyData(data);
+        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+        const pct = Math.min(100, (avg / 255) * 100 * 3); // amplify for visual
+        if (bar) bar.style.width = pct + '%';
+
+        const now = Date.now();
+        // Threshold: avg > 25/255 ≈ meaningful noise, suppress for 20 s between reports
+        if (avg > 25 && now - lastNoise > 20000 && submissionId) {
+            lastNoise = now;
+            const noiseLevel = Math.round(avg);
+            if (lbl) lbl.textContent = `High (${noiseLevel})`;
+            // 1. Register the violation and get an ID, then upload an audio+video clip
+            AUTH.fetch(`/api/exam/${submissionId}/noise-detected`, {
+                method: 'POST',
+                body: JSON.stringify({ noise_level: noiseLevel }),
+            }).then(r => r.ok && r.json()).then(d => {
+                if (!d) return;
+                updateRisk(d);
+                if (d.violation_id) recordNoiseClip(d.violation_id);
+            });
+            showViolationAlert('Noise/voice detected. Please stay silent during the exam.');
+        } else {
+            if (lbl) lbl.textContent = avg > 10 ? 'Low' : 'Silent';
+        }
+        setTimeout(tick, 800);
+    };
+    tick();
+}
+
+// ─── Load Verified Exam ───────────────────────────────────────────────────────
 async function loadVerifiedExam(preloadedSubmissionId) {
     submissionId = preloadedSubmissionId;
-    
-    // Start exam to get questions and remaining time
+
     const startResp = await AUTH.fetch(`/api/student/exams/${examId}/start`, { method: 'POST' });
-    if (!startResp.ok) {
-        showExamNotice('Failed to load exam. Please try again.');
-        return;
-    }
-    
+    if (!startResp.ok) { showExamNotice('Failed to load exam. Please try again.'); return; }
+
     const startData = await startResp.json();
     questions = startData.questions;
     answersByQuestion = (startData.answers || []).reduce((acc, ans) => {
         acc[ans.question_id] = ans;
         return acc;
     }, {});
-    
-    // Show exam
-    document.getElementById('questions-container').classList.remove('hidden');
+
     document.getElementById('exam-title').textContent = startData.exam.title;
     proctorRecordingEnabled = Boolean(startData.exam?.is_proctored);
+
     renderQuestions();
     startTimer(startData.remaining_seconds ?? (startData.exam.duration_minutes * 60));
     startProctoring();
+    startPeriodicScreenshots();
     setupTabDetection();
     setupCopyProtection();
+    setupWindowBlurDetection();
+    setupKeyboardMonitoring();
+    setupBeforeUnload();
     setupFullscreenGuard();
     requestFullscreen();
 }
 
-// ─── Capture Video Frame ───
+// ─── Capture Frame ────────────────────────────────────────────────────────────
 function captureFrame() {
-    const video = document.getElementById('proctor-video');
+    const video  = document.getElementById('proctor-video');
     const canvas = document.getElementById('proctor-canvas');
-    canvas.width = video.videoWidth || 640;
+    canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
     canvas.getContext('2d').drawImage(video, 0, 0);
     return canvas.toDataURL('image/jpeg', 0.7);
 }
 
-// ─── Render Questions ───
+// ─── Fullscreen ───────────────────────────────────────────────────────────────
+function requestFullscreen() {
+    const el  = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req) {
+        req.call(el).then(() => {
+            setBadge('badge-fs', true);
+        }).catch(() => {
+            console.warn('Fullscreen denied — exam continues.');
+            setBadge('badge-fs', false);
+        });
+    }
+}
+
+function setupFullscreenGuard() {
+    const onChange = async () => {
+        const isFull = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        if (isFull) {
+            setBadge('badge-fs', true);
+            hideFullscreenOverlay();
+            return;
+        }
+        // Exited fullscreen
+        setBadge('badge-fs', false);
+        if (examSubmitted || !submissionId) return;
+
+        const now = Date.now();
+        if (now - lastFsExit < 8000) return; // debounce
+        lastFsExit = now;
+
+        const frame = captureFrame();
+        AUTH.fetch(`/api/exam/${submissionId}/fullscreen-exit`, {
+            method: 'POST',
+            body: JSON.stringify({ image: frame }),
+        }).then(r => r.ok && r.json()).then(d => d && updateRisk(d));
+
+        showFullscreenOverlay();
+        showViolationAlert('Fullscreen exit recorded as a violation!');
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+    document.addEventListener('msfullscreenchange', onChange);
+}
+
+let fsAutoReturnTimer = null;
+function showFullscreenOverlay() {
+    const overlay  = document.getElementById('fs-warning-overlay');
+    const countdown = document.getElementById('fs-countdown');
+    overlay.classList.remove('hidden');
+    let secs = 10;
+    if (countdown) countdown.textContent = secs;
+    clearInterval(fsAutoReturnTimer);
+    fsAutoReturnTimer = setInterval(() => {
+        secs--;
+        if (countdown) countdown.textContent = secs;
+        if (secs <= 0) {
+            clearInterval(fsAutoReturnTimer);
+            reEnterFullscreen();
+        }
+    }, 1000);
+}
+
+function hideFullscreenOverlay() {
+    clearInterval(fsAutoReturnTimer);
+    document.getElementById('fs-warning-overlay').classList.add('hidden');
+}
+
+function reEnterFullscreen() {
+    hideFullscreenOverlay();
+    requestFullscreen();
+}
+
+// ─── Window Blur Detection ────────────────────────────────────────────────────
+function setupWindowBlurDetection() {
+    window.addEventListener('blur', async () => {
+        if (examSubmitted || !submissionId) return;
+        const now = Date.now();
+        if (now - lastWindowBlur < 6000) return;
+        lastWindowBlur = now;
+        const frame = captureFrame();
+        AUTH.fetch(`/api/exam/${submissionId}/window-blur`, {
+            method: 'POST',
+            body: JSON.stringify({ image: frame, type: 'window_blur' }),
+        }).then(r => r.ok && r.json()).then(d => d && updateRisk(d));
+        showViolationAlert('You left the exam window — this has been recorded.');
+    });
+
+    // Mouse leaving the browser window
+    document.addEventListener('mouseleave', async () => {
+        if (examSubmitted || !submissionId) return;
+        const now = Date.now();
+        if (now - lastWindowBlur < 6000) return;
+        lastWindowBlur = now;
+        const frame = captureFrame();
+        AUTH.fetch(`/api/exam/${submissionId}/window-blur`, {
+            method: 'POST',
+            body: JSON.stringify({ image: frame, type: 'mouse_left_window' }),
+        }).then(r => r.ok && r.json()).then(d => d && updateRisk(d));
+    });
+}
+
+// ─── Keyboard Shortcut Monitoring ────────────────────────────────────────────
+function setupKeyboardMonitoring() {
+    document.addEventListener('keydown', async (e) => {
+        // Block Escape from exiting fullscreen
+        if (e.key === 'Escape') { e.preventDefault(); return; }
+
+        const suspicious =
+            (e.altKey && e.key === 'Tab')    ||
+            (e.key === 'Meta')               ||
+            (e.altKey && e.key === 'F4')     ||
+            (e.key === 'PrintScreen')        ||
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+            e.key === 'F12';
+
+        if (suspicious) {
+            e.preventDefault();
+            if (examSubmitted || !submissionId) return;
+            AUTH.fetch(`/api/exam/${submissionId}/keyboard-shortcut`, {
+                method: 'POST',
+                body: JSON.stringify({ key: e.key, alt: e.altKey, ctrl: e.ctrlKey, meta: e.metaKey }),
+            }).then(r => r.ok && r.json()).then(d => d && updateRisk(d));
+            showViolationAlert('Suspicious keyboard shortcut detected and blocked.');
+        }
+    });
+}
+
+// ─── Tab Switch Detection ─────────────────────────────────────────────────────
+function setupTabDetection() {
+    document.addEventListener('visibilitychange', async () => {
+        if (!document.hidden || examSubmitted || !submissionId) return;
+        const frame = captureFrame();
+        AUTH.fetch(`/api/exam/${submissionId}/tab-switch`, { method: 'POST' })
+            .then(r => r.ok && r.json()).then(d => d && updateRisk(d));
+        showViolationAlert('Tab/window switch detected and recorded.');
+    });
+}
+
+// ─── Before Unload ────────────────────────────────────────────────────────────
+function setupBeforeUnload() {
+    window.addEventListener('beforeunload', (e) => {
+        if (examSubmitted || !submissionId) return;
+        navigator.sendBeacon(`/api/exam/${submissionId}/window-blur`,
+            new Blob([JSON.stringify({ type: 'page_close_attempt' })], { type: 'application/json' }));
+        e.preventDefault();
+        e.returnValue = 'Leaving will be recorded as a violation. Are you sure?';
+        return e.returnValue;
+    });
+}
+
+// ─── Copy Protection ─────────────────────────────────────────────────────────
+function setupCopyProtection() {
+    const panel = document.getElementById('questions-panel');
+    if (!panel) return;
+    const editable = t => { const tag = t?.tagName?.toLowerCase(); return tag==='textarea'||tag==='input'||t?.isContentEditable; };
+    ['copy','cut','contextmenu'].forEach(evt => {
+        panel.addEventListener(evt, e => {
+            if (editable(e.target)) return;
+            e.preventDefault();
+            showViolationAlert('Copy and cut are disabled during the exam.');
+            if (submissionId) AUTH.fetch(`/api/exam/${submissionId}/copy-attempt`, { method: 'POST' });
+        });
+    });
+}
+
+// ─── Periodic Screenshots ─────────────────────────────────────────────────────
+function startPeriodicScreenshots() {
+    screenshotInterval = setInterval(async () => {
+        if (examSubmitted || !submissionId || !stream) return;
+        const frame = captureFrame();
+        const resp  = await AUTH.fetch(`/api/exam/${submissionId}/periodic-screenshot`, {
+            method: 'POST',
+            body: JSON.stringify({ image: frame }),
+        });
+        if (resp.ok) {
+            snapCount++;
+            const el = document.getElementById('snap-count');
+            if (el) el.textContent = `${snapCount} snapshot${snapCount !== 1 ? 's' : ''}`;
+        }
+    }, 30000); // every 30 s
+}
+
+// ─── Proctoring (frame analysis) ─────────────────────────────────────────────
+function startProctoring() {
+    proctorInterval = setInterval(async () => {
+        if (examSubmitted || !submissionId) return;
+        const frame = captureFrame();
+        const resp  = await AUTH.fetch(`/api/exam/${submissionId}/proctor-frame`, {
+            method: 'POST',
+            body: JSON.stringify({ image: frame }),
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        updateRisk(data);
+        if (data.violations && data.violations.length > 0) {
+            const labels = data.violations.map(v => v.type || v).filter(Boolean);
+            showViolationAlert(`Detected: ${labels.join(', ')}`);
+            const firstId = data.violations[0]?.id || null;
+            if (firstId) recordViolationClip(firstId);
+        }
+    }, 10000);
+}
+
+function updateRisk(data) {
+    if (data.risk_score === undefined) return;
+    const el = document.getElementById('risk-score');
+    if (!el) return;
+    el.textContent = data.risk_score;
+    if (data.risk_score > 80)      el.className = 'text-lg font-bold risk-high';
+    else if (data.risk_score > 40) el.className = 'text-lg font-bold risk-mid';
+    else                           el.className = 'text-lg font-bold risk-safe';
+    if (data.is_flagged) el.classList.add('animate-pulse');
+}
+
+// ─── Violation Alert ──────────────────────────────────────────────────────────
+function showViolationAlert(message) {
+    const alertDiv = document.getElementById('violation-alert');
+    const msgEl    = document.getElementById('violation-msg');
+    if (!alertDiv || !msgEl) return;
+    msgEl.textContent = message;
+    alertDiv.classList.remove('hidden');
+    setTimeout(() => alertDiv.classList.add('hidden'), 5000);
+}
+
+// ─── Noise Clip Recording (audio + video, 10 s) ───────────────────────────────
+let noiseRecordingInProgress = false;
+
+async function recordNoiseClip(violationId) {
+    if (noiseRecordingInProgress) return;
+    // Build a combined stream: video from camera + audio from mic
+    const tracks = [];
+    if (stream)      tracks.push(...stream.getVideoTracks());
+    if (audioStream) tracks.push(...audioStream.getAudioTracks());
+    if (tracks.length === 0) return;
+
+    noiseRecordingInProgress = true;
+    const combined = new MediaStream(tracks);
+    const chunks   = [];
+    let recorder;
+
+    const mimeOptions = [
+        'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=vp9,opus',
+        'video/webm',
+        '',
+    ];
+    for (const mime of mimeOptions) {
+        try {
+            recorder = mime
+                ? new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 350000 })
+                : new MediaRecorder(combined);
+            break;
+        } catch (_) {}
+    }
+    if (!recorder) { noiseRecordingInProgress = false; return; }
+
+    recorder.ondataavailable = e => { if (e.data?.size > 0) chunks.push(e.data); };
+    recorder.onstop = async () => {
+        noiseRecordingInProgress = false;
+        const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+        if (blob.size === 0) return;
+        const fd = new FormData();
+        fd.append('clip', blob, `noise_${violationId}.webm`);
+        fd.append('duration', '10');
+        await fetch(`/api/exam/violations/${violationId}/clip`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
+            body: fd,
+        }).catch(() => {});
+    };
+
+    recorder.start();
+    setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 10000);
+}
+
+// ─── Violation Clip Recording ─────────────────────────────────────────────────
+async function recordViolationClip(violationId) {
+    if (!proctorRecordingEnabled || !stream || violationRecordingInProgress) return;
+    violationRecordingInProgress = true;
+    const chunks = [];
+    let recorder;
+    try {
+        recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 350000 });
+    } catch (_) {
+        try { recorder = new MediaRecorder(stream); } catch (err) { violationRecordingInProgress = false; return; }
+    }
+    recorder.ondataavailable = e => { if (e.data?.size > 0) chunks.push(e.data); };
+    recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+        violationRecordingInProgress = false;
+        if (blob.size === 0) return;
+        const fd = new FormData();
+        fd.append('clip', blob, `violation_${violationId}.webm`);
+        fd.append('duration', '8');
+        await fetch(`/api/exam/violations/${violationId}/clip`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
+            body: fd,
+        }).catch(() => {});
+    };
+    recorder.start();
+    setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 8000);
+}
+
+// ─── Render Questions ─────────────────────────────────────────────────────────
 function renderQuestions() {
-    const container = document.getElementById('questions-container');
-    const nav = document.getElementById('question-nav');
     currentQuestionIndex = 0;
-    const firstUnanswered = findFirstUnansweredIndex();
-    if (firstUnanswered !== -1) currentQuestionIndex = firstUnanswered;
+    const first = findFirstUnansweredIndex();
+    if (first !== -1) currentQuestionIndex = first;
     renderCurrentQuestion();
-    nav.innerHTML = `<div class="text-sm text-slate-300">Question ${currentQuestionIndex + 1} of ${questions.length}</div>`;
 }
 
 function renderCurrentQuestion() {
     const container = document.getElementById('questions-container');
-    const nav = document.getElementById('question-nav');
+    const nav       = document.getElementById('question-nav');
     const q = questions[currentQuestionIndex];
     if (!q) {
         container.innerHTML = '<div class="glass-card rounded-2xl p-6 text-center">All questions completed. You can submit your exam now.</div>';
         nav.innerHTML = `<div class="text-sm text-slate-300">Completed</div>`;
         return;
     }
-
     const existing = answersByQuestion[q.id] || null;
     currentAnswerValue = null;
     container.innerHTML = `
         <div id="q-${q.id}" class="glass-card question-card rounded-2xl p-6 fade-up">
             <div class="flex justify-between items-start mb-4">
-                <span class="bg-white/10 border border-white/20 text-white text-xs font-medium px-2 py-1 rounded-lg">Q${currentQuestionIndex + 1}</span>
+                <span class="bg-white/10 border border-white/20 text-white text-xs font-medium px-2 py-1 rounded-lg">Q${currentQuestionIndex+1}</span>
                 <span class="text-xs text-slate-400">${q.marks} marks • ${q.difficulty}</span>
             </div>
             <p class="text-slate-100 mb-4 leading-relaxed no-copy">${q.question_text}</p>
@@ -319,39 +738,33 @@ function renderCurrentQuestion() {
             </div>
         </div>
     `;
-
     if (existing) {
-        if (q.question_type === 'mcq' && existing.selected_option !== null && existing.selected_option !== undefined) {
-            currentAnswerValue = existing.selected_option;
-        } else if (q.question_type !== 'mcq' && existing.answer_text) {
-            currentAnswerValue = existing.answer_text;
-        }
+        if (q.question_type === 'mcq' && existing.selected_option != null) currentAnswerValue = existing.selected_option;
+        else if (q.question_type !== 'mcq' && existing.answer_text)        currentAnswerValue = existing.answer_text;
     }
-    nav.innerHTML = `<div class="text-sm text-slate-300">Question ${currentQuestionIndex + 1} of ${questions.length}</div>`;
+    nav.innerHTML = `<div class="text-sm text-slate-300">Question ${currentQuestionIndex+1} of ${questions.length}</div>`;
 }
 
 function renderMCQ(q, existing) {
     const selected = existing ? existing.selected_option : null;
     return q.options.map((opt, i) => `
         <label class="option-row no-copy flex items-center space-x-3 p-3 rounded-xl bg-slate-800/35 hover:bg-slate-700/40 border border-slate-700/60 cursor-pointer mb-2">
-            <input type="radio" name="q_${q.id}" value="${i}" onchange="setCurrentAnswer('mcq', ${i})" ${selected === i ? 'checked' : ''}
-                   class="w-4 h-4 text-white">
+            <input type="radio" name="q_${q.id}" value="${i}" onchange="setCurrentAnswer('mcq',${i})" ${selected===i?'checked':''} class="w-4 h-4 text-white">
             <span class="text-slate-200">${opt}</span>
         </label>
     `).join('');
 }
 
 function renderTextAnswer(q, existing) {
-    const text = existing && existing.answer_text ? existing.answer_text : '';
-    return `<textarea oninput="setCurrentAnswer('${q.question_type}', this.value)"
-                      class="w-full bg-slate-900/60 text-slate-100 border border-slate-700 rounded-xl p-3 focus:ring-2 focus:ring-white/40 outline-none transition"
-                      rows="${q.question_type === 'essay' ? 8 : 3}"
-                      placeholder="Type your answer...">${text}</textarea>`;
+    const text = existing?.answer_text || '';
+    return `<textarea oninput="setCurrentAnswer('${q.question_type}',this.value)"
+                class="w-full bg-slate-900/60 text-slate-100 border border-slate-700 rounded-xl p-3 focus:ring-2 focus:ring-white/40 outline-none transition"
+                rows="${q.question_type==='essay'?8:3}"
+                placeholder="Type your answer…">${text}</textarea>`;
 }
 
 function setCurrentAnswer(type, value) {
-    if (type === 'mcq') currentAnswerValue = value;
-    else currentAnswerValue = (value || '').trim();
+    currentAnswerValue = type === 'mcq' ? value : (value||'').trim();
 }
 
 async function submitCurrentAnswer() {
@@ -361,321 +774,105 @@ async function submitCurrentAnswer() {
         showExamNotice('Please provide an answer before continuing.');
         return;
     }
-
     const ok = await saveAnswer(q.id, q.question_type, currentAnswerValue, true);
     if (!ok) return;
-
-    if (currentQuestionIndex >= questions.length - 1) {
-        submitExam(true);
-        return;
-    }
-
-    currentQuestionIndex += 1;
+    if (currentQuestionIndex >= questions.length - 1) { submitExam(true); return; }
+    currentQuestionIndex++;
     renderCurrentQuestion();
 }
 
-// ─── Save Answer ───
 async function saveAnswer(questionId, type, value, silent = false) {
     const body = { question_id: questionId };
     if (type === 'mcq') body.selected_option = value;
-    else body.answer_text = value;
-    if (type === 'mcq') {
-        answersByQuestion[questionId] = { question_id: questionId, selected_option: value, answer_text: null };
-    } else {
-        answersByQuestion[questionId] = { question_id: questionId, selected_option: null, answer_text: value };
-    }
-
+    else                body.answer_text = value;
+    answersByQuestion[questionId] = type === 'mcq'
+        ? { question_id: questionId, selected_option: value, answer_text: null }
+        : { question_id: questionId, selected_option: null,  answer_text: value };
     const resp = await AUTH.fetch(`/api/student/exams/${submissionId}/answer`, {
-        method: 'POST',
-        body: JSON.stringify(body),
+        method: 'POST', body: JSON.stringify(body),
     });
-
-    if (!resp.ok) {
-        if (!silent) showExamNotice('Failed to save answer. Please try again.');
-        return false;
-    }
-
+    if (!resp.ok) { if (!silent) showExamNotice('Failed to save answer. Please try again.'); return false; }
     return true;
 }
 
 function findFirstUnansweredIndex() {
-    for (let i = 0; i < questions.length; i += 1) {
-        const q = questions[i];
-        const ans = answersByQuestion[q.id];
+    for (let i = 0; i < questions.length; i++) {
+        const q = questions[i], ans = answersByQuestion[q.id];
         if (!ans) return i;
-        if (q.question_type === 'mcq') {
-            if (ans.selected_option === null || ans.selected_option === undefined) return i;
-        } else {
-            if (!ans.answer_text) return i;
-        }
+        if (q.question_type === 'mcq' && (ans.selected_option === null || ans.selected_option === undefined)) return i;
+        if (q.question_type !== 'mcq' && !ans.answer_text) return i;
     }
     return -1;
 }
 
-// ─── Timer ───
+// ─── Timer ───────────────────────────────────────────────────────────────────
 function startTimer(seconds) {
-    let remaining = seconds;
-    let prevRemaining = seconds;
-    warnedFiveMinutes = false;
-    warnedTwoMinutes = false;
-    const timerEl = document.getElementById('timer');
+    let remaining = seconds, prev = seconds;
+    warnedFiveMinutes = warnedTwoMinutes = false;
+    const el = document.getElementById('timer');
     timerInterval = setInterval(() => {
         remaining--;
-        const m = Math.floor(remaining / 60);
-        const s = remaining % 60;
-        timerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-
-        if (remaining <= 300) timerEl.classList.replace('text-yellow-400', 'text-red-400');
-        if (!warnedFiveMinutes && prevRemaining > 300 && remaining <= 300) {
-            warnedFiveMinutes = true;
-            showExamNotice('5 minutes remaining. Please wrap up your answers.');
-        }
-        if (!warnedTwoMinutes && prevRemaining > 120 && remaining <= 120 && remaining > 0) {
-            warnedTwoMinutes = true;
-            showExamNotice('2 minutes remaining. Your exam will submit automatically when time is up.');
-        }
-        prevRemaining = remaining;
+        const m = Math.floor(remaining/60), s = remaining%60;
+        el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        if (remaining <= 300) el.classList.replace('text-yellow-400','text-red-400');
+        if (!warnedFiveMinutes && prev > 300 && remaining <= 300) { warnedFiveMinutes=true; showExamNotice('5 minutes remaining. Please wrap up your answers.'); }
+        if (!warnedTwoMinutes  && prev > 120 && remaining <= 120 && remaining > 0) { warnedTwoMinutes=true; showExamNotice('2 minutes remaining. Exam will auto-submit when time is up.'); }
+        prev = remaining;
         if (remaining <= 0) { clearInterval(timerInterval); submitExam(true); }
     }, 1000);
 }
 
-// ─── Proctoring ───
-function startProctoring() {
-    proctorInterval = setInterval(async () => {
-        const frame = captureFrame();
-        const resp = await AUTH.fetch(`/api/exam/${submissionId}/proctor-frame`, {
-            method: 'POST',
-            body: JSON.stringify({ image: frame }),
-        });
-        if (resp.ok) {
-            const data = await resp.json();
-            document.getElementById('risk-score').textContent = data.risk_score;
+// ─── Modals ───────────────────────────────────────────────────────────────────
+function openSubmitModal()  { document.getElementById('submit-confirm-modal').classList.remove('hidden'); }
+function closeSubmitModal() { document.getElementById('submit-confirm-modal').classList.add('hidden'); }
+function openSubmitSuccess(){ document.getElementById('submit-success-modal').classList.remove('hidden'); }
+function closeSubmitSuccess(){ document.getElementById('submit-success-modal').classList.add('hidden'); window.location.href='/student/dashboard?view=exams'; }
 
-            // Update risk score color
-            const scoreEl = document.getElementById('risk-score');
-            if (data.risk_score > 80) scoreEl.className = 'text-lg font-bold risk-high';
-            else if (data.risk_score > 40) scoreEl.className = 'text-lg font-bold risk-mid';
-            else scoreEl.className = 'text-lg font-bold risk-safe';
-
-            // Show violation alert
-            if (data.violations && data.violations.length > 0) {
-                const alertDiv = document.getElementById('violation-alert');
-                const msgEl = document.getElementById('violation-msg');
-                const violationLabels = data.violations.map(v => v.type || v).filter(Boolean);
-                alertDiv.classList.remove('hidden');
-                msgEl.textContent = `Detected: ${violationLabels.join(', ')}`;
-                setTimeout(() => alertDiv.classList.add('hidden'), 5000);
-
-                const firstViolationId = data.violations[0]?.id || null;
-                if (firstViolationId) {
-                    recordViolationClip(firstViolationId);
-                }
-            }
-
-            if (data.is_flagged) {
-                document.getElementById('risk-score').classList.add('animate-pulse');
-            }
-        }
-    }, 10000); // Every 10 seconds
-}
-
-async function recordViolationClip(violationId) {
-    if (!proctorRecordingEnabled || !stream || violationRecordingInProgress) return;
-    violationRecordingInProgress = true;
-
-    const chunks = [];
-    let recorder = null;
-    try {
-        recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 350000 });
-    } catch (_) {
-        try {
-            recorder = new MediaRecorder(stream);
-        } catch (err) {
-            violationRecordingInProgress = false;
-            return;
-        }
-    }
-
-    recorder.ondataavailable = (evt) => {
-        if (evt.data && evt.data.size > 0) chunks.push(evt.data);
-    };
-
-    recorder.onstop = async () => {
-        const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
-        violationRecordingInProgress = false;
-        if (blob.size === 0) return;
-        await uploadViolationClip(violationId, blob);
-    };
-
-    recorder.start();
-    setTimeout(() => {
-        if (recorder.state === 'recording') recorder.stop();
-    }, 8000);
-}
-
-async function uploadViolationClip(violationId, blob) {
-    const formData = new FormData();
-    formData.append('clip', blob, `violation_${violationId}.webm`);
-    formData.append('duration', '8');
-    try {
-        await fetch(`/api/exam/violations/${violationId}/clip`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
-            body: formData,
-        });
-    } catch (_) {}
-}
-
-// ─── Tab Switch Detection ───
-function setupTabDetection() {
-    document.addEventListener('visibilitychange', async () => {
-        if (document.hidden && submissionId) {
-            await AUTH.fetch(`/api/exam/${submissionId}/tab-switch`, { method: 'POST' });
-        }
-    });
-}
-
-function showCopyWarning(message) {
-    const alertDiv = document.getElementById('violation-alert');
-    const msgEl = document.getElementById('violation-msg');
-    if (!alertDiv || !msgEl) return;
-    alertDiv.classList.remove('hidden');
-    msgEl.textContent = message;
-    setTimeout(() => alertDiv.classList.add('hidden'), 3000);
-}
-
-function setupCopyProtection() {
-    const panel = document.getElementById('questions-panel');
-    if (!panel) return;
-
-    const isEditableTarget = (target) => {
-        if (!target) return false;
-        const tag = target.tagName ? target.tagName.toLowerCase() : '';
-        return tag === 'textarea' || tag === 'input' || target.isContentEditable;
-    };
-
-    ['copy', 'cut', 'contextmenu'].forEach((evtName) => {
-        panel.addEventListener(evtName, (e) => {
-            if (isEditableTarget(e.target)) return;
-            e.preventDefault();
-            showCopyWarning('Copy and cut are disabled during the exam.');
-            if (submissionId) {
-                AUTH.fetch(`/api/exam/${submissionId}/copy-attempt`, { method: 'POST' });
-            }
-        });
-    });
-}
-
-function requestFullscreen() {
-    const root = document.getElementById('exam-root');
-    if (!root) return;
-    const req = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
-    if (req) {
-        req.call(root).catch(() => {
-            // Fullscreen denied by browser or user — continue exam normally
-            console.warn('Fullscreen request denied; exam continues without fullscreen.');
-        });
-    }
-}
-
-function setupFullscreenGuard() {
-    const onChange = () => {
-        const isFull = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-        if (!isFull && submissionId) {
-            // Warn but do NOT force-exit — student keeps taking the exam
-            showCopyWarning('You exited fullscreen. Please return to fullscreen for best exam experience.');
-        }
-    };
-    document.addEventListener('fullscreenchange', onChange);
-    document.addEventListener('webkitfullscreenchange', onChange);
-    document.addEventListener('msfullscreenchange', onChange);
-}
-
-function openSubmitModal() {
-    document.getElementById('submit-confirm-modal').classList.remove('hidden');
-}
-
-function closeSubmitModal() {
-    document.getElementById('submit-confirm-modal').classList.add('hidden');
-}
-
-function openSubmitSuccess() {
-    document.getElementById('submit-success-modal').classList.remove('hidden');
-}
-
-function closeSubmitSuccess() {
-    document.getElementById('submit-success-modal').classList.add('hidden');
-    window.location.href = '/student/dashboard?view=exams';
-}
-
-function showExamNotice(message, title = 'Notice') {
-    document.getElementById('exam-notice-title').textContent = title;
+function showExamNotice(message, title='Notice') {
+    document.getElementById('exam-notice-title').textContent   = title;
     document.getElementById('exam-notice-message').textContent = message;
-    const noticeModal = document.getElementById('exam-notice-modal');
-    const isAlreadySubmitted = message.toLowerCase().includes('already submitted');
-    noticeModal.dataset.redirectAfterClose = isAlreadySubmitted ? 'results' : '';
-    noticeModal.classList.remove('hidden');
+    const modal = document.getElementById('exam-notice-modal');
+    modal.dataset.redirectAfterClose = message.toLowerCase().includes('already submitted') ? 'results' : '';
+    modal.classList.remove('hidden');
     if (examNoticeTimeout) clearTimeout(examNoticeTimeout);
-    examNoticeTimeout = setTimeout(() => {
-        closeExamNotice();
-    }, 4000);
+    examNoticeTimeout = setTimeout(closeExamNotice, 4000);
 }
 
 function closeExamNotice() {
-    const noticeModal = document.getElementById('exam-notice-modal');
-    const redirect = noticeModal.dataset.redirectAfterClose;
-    noticeModal.classList.add('hidden');
-    if (redirect === 'results') {
-        window.location.href = '/student/dashboard?view=exams';
-    }
+    const modal = document.getElementById('exam-notice-modal');
+    const redir = modal.dataset.redirectAfterClose;
+    modal.classList.add('hidden');
+    if (redir === 'results') window.location.href = '/student/dashboard?view=exams';
 }
 
-function confirmSubmitExam() {
-    closeSubmitModal();
-    submitExam(true);
-}
+function confirmSubmitExam() { closeSubmitModal(); submitExam(true); }
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        // Prevent Escape from exiting fullscreen silently; just block the default
-        e.preventDefault();
-    }
-});
-
-document.getElementById('submit-confirm-modal').addEventListener('click', (e) => {
-    if (e.target.id === 'submit-confirm-modal') closeSubmitModal();
-});
-
-document.getElementById('submit-success-modal').addEventListener('click', (e) => {
-    if (e.target.id === 'submit-success-modal') closeSubmitSuccess();
-});
-
-document.getElementById('exam-notice-modal').addEventListener('click', (e) => {
-    if (e.target.id === 'exam-notice-modal') closeExamNotice();
-});
-
-// ─── Submit Exam ───
+// ─── Submit Exam ──────────────────────────────────────────────────────────────
 async function submitExam(autoSubmit = false) {
     if (!submissionId) return;
-    if (!autoSubmit) {
-        openSubmitModal();
-        return;
-    }
+    if (!autoSubmit) { openSubmitModal(); return; }
 
+    examSubmitted = true;
     clearInterval(timerInterval);
     clearInterval(proctorInterval);
+    clearInterval(screenshotInterval);
+    if (audioContext) { audioContext.close().catch(()=>{}); audioContext = null; }
 
     const resp = await AUTH.fetch(`/api/student/exams/${submissionId}/submit`, { method: 'POST' });
     if (resp.ok) {
-        await resp.json().catch(() => ({}));
-        if (stream) stream.getTracks().forEach(t => t.stop());
-        const exitFull = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
-        if (exitFull) {
-            try { await exitFull.call(document); } catch (_) {}
-        }
+        await resp.json().catch(()=>({}));
+        if (stream)      stream.getTracks().forEach(t => t.stop());
+        if (audioStream) audioStream.getTracks().forEach(t => t.stop());
+        const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+        if (exit) { try { await exit.call(document); } catch(_){} }
         openSubmitSuccess();
     }
 }
+
+// ─── Event listeners ─────────────────────────────────────────────────────────
+document.getElementById('submit-confirm-modal').addEventListener('click', e => { if(e.target.id==='submit-confirm-modal') closeSubmitModal(); });
+document.getElementById('submit-success-modal').addEventListener('click', e => { if(e.target.id==='submit-success-modal') closeSubmitSuccess(); });
+document.getElementById('exam-notice-modal').addEventListener('click',   e => { if(e.target.id==='exam-notice-modal') closeExamNotice(); });
 
 initCamera();
 </script>

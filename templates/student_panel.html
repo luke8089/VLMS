@@ -5,6 +5,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
     /* ── Inter font ── */
     * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -260,6 +262,38 @@
         font-size: 11px;
         color: rgba(255,255,255,0.7);
     }
+    /* ── Live toast ── */
+    .live-toast-item {
+        pointer-events: auto;
+        display: flex; align-items: flex-start; gap: 10px;
+        background: rgba(15,15,15,0.92);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 12px 16px;
+        min-width: 240px; max-width: 320px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+        backdrop-filter: blur(12px);
+        animation: toastIn .32s cubic-bezier(.4,0,.2,1) both;
+        transition: opacity .3s ease, transform .3s ease;
+    }
+    .live-toast-item.out {
+        opacity: 0; transform: translateY(12px);
+    }
+    @keyframes toastIn {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    /* ── Live badge ── */
+    .live-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: 10px; padding: 2px 8px; border-radius: 9999px;
+        background: rgba(74,222,128,.12); color: #4ade80;
+        border: 1px solid rgba(74,222,128,.3);
+    }
+    .live-badge-dot {
+        width: 6px; height: 6px; border-radius: 9999px; background: #4ade80;
+        animation: pulse 1.4s infinite;
+    }
     @keyframes examSlideUp {
         from { opacity: 0; transform: translateY(14px); }
         to { opacity: 1; transform: translateY(0); }
@@ -381,9 +415,15 @@
 
     <!-- ═══════ EXAMS SECTION ═══════ -->
     <div id="section-exams" class="hidden">
-        <div class="mb-6">
-            <h2 class="text-2xl font-bold text-white">Exams & Quizzes</h2>
-            <p class="text-sm text-neutral-500 mt-1">Posted CATs and exams grouped by unit, with upcoming assessments clearly highlighted</p>
+        <div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold text-white">Exams & Quizzes</h2>
+                    <span class="live-badge"><span class="live-badge-dot"></span>Live</span>
+                </div>
+                <p class="text-sm text-neutral-500 mt-1">Posted CATs and exams grouped by unit, with upcoming assessments clearly highlighted</p>
+            </div>
+            <span id="exams-last-updated" class="text-xs text-neutral-600 mt-1 self-end"></span>
         </div>
         <div id="exams-full-list" class="space-y-4">
             <div class="text-center text-neutral-500">Loading...</div>
@@ -392,9 +432,24 @@
 
     <!-- ═══════ GRADES SECTION ═══════ -->
     <div id="section-grades" class="hidden">
-        <div class="mb-6">
-            <h2 class="text-2xl font-bold text-white">Grades & Results</h2>
-            <p class="text-sm text-neutral-500 mt-1">Your performance across all assessments</p>
+        <div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold text-white">Grades & Results</h2>
+                    <span class="live-badge"><span class="live-badge-dot"></span>Live</span>
+                </div>
+                <p class="text-sm text-neutral-500 mt-1">Your performance across all assessments</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="grades-last-updated" class="text-xs text-neutral-600 self-end"></span>
+                <button onclick="downloadGradesPDF()" id="btn-download-grades"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors border border-white/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download PDF
+                </button>
+            </div>
         </div>
         <!-- Grade summary cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -768,6 +823,9 @@
     </div>
 </div>
 
+<!-- ── Live-update toast ─────────────────────────────────────────────── -->
+<div id="live-toast" class="fixed bottom-6 right-6 z-[80] flex flex-col gap-2 pointer-events-none"></div>
+
 <div id="student-notice-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
     <div class="bg-neutral-950 rounded-2xl border border-white/10 w-full max-w-md p-6">
         <h3 id="student-notice-title" class="text-lg font-semibold text-white">Notice</h3>
@@ -920,6 +978,7 @@ function navigateTo(section, { syncUrl = true } = {}) {
     document.getElementById('close-icon').classList.add('hidden');
 
     currentSection = section;
+    _startPoller(section);
 
     if (syncUrl) {
         // Push view changes so browser back returns to previous in-dashboard section.
@@ -988,15 +1047,19 @@ let allCoursesData = [];
 let currentCoursesTab = 'mine';
 let studentExamsByCourse = {};
 
-async function loadCoursesPage() {
+async function loadCoursesPage(silent = false) {
     const allGrid = document.getElementById('all-courses-grid');
     const myGrid = document.getElementById('my-courses-grid');
-    allGrid.innerHTML = '<div class="text-center text-neutral-500 col-span-3">Loading courses...</div>';
-    myGrid.innerHTML = '<div class="text-center text-neutral-500 col-span-3">Loading courses...</div>';
+    if (!silent) {
+        allGrid.innerHTML = '<div class="text-center text-neutral-500 col-span-3">Loading courses...</div>';
+        myGrid.innerHTML = '<div class="text-center text-neutral-500 col-span-3">Loading courses...</div>';
+    }
 
     const resp = await AUTH.fetch('/api/student/courses/all');
     if (!resp.ok) return;
     const data = await resp.json();
+    if (silent && !_fp('courses', data)) return;
+    _fp('courses', data);
     allCoursesData = data.items || [];
 
     const examsResp = await AUTH.fetch('/api/student/exams');
@@ -1179,9 +1242,9 @@ async function registerCourse(courseId) {
 }
 
 // ═══════ EXAMS PAGE ═══════
-async function loadExamsPage() {
+async function loadExamsPage(silent = false) {
     const container = document.getElementById('exams-full-list');
-    container.innerHTML = `
+    if (!silent) container.innerHTML = `
         <div class="dark-card p-10 text-center text-neutral-400">
             <div class="inline-flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
@@ -1191,6 +1254,9 @@ async function loadExamsPage() {
     const resp = await AUTH.fetch('/api/student/exams');
     if (!resp.ok) return;
     const data = await resp.json();
+    if (silent && !_fp('exams', data)) return;
+    _fp('exams', data);
+    _setLastUpdated('exams-last-updated');
     const exams = data.exams || [];
     if (exams.length === 0) {
         container.innerHTML = '<div class="dark-card py-12 text-center text-neutral-500">No exams available for your enrolled courses.</div>';
@@ -1345,6 +1411,9 @@ function renderExamItem(e, index = 0) {
         </div>`;
     } else if (done) {
         btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
+    } else if (inProgress && isClosed) {
+        // Time ran out while exam was in progress — auto-submitted
+        btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
     } else if (inProgress) {
         btn = `<button onclick="startExam(${e.id})" class="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200">Continue</button>`;
     } else if (isOpen) {
@@ -1352,7 +1421,7 @@ function renderExamItem(e, index = 0) {
     } else if (isUpcoming) {
         btn = `<button disabled class="bg-white/10 text-neutral-500 text-sm px-4 py-2 rounded-lg cursor-not-allowed">Not Yet Open</button>`;
     } else {
-        btn = `<button disabled class="bg-white/5 text-neutral-600 text-sm px-4 py-2 rounded-lg cursor-not-allowed">Closed</button>`;
+        btn = `<span class="text-xs font-medium text-neutral-500 bg-white/5 border border-white/5 px-3 py-2 rounded-lg">Closed</span>`;
     }
 
     return `
@@ -1390,9 +1459,9 @@ function isGroupedAssessmentEntry(r) {
         || type === 'quiz' || type === 'midterm' || type === 'final';
 }
 
-async function loadGradesPage() {
+async function loadGradesPage(silent = false) {
     const tbody = document.getElementById('grades-table-body');
-    tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-neutral-500">Loading grades...</td></tr>';
+    if (!silent) tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-neutral-500">Loading grades...</td></tr>';
     console.log('Loading grades page...');
     
     try {
@@ -1409,6 +1478,9 @@ async function loadGradesPage() {
         }
 
         const data = await resp.json();
+        if (silent && !_fp('grades', data)) return;
+        _fp('grades', data);
+        _setLastUpdated('grades-last-updated');
         console.log('Grades API response data:', data);
         console.log('Number of results:', data.results ? data.results.length : 0);
         
@@ -1482,6 +1554,7 @@ async function loadGradesPage() {
             return group;
         });
         
+        _gradesData = courseGroupsArray;
         document.getElementById('grade-total').textContent = courseGroupsArray.length;
         
         // Calculate average and highest only for courses with complete assessments (CAT 1, CAT 2, Main Exam)
@@ -1656,14 +1729,191 @@ async function loadGradesPage() {
     }).join('');
 }
 
+// ═══════ GRADES PDF DOWNLOAD ═══════
+function downloadGradesPDF() {
+    const { jsPDF } = window.jspdf;
+    if (!jsPDF) { alert('PDF library not loaded. Please refresh and try again.'); return; }
+
+    const user = AUTH.getUser() || {};
+    const studentName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Student';
+    const email = user.email || '—';
+    const department = user.department || '—';
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 18;
+    let y = margin;
+
+    // ── Header band ──
+    doc.setFillColor(10, 10, 10);
+    doc.rect(0, 0, pageW, 38, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MindStack LMS', margin, 16);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(180, 180, 180);
+    doc.text('Academic Performance Report', margin, 23);
+    doc.setTextColor(120, 120, 120);
+    doc.text('UNOFFICIAL TRANSCRIPT', pageW - margin, 16, { align: 'right' });
+    doc.text('Confidential — For student use only', pageW - margin, 23, { align: 'right' });
+
+    // ── Divider line ──
+    doc.setDrawColor(50, 50, 50);
+    doc.setLineWidth(0.5);
+    doc.line(0, 38, pageW, 38);
+
+    y = 50;
+
+    // ── Title ──
+    doc.setTextColor(20, 20, 20);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('STUDENT ACADEMIC TRANSCRIPT', pageW / 2, y, { align: 'center' });
+    y += 10;
+
+    // ── Student info box ──
+    doc.setFillColor(245, 245, 247);
+    doc.roundedRect(margin, y, pageW - margin * 2, 28, 3, 3, 'F');
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(80, 80, 80);
+    const col1 = margin + 5, col2 = pageW / 2 + 5;
+    doc.text('Student Name:', col1, y + 7);
+    doc.text('Email:', col1, y + 14);
+    doc.text('Department:', col2, y + 7);
+    doc.text('Date Generated:', col2, y + 14);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(20, 20, 20);
+    doc.text(studentName, col1 + 28, y + 7);
+    doc.text(email, col1 + 12, y + 14);
+    doc.text(department, col2 + 24, y + 7);
+    doc.text(`${dateStr} at ${timeStr}`, col2 + 30, y + 14);
+    y += 36;
+
+    // ── Performance summary ──
+    const completeCourses = _gradesData.filter(g => g.allComplete);
+    const avgScore = completeCourses.length
+        ? Math.round(completeCourses.reduce((s, g) => s + g.percentage, 0) / completeCourses.length)
+        : null;
+    const highScore = completeCourses.length
+        ? Math.round(Math.max(...completeCourses.map(g => g.percentage)))
+        : null;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(20, 20, 20);
+    doc.text('Performance Summary', margin, y);
+    y += 6;
+
+    doc.autoTable({
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['Metric', 'Value']],
+        body: [
+            ['Average Score', avgScore != null ? `${avgScore}%` : 'Pending'],
+            ['Highest Score', highScore != null ? `${highScore}%` : 'Pending'],
+            ['Total Courses', String(_gradesData.length)],
+            ['Completed Assessments', String(completeCourses.length) + ' course(s) with full CAT + Exam data'],
+        ],
+        headStyles: { fillColor: [20, 20, 20], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+        bodyStyles: { fontSize: 9, textColor: [30, 30, 30] },
+        alternateRowStyles: { fillColor: [248, 248, 250] },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60 }, 1: { cellWidth: 'auto' } },
+        theme: 'grid',
+        tableLineColor: [220, 220, 220],
+        tableLineWidth: 0.2,
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    // ── Assessment results ──
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(20, 20, 20);
+    doc.text('Assessment Results by Course', margin, y);
+    y += 6;
+
+    const scoreLabel = a => {
+        if (!a) return '—';
+        if (a.total_score == null) return 'Pending';
+        return `${a.total_score} / ${a.total_marks}`;
+    };
+
+    const tableRows = _gradesData.map(g => [
+        g.courseTitle,
+        scoreLabel(g.cat1),
+        scoreLabel(g.cat2),
+        scoreLabel(g.mainExam),
+        scoreLabel(g.assignment),
+        g.gradeInfo.letter,
+        g.latestDate ? new Date(g.latestDate).toLocaleDateString('en-GB') : '—',
+    ]);
+
+    // Grade colour map for cells
+    const gradeColors = { A: [34, 197, 94], B: [59, 130, 246], C: [234, 179, 8], D: [249, 115, 22], F: [239, 68, 68] };
+
+    doc.autoTable({
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['Course', 'CAT 1', 'CAT 2', 'Main Exam', 'Assignment', 'Grade', 'Date']],
+        body: tableRows,
+        headStyles: { fillColor: [20, 20, 20], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8, halign: 'center' },
+        bodyStyles: { fontSize: 8, textColor: [30, 30, 30], halign: 'center' },
+        columnStyles: {
+            0: { halign: 'left', cellWidth: 48, fontStyle: 'bold' },
+            1: { cellWidth: 22 },
+            2: { cellWidth: 22 },
+            3: { cellWidth: 26 },
+            4: { cellWidth: 26 },
+            5: { cellWidth: 16, fontStyle: 'bold' },
+            6: { cellWidth: 24 },
+        },
+        alternateRowStyles: { fillColor: [248, 248, 250] },
+        theme: 'grid',
+        tableLineColor: [220, 220, 220],
+        tableLineWidth: 0.2,
+        didParseCell(data) {
+            if (data.section === 'body' && data.column.index === 5) {
+                const letter = data.cell.raw;
+                const rgb = gradeColors[letter];
+                if (rgb) data.cell.styles.textColor = rgb;
+            }
+        },
+    });
+
+    // ── Footer ──
+    const footerY = pageH - 14;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(margin, footerY - 4, pageW - margin, footerY - 4);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(130, 130, 130);
+    doc.text('MindStack LMS — Academic Performance Report', margin, footerY);
+    doc.text(`Generated: ${dateStr} ${timeStr}  •  This is an unofficial transcript and does not constitute an official academic record.`, margin, footerY + 4.5);
+    doc.text(`Page 1`, pageW - margin, footerY, { align: 'right' });
+
+    // ── Save ──
+    const safeName = studentName.replace(/\s+/g, '_').toLowerCase();
+    const safeDate = now.toISOString().slice(0, 10);
+    doc.save(`grades_${safeName}_${safeDate}.pdf`);
+}
+
 // ═══════ RESOURCES PAGE ═══════
-async function loadResourcesPage() {
+async function loadResourcesPage(silent = false) {
     const container = document.getElementById('resources-list');
-    container.innerHTML = '<div class="text-center text-neutral-500">Loading resources...</div>';
+    if (!silent) container.innerHTML = '<div class="text-center text-neutral-500">Loading resources...</div>';
     // Get enrolled courses first
     const coursesResp = await AUTH.fetch('/api/student/courses');
     if (!coursesResp.ok) return;
     const coursesData = await coursesResp.json();
+    if (silent && !_fp('resources', coursesData)) return;
+    _fp('resources', coursesData);
     if (coursesData.items.length === 0) {
         container.innerHTML = '<div class="text-center py-12 text-neutral-500">Enroll in courses to see resources.</div>';
         return;
@@ -1709,18 +1959,22 @@ async function loadResourcesPage() {
 
 // ═══════ CLASSES PAGE ═══════
 let classesCountdownInterval = null;
-async function loadClassesPage() {
+async function loadClassesPage(silent = false) {
     const container = document.getElementById('classes-list');
     const refreshIndicator = document.getElementById('classes-refresh-indicator');
-    if (refreshIndicator) refreshIndicator.classList.remove('hidden');
-    container.innerHTML = '<div class="text-center text-neutral-500">Loading classes...</div>';
+    if (!silent) {
+        if (refreshIndicator) refreshIndicator.classList.remove('hidden');
+        container.innerHTML = '<div class="text-center text-neutral-500">Loading classes...</div>';
+    }
     const resp = await AUTH.fetch('/api/student/classes');
     if (!resp.ok) {
-        container.innerHTML = '<div class="text-center text-neutral-400">Failed to load classes.</div>';
-        if (refreshIndicator) refreshIndicator.classList.add('hidden');
+        if (!silent) container.innerHTML = '<div class="text-center text-neutral-400">Failed to load classes.</div>';
+        if (!silent && refreshIndicator) refreshIndicator.classList.add('hidden');
         return;
     }
     const data = await resp.json();
+    if (silent && !_fp('classes', data)) return;
+    _fp('classes', data);
     const classes = data.classes || [];
     if (classes.length === 0) {
         container.innerHTML = '<div class="text-center py-12 text-neutral-500">No live classes scheduled for your courses.</div>';
@@ -1815,7 +2069,7 @@ async function loadClassesPage() {
 let calendarDate = new Date();
 let calendarEventsData = [];
 
-async function loadCalendarPage() {
+async function loadCalendarPage(silent = false) {
     const [examsResp, classesResp] = await Promise.all([
         AUTH.fetch('/api/student/exams'),
         AUTH.fetch('/api/student/classes')
@@ -1861,6 +2115,8 @@ async function loadCalendarPage() {
     }
 
     calendarEventsData = mergedEvents.sort((a, b) => new Date(a.start_at) - new Date(b.start_at));
+    if (silent && !_fp('calendar', calendarEventsData)) return;
+    _fp('calendar', calendarEventsData);
     renderCalendar();
     renderCalendarEvents();
 }
@@ -2027,26 +2283,29 @@ function openCalendarEvent(type, id) {
     navigateTo('exams');
 }
 
-async function loadDashboard() {
+async function loadDashboard(silent = false) {
     // Load courses
     const coursesResp = await AUTH.fetch('/api/student/courses');
     if (coursesResp.ok) {
         const data = await coursesResp.json();
-        const list = document.getElementById('courses-list');
-        if (data.items.length === 0) {
-            list.innerHTML = '<div class="p-6 text-center text-neutral-500">No courses enrolled. Browse courses to get started.</div>';
-        } else {
-            list.innerHTML = data.items.map(c => `
-                <div class="p-4 hover:bg-white/5 transition-colors cursor-pointer" onclick="viewCourse(${c.id})">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-medium text-white">${c.title}</h3>
-                            <p class="text-sm text-neutral-400 mt-1">${c.code} • ${c.category || 'General'}</p>
+        if (!silent || _fp('dash_courses', data)) {
+            _fp('dash_courses', data);
+            const list = document.getElementById('courses-list');
+            if (data.items.length === 0) {
+                list.innerHTML = '<div class="p-6 text-center text-neutral-500">No courses enrolled. Browse courses to get started.</div>';
+            } else {
+                list.innerHTML = data.items.map(c => `
+                    <div class="p-4 hover:bg-white/5 transition-colors cursor-pointer" onclick="viewCourse(${c.id})">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium text-white">${c.title}</h3>
+                                <p class="text-sm text-neutral-400 mt-1">${c.code} • ${c.category || 'General'}</p>
+                            </div>
+                            <span class="bg-white/10 text-neutral-300 text-xs px-2 py-1 rounded-full">Active</span>
                         </div>
-                        <span class="bg-white/10 text-neutral-300 text-xs px-2 py-1 rounded-full">Active</span>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
     }
 
@@ -2054,6 +2313,8 @@ async function loadDashboard() {
     const examsResp = await AUTH.fetch('/api/student/exams');
     if (examsResp.ok) {
         const data = await examsResp.json();
+        if (!silent || _fp('dash_exams', data)) {
+        _fp('dash_exams', data);
         const list = document.getElementById('exams-list');
         const previewExams = [...(data.exams || [])]
             .sort((a, b) => {
@@ -2110,6 +2371,9 @@ async function loadDashboard() {
                     btn = `<div class="text-right"><div class="text-lg font-bold text-white">${e.total_score}<span class="text-sm font-normal text-neutral-400">/${e.total_marks}</span></div></div>`;
                 } else if (done) {
                     btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
+                } else if (inProgress && isClosed) {
+                    // Time ran out while exam was in progress — auto-submitted
+                    btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
                 } else if (inProgress) {
                     btn = `<button onclick="startExam(${e.id})" class="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200">Continue</button>`;
                 } else if (isOpen) {
@@ -2117,7 +2381,7 @@ async function loadDashboard() {
                 } else if (isUpcoming) {
                     btn = `<button disabled class="bg-white/10 text-neutral-500 text-sm px-4 py-2 rounded-lg cursor-not-allowed" id="btn-exam-${e.id}">Not Yet Open</button>`;
                 } else {
-                    btn = `<button disabled class="bg-white/5 text-neutral-600 text-sm px-4 py-2 rounded-lg cursor-not-allowed">Closed</button>`;
+                    btn = `<span class="text-xs font-medium text-neutral-500 bg-white/5 border border-white/5 px-3 py-2 rounded-lg">Closed</span>`;
                 }
 
                 return `
@@ -2140,12 +2404,15 @@ async function loadDashboard() {
             // Start countdown timers for upcoming exams
             startCountdowns();
         }
+        } // end fingerprint guard
     }
 
     // Load results
     const resultsResp = await AUTH.fetch('/api/student/results');
     if (resultsResp.ok) {
         const data = await resultsResp.json();
+        if (silent && !_fp('dash_results', data)) { /* skip */ } else {
+        _fp('dash_results', data);
         const list = document.getElementById('results-list');
         if (data.results.length === 0) {
             list.innerHTML = '<div class="p-4 text-center text-neutral-500 text-sm">No results yet.</div>';
@@ -2165,6 +2432,7 @@ async function loadDashboard() {
                 </div>
             `).join('');
         }
+        } // end fingerprint guard
     }
 
     // Load upcoming classes
@@ -2172,6 +2440,8 @@ async function loadDashboard() {
     const dcList = document.getElementById('dashboard-classes-list');
     if (classesResp.ok) {
         const cData = await classesResp.json();
+        if (silent && !_fp('dash_classes', cData)) { /* skip */ } else {
+        _fp('dash_classes', cData);
         const classes = cData.classes || [];
         if (classes.length === 0) {
             dcList.innerHTML = '<div class="p-4 text-center text-neutral-500 text-sm">No classes scheduled.</div>';
@@ -2205,7 +2475,8 @@ async function loadDashboard() {
                 </div>`;
             }).join('');
         }
-    } else {
+        } // end fingerprint guard
+    } else if (!silent) {
         dcList.innerHTML = '<div class="p-4 text-center text-neutral-500 text-sm">Could not load classes.</div>';
     }
 }
@@ -2775,6 +3046,132 @@ function logout() {
     AUTH.clear();
     window.location.href = '/login';
 }
+
+// ═══════ LIVE TOAST ═══════
+function showLiveToast(message, icon = '🔔') {
+    const container = document.getElementById('live-toast');
+    if (!container) return;
+
+    const item = document.createElement('div');
+    item.className = 'live-toast-item';
+    item.innerHTML = `
+        <span style="font-size:18px;line-height:1">${icon}</span>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-white leading-snug">${message}</p>
+            <p class="text-[11px] text-neutral-500 mt-0.5">Just now</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-neutral-600 hover:text-white text-lg leading-none ml-1" style="flex-shrink:0">&times;</button>
+    `;
+    container.appendChild(item);
+
+    // Auto-dismiss after 5 s
+    setTimeout(() => {
+        item.classList.add('out');
+        setTimeout(() => item.remove(), 320);
+    }, 5000);
+}
+
+function _setLastUpdated(elId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const t = new Date();
+    el.textContent = `Updated ${t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+// ═══════ LIVE UPDATER ═══════
+// Polls the active section in the background so new content (CATs, grades,
+// classes) appears automatically without a hard-refresh.
+// Safe to add: only runs when tab is visible, only re-renders on data change.
+
+const _liveFingerprints = {};
+let _gradesData = [];
+
+/** Returns true if data changed (and updates stored fingerprint). */
+function _fp(key, data) {
+    const str = JSON.stringify(data);
+    const changed = _liveFingerprints[key] !== str;
+    _liveFingerprints[key] = str;
+    return changed;
+}
+
+let _pollerTimer = null;
+
+const _POLL_MS = {
+    dashboard: 30000,
+    exams:     30000,
+    courses:   60000,
+    grades:    60000,
+    classes:   30000,
+    resources: 60000,
+    calendar:  60000,
+};
+
+function _startPoller(section) {
+    _stopPoller();
+    const ms = _POLL_MS[section];
+    if (!ms) return; // profile — no polling needed
+    _pollerTimer = setInterval(() => {
+        if (document.hidden) return;        // tab not visible — skip
+        if (currentSection !== section) return; // stale timer — skip
+        _silentRefresh(section);
+    }, ms);
+}
+
+function _stopPoller() {
+    if (_pollerTimer) { clearInterval(_pollerTimer); _pollerTimer = null; }
+}
+
+// Snapshot of fingerprints BEFORE a silent refresh so we can detect what changed
+async function _silentRefresh(section) {
+    const before = { ...Object.fromEntries(Object.entries(_liveFingerprints)) };
+    try {
+        if      (section === 'dashboard') await loadDashboard(true);
+        else if (section === 'exams')     await loadExamsPage(true);
+        else if (section === 'courses')   await loadCoursesPage(true);
+        else if (section === 'grades')    await loadGradesPage(true);
+        else if (section === 'classes')   await loadClassesPage(true);
+        else if (section === 'resources') await loadResourcesPage(true);
+        else if (section === 'calendar')  await loadCalendarPage(true);
+    } catch (e) {
+        console.warn('[LiveUpdater] poll error:', e);
+        return;
+    }
+
+    // Detect which keys changed and notify
+    const changed = Object.keys(_liveFingerprints).some(k => _liveFingerprints[k] !== before[k]);
+    if (!changed) return;
+
+    const toastMap = {
+        exams:        { msg: 'New exam or CAT has been posted.',    icon: '📋' },
+        grades:       { msg: 'A new grade has been released.',       icon: '🎓' },
+        courses:      { msg: 'Course list has been updated.',        icon: '📚' },
+        classes:      { msg: 'A live class has been updated.',       icon: '📡' },
+        resources:    { msg: 'New course material is available.',    icon: '📄' },
+        calendar:     { msg: 'Your calendar has been updated.',      icon: '📅' },
+        dash_exams:   { msg: 'New exam or CAT has been posted.',    icon: '📋' },
+        dash_grades:  { msg: 'A new grade has been released.',       icon: '🎓' },
+        dash_courses: { msg: 'Course list has been updated.',        icon: '📚' },
+        dash_classes: { msg: 'A live class has been updated.',       icon: '📡' },
+    };
+
+    // Deduplicate — only one toast per refresh cycle
+    const changedKeys = Object.keys(_liveFingerprints).filter(k => _liveFingerprints[k] !== before[k]);
+    for (const key of changedKeys) {
+        const t = toastMap[key];
+        if (t) { showLiveToast(t.msg, t.icon); break; }
+    }
+
+    // Update "last updated" timestamps
+    if (changedKeys.some(k => k === 'exams' || k === 'dash_exams')) _setLastUpdated('exams-last-updated');
+    if (changedKeys.some(k => k === 'grades')) _setLastUpdated('grades-last-updated');
+}
+
+// Pause polling when the tab is hidden, resume on visibility
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && _POLL_MS[currentSection]) {
+        _silentRefresh(currentSection); // immediate catch-up on tab focus
+    }
+});
 
 checkProfileSetup();
 

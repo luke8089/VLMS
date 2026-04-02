@@ -534,7 +534,7 @@ CREATE TABLE `user_analytics` (
 CREATE TABLE `violations` (
   `id` int(11) NOT NULL,
   `submission_id` int(11) NOT NULL,
-  `violation_type` enum('multiple_faces','no_face','eye_gaze','head_pose','lip_movement','phone_detected','tab_switch','background_person','other') NOT NULL,
+  `violation_type` enum('multiple_faces','no_face','eye_gaze','head_pose','lip_movement','phone_detected','tab_switch','background_person','other','fullscreen_exit','noise_detected','window_blur','keyboard_shortcut') NOT NULL,
   `severity` int(11) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `screenshot_path` varchar(500) DEFAULT NULL,
@@ -881,6 +881,22 @@ ALTER TABLE `user_analytics`
 ALTER TABLE `violations`
   ADD CONSTRAINT `violations_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `submissions` (`id`);
 COMMIT;
+
+-- ============================================================
+-- MIGRATION: Enhanced Proctoring — run once on existing DBs
+-- ============================================================
+
+-- 1. Expand violation_type enum with new monitoring categories
+ALTER TABLE `violations`
+  MODIFY COLUMN `violation_type`
+    ENUM(
+      'multiple_faces','no_face','eye_gaze','head_pose',
+      'lip_movement','phone_detected','tab_switch',
+      'background_person','other',
+      'fullscreen_exit','noise_detected','window_blur','keyboard_shortcut'
+    ) NOT NULL;
+
+-- ============================================================
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
