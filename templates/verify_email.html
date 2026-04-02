@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}Verify Email — MindStack{% endblock %}
+
+{% block head %}
+<style>
+    .auth-bg {
+        position: relative;
+        background: #000000;
+    }
+    .auth-bg::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        opacity: 0.12;
+        z-index: 0;
+        filter: grayscale(100%);
+    }
+    .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        animation: floatOrb 8s ease-in-out infinite;
+    }
+    .orb-1 { width: 350px; height: 350px; background: #ffffff; top: -80px; left: -80px; animation-delay: 0s; opacity: 0.06; }
+    .orb-2 { width: 300px; height: 300px; background: #a0a0a0; bottom: -60px; right: -60px; animation-delay: 3s; opacity: 0.08; }
+    @keyframes floatOrb {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-30px) scale(1.05); }
+    }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.08);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+        animation: shimmer 4s ease-in-out infinite;
+        pointer-events: none;
+    }
+    @keyframes shimmer { 0% { left: -100%; } 50% { left: 100%; } 100% { left: 100%; } }
+    .glow-btn {
+        background: #ffffff; color: #000000;
+        position: relative; overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .glow-btn::before {
+        content: ''; position: absolute; inset: -2px;
+        background: #ffffff; border-radius: inherit;
+        z-index: -1; opacity: 0;
+        transition: opacity 0.3s ease; filter: blur(12px);
+    }
+    .glow-btn:hover::before { opacity: 0.6; }
+    .glow-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
+
+    .icon-circle {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 24px;
+    }
+    .icon-circle.success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); }
+    .icon-circle.error   { background: rgba(239,68,68,0.15);  border: 1px solid rgba(239,68,68,0.3); }
+    .icon-circle.info    { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); }
+
+    .fade-up {
+        animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.25s; }
+    .delay-3 { animation-delay: 0.4s; }
+
+    .particle {
+        position: absolute; width: 3px; height: 3px;
+        background: rgba(255,255,255,0.3); border-radius: 50%;
+        animation: drift linear infinite;
+    }
+    @keyframes drift {
+        from { transform: translateY(0); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        to  { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+    }
+    .particle-1 { left: 15%; bottom: 0; animation-duration: 7s; }
+    .particle-2 { left: 40%; bottom: 0; animation-duration: 9s; animation-delay: 1s; }
+    .particle-3 { left: 65%; bottom: 0; animation-duration: 6s; animation-delay: 2s; }
+    .particle-4 { left: 85%; bottom: 0; animation-duration: 8s; animation-delay: 0.5s; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-bg min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+    <div class="particle particle-4"></div>
+
+    <div class="w-full max-w-md relative z-10">
+
+        <!-- Logo -->
+        <div class="text-center mb-8 fade-up">
+            <h1 class="text-4xl font-extrabold text-white tracking-tight">MindStack</h1>
+            <p class="text-white/50 mt-2 text-sm font-medium tracking-wide">Intelligent Learning, Stacked for You</p>
+        </div>
+
+        <!-- Card -->
+        <div class="glass-card rounded-3xl p-8 relative overflow-hidden text-center">
+
+            {% if status == 'success' %}
+            <!-- ── SUCCESS ── -->
+            <div class="fade-up delay-1">
+                <div class="icon-circle success">
+                    <svg class="w-10 h-10 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Email Verified!</h2>
+                <p class="text-white/50 text-sm mb-6">
+                    {% if first_name %}Hi {{ first_name }}, your{% else %}Your{% endif %}
+                    account is now active. You can sign in and start learning.
+                </p>
+            </div>
+            <div class="fade-up delay-2">
+                <a href="/login" class="glow-btn block w-full font-semibold py-3.5 rounded-xl transition duration-300">
+                    Continue to Sign In
+                </a>
+            </div>
+
+            {% elif status == 'already_verified' %}
+            <!-- ── ALREADY VERIFIED ── -->
+            <div class="fade-up delay-1">
+                <div class="icon-circle info">
+                    <svg class="w-10 h-10 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Already Verified</h2>
+                <p class="text-white/50 text-sm mb-6">
+                    Your email is already verified. Go ahead and sign in.
+                </p>
+            </div>
+            <div class="fade-up delay-2">
+                <a href="/login" class="glow-btn block w-full font-semibold py-3.5 rounded-xl transition duration-300">
+                    Sign In
+                </a>
+            </div>
+
+            {% else %}
+            <!-- ── ERROR / INVALID / EXPIRED ── -->
+            <div class="fade-up delay-1">
+                <div class="icon-circle error">
+                    <svg class="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Verification Failed</h2>
+                <p class="text-white/50 text-sm mb-6">
+                    {% if message %}{{ message }}{% else %}This verification link is invalid or has expired.{% endif %}
+                    Request a new link below.
+                </p>
+            </div>
+
+            <!-- Resend form -->
+            <div class="fade-up delay-2">
+                <div id="resend-error"   class="hidden bg-red-500/10 border border-red-400/30 text-red-300 px-4 py-3 rounded-xl mb-4 text-sm"></div>
+                <div id="resend-success" class="hidden bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 px-4 py-3 rounded-xl mb-4 text-sm"></div>
+
+                <form id="resend-form" class="space-y-3 text-left">
+                    <label class="block text-sm font-medium text-white/60 mb-1">Your email address</label>
+                    <input type="email" id="resend-email" required
+                           class="w-full bg-white/6 border border-white/12 text-white rounded-xl px-4 py-3 outline-none
+                                  focus:border-white/40 focus:bg-white/10 transition text-sm placeholder-white/30"
+                           placeholder="you@example.com">
+                    <button type="submit" id="resend-btn"
+                            class="glow-btn w-full font-semibold py-3.5 rounded-xl transition duration-300">
+                        Resend Verification Email
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- Back to login -->
+            <div class="fade-up delay-3 mt-6">
+                <a href="/login" class="text-sm text-white/40 hover:text-white transition-colors">&larr; Back to Login</a>
+            </div>
+        </div>
+
+        <p class="text-center text-white/20 text-xs mt-8 tracking-wide">&copy; 2026 MindStack. All rights reserved.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const resendForm = document.getElementById('resend-form');
+if (resendForm) {
+    resendForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn     = document.getElementById('resend-btn');
+        const errDiv  = document.getElementById('resend-error');
+        const okDiv   = document.getElementById('resend-success');
+        errDiv.classList.add('hidden');
+        okDiv.classList.add('hidden');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+
+        try {
+            const resp = await fetch('/api/auth/resend-verification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: document.getElementById('resend-email').value.trim() }),
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                errDiv.textContent = data.error || 'Request failed.';
+                errDiv.classList.remove('hidden');
+            } else {
+                okDiv.textContent = data.message || 'Verification email sent. Check your inbox.';
+                okDiv.classList.remove('hidden');
+                resendForm.classList.add('hidden');
+            }
+        } catch {
+            errDiv.textContent = 'Network error. Please try again.';
+            errDiv.classList.remove('hidden');
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Resend Verification Email';
+    });
+}
+</script>
+{% endblock %}

@@ -2,6 +2,8 @@ from database.models import db, User
 from utils.security import hash_password, check_password
 from flask_jwt_extended import create_access_token, create_refresh_token
 import re
+import secrets
+from datetime import datetime, timedelta
 
 
 class AuthenticationService:
@@ -26,12 +28,16 @@ class AuthenticationService:
         if role not in ('admin', 'lecturer', 'student'):
             return None, 'Invalid role.'
 
+        verification_token = secrets.token_urlsafe(48)
         user = User(
             email=email,
             password_hash=hash_password(password),
             first_name=first_name,
             last_name=last_name,
             role=role,
+            email_verified=False,
+            email_verification_token=verification_token,
+            email_verification_token_expires=datetime.utcnow() + timedelta(hours=24),
         )
         db.session.add(user)
         db.session.commit()
@@ -54,6 +60,7 @@ class AuthenticationService:
             User.is_active,
             User.share_contact,
             User.created_at,
+            User.email_verified,
             User.face_encoding.isnot(None).label('face_registered'),
         ).filter(
             User.email == email,
@@ -62,6 +69,9 @@ class AuthenticationService:
 
         if not user_row or not check_password(password, user_row.password_hash):
             return None, 'Invalid email or password.'
+
+        if not user_row.email_verified:
+            return None, 'EMAIL_NOT_VERIFIED'
 
         profile_steps = [
             bool(user_row.profile_image),
@@ -82,6 +92,7 @@ class AuthenticationService:
             'phone_number': user_row.phone_number,
             'bio': user_row.bio,
             'is_active': user_row.is_active,
+            'email_verified': bool(user_row.email_verified),
             'share_contact': user_row.share_contact,
             'profile_complete': profile_complete,
             'face_registered': bool(user_row.face_registered),
@@ -132,3 +143,36 @@ class AuthenticationService:
         user.password_hash = hash_password(new_password)
         db.session.commit()
         return True, None
+
+    @staticmethod
+    def verify_email(token: str):
+        """Mark a user's email as verified using the verification token."""
+        user = User.query.filter_by(email_verification_token=token).first()
+        if not user:
+            return None, 'Invalid verification link.'
+        if user.email_verified:
+            return user, 'already_verified'
+        if user.email_verification_token_expires and \
+                user.email_verification_token_expires < datetime.utcnow():
+            return None, 'Verification link has expired. Please request a new one.'
+
+        user.email_verified = True
+        user.email_verification_token = None
+        user.email_verification_token_expires = None
+        db.session.commit()
+        return user, 'verified'
+
+    @staticmethod
+    def regenerate_verification_token(email: str):
+        """Issue a fresh verification token for an unverified account."""
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return None, 'No account found with that email.'
+        if user.email_verified:
+            return None, 'This account is already verified.'
+
+        token = secrets.token_urlsafe(48)
+        user.email_verification_token = token
+        user.email_verification_token_expires = datetime.utcnow() + timedelta(hours=24)
+        db.session.commit()
+        return user, token

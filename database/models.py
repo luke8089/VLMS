@@ -23,6 +23,9 @@ class User(db.Model):
     share_contact = db.Column(db.Boolean, default=False)
     reset_token = db.Column(db.String(100), nullable=True, index=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
+    email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    email_verification_token = db.Column(db.String(100), nullable=True, index=True)
+    email_verification_token_expires = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -47,6 +50,7 @@ class User(db.Model):
             'phone_number': self.phone_number,
             'bio': self.bio,
             'is_active': self.is_active,
+            'email_verified': self.email_verified,
             'share_contact': self.share_contact,
             'profile_complete': self._profile_completion(),
             'face_registered': bool(self.face_encoding),

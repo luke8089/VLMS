@@ -9,6 +9,7 @@ from services.authentication_service import AuthenticationService
 from config import UNIVERSITY_DEPARTMENTS
 import secrets
 from datetime import datetime, timedelta
+from mail.mailer import send_verification_email, send_password_reset_email
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -57,7 +58,15 @@ def register():
     if error:
         return jsonify({'error': error}), 400
 
-    return jsonify({'message': 'Registration successful', 'user': user.to_dict()}), 201
+    # Send verification email
+    base_url = request.host_url.rstrip('/')
+    verify_url = f"{base_url}/verify-email?token={user.email_verification_token}"
+    send_verification_email(user.first_name, user.email, verify_url)
+
+    return jsonify({
+        'message': 'Registration successful. Please check your email to verify your account.',
+        'user': user.to_dict(),
+    }), 201
 
 
 @auth_bp.route('/api/auth/login', methods=['POST'])
@@ -68,6 +77,12 @@ def login():
 
     result, error = AuthenticationService.login(data['email'], data['password'])
     if error:
+        if error == 'EMAIL_NOT_VERIFIED':
+            return jsonify({
+                'error': 'Please verify your email before logging in.',
+                'code': 'email_not_verified',
+                'email': data['email'],
+            }), 401
         return jsonify({'error': error}), 401
 
     # Set JWT cookies for browser-based auth + return tokens in body for API use
@@ -187,10 +202,55 @@ def register_face():
     })
 
 
+# ──────────────── EMAIL VERIFICATION ────────────────
+
+@auth_bp.route('/verify-email', methods=['GET'])
+def verify_email_page():
+    """User clicks the link in their verification email."""
+    token = request.args.get('token', '').strip()
+    if not token:
+        return render_template('verify_email.html', status='invalid')
+
+    user, result = AuthenticationService.verify_email(token)
+    if result == 'verified':
+        return render_template('verify_email.html', status='success',
+                               first_name=user.first_name)
+    if result == 'already_verified':
+        return render_template('verify_email.html', status='already_verified')
+    return render_template('verify_email.html', status='error', message=result)
+
+
+@auth_bp.route('/api/auth/resend-verification', methods=['POST'])
+def resend_verification():
+    """Resend a verification email to an unverified account."""
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
+
+    user, token_or_error = AuthenticationService.regenerate_verification_token(email)
+
+    # Always return a generic message to prevent email enumeration
+    if not user:
+        return jsonify({'message': 'If that email exists and is unverified, a new link has been sent.'})
+
+    base_url = request.host_url.rstrip('/')
+    verify_url = f"{base_url}/verify-email?token={token_or_error}"
+    send_verification_email(user.first_name, user.email, verify_url)
+
+    return jsonify({'message': 'Verification email resent. Please check your inbox.'})
+
+
 # ──────────────── FORGOT PASSWORD ────────────────
 
 @auth_bp.route('/forgot-password', methods=['GET'])
 def forgot_password_page():
+    return render_template('forgot_password.html')
+
+
+@auth_bp.route('/reset-password', methods=['GET'])
+def reset_password_page():
+    """Landing page for the link inside the password-reset email."""
     return render_template('forgot_password.html')
 
 
@@ -214,10 +274,11 @@ def forgot_password():
     user.reset_token_expires = datetime.utcnow() + timedelta(minutes=30)
     db.session.commit()
 
-    return jsonify({
-        'message': 'If an account with that email exists, a reset link has been generated.',
-        'reset_token': token,
-    })
+    base_url = request.host_url.rstrip('/')
+    reset_url = f"{base_url}/reset-password?token={token}"
+    send_password_reset_email(user.first_name, user.email, reset_url)
+
+    return jsonify({'message': 'If an account with that email exists, a password reset link has been sent.'})
 
 
 @auth_bp.route('/api/auth/reset-password', methods=['POST'])

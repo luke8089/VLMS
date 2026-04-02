@@ -428,9 +428,11 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
             errDiv.textContent = data.error || 'Registration failed';
             errDiv.classList.remove('hidden');
         } else {
-            successDiv.textContent = 'Account created! Redirecting to login...';
+            successDiv.innerHTML =
+                '<strong>Account created!</strong> A verification link has been sent to your email. ' +
+                'Please check your inbox and click the link to activate your account.';
             successDiv.classList.remove('hidden');
-            setTimeout(() => window.location.href = '/login', 1500);
+            document.getElementById('register-form').classList.add('hidden');
         }
     } catch (err) {
         errDiv.textContent = 'Network error. Please try again.';

@@ -487,7 +487,10 @@ CREATE TABLE `users` (
   `bio` text DEFAULT NULL,
   `reset_token` varchar(100) DEFAULT NULL,
   `reset_token_expires` datetime DEFAULT NULL,
-  `share_contact` tinyint(1) DEFAULT 0
+  `share_contact` tinyint(1) DEFAULT 0,
+  `email_verified` tinyint(1) NOT NULL DEFAULT 1,
+  `email_verification_token` varchar(100) DEFAULT NULL,
+  `email_verification_token_expires` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -895,6 +898,20 @@ ALTER TABLE `violations`
       'background_person','other',
       'fullscreen_exit','noise_detected','window_blur','keyboard_shortcut'
     ) NOT NULL;
+
+-- ============================================================
+-- MIGRATION: Email Verification — run once on existing DBs
+-- ============================================================
+
+-- 2a. Add email verification columns (existing users set to verified=1)
+ALTER TABLE `users`
+  ADD COLUMN IF NOT EXISTS `email_verified` tinyint(1) NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS `email_verification_token` varchar(100) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS `email_verification_token_expires` datetime DEFAULT NULL;
+
+-- 2b. Index for fast token lookups
+ALTER TABLE `users`
+  ADD INDEX IF NOT EXISTS `ix_users_email_verification_token` (`email_verification_token`);
 
 -- ============================================================
 

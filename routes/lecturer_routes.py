@@ -1,5 +1,6 @@
 import os
 import re
+import threading
 from flask import Blueprint, request, jsonify, render_template, current_app
 from flask_jwt_extended import jwt_required
 from database.models import (
@@ -9,6 +10,19 @@ from database.models import (
 from utils.security import role_required, get_identity
 from utils.helpers import paginate_query, save_uploaded_file, allowed_file
 from datetime import datetime, timedelta
+from mail.mailer import send_exam_published_email, send_live_class_email
+
+
+def _notify_enrolled_students(app, func, *args, **kwargs):
+    """Fire-and-forget email sender — runs in a background thread so it
+    never blocks the HTTP response."""
+    def _run():
+        with app.app_context():
+            try:
+                func(*args, **kwargs)
+            except Exception:
+                pass  # never crash the app over an email failure
+    threading.Thread(target=_run, daemon=True).start()
 
 lecturer_bp = Blueprint('lecturer', __name__)
 
@@ -729,6 +743,52 @@ def publish_exam(exam_id):
 
     exam.is_published = True
     db.session.commit()
+
+    # ── Notify enrolled students ──
+    lecturer = User.query.get(identity['id'])
+    lecturer_name = f"{lecturer.first_name} {lecturer.last_name}" if lecturer else 'Your Lecturer'
+    enrollments = Enrollment.query.filter_by(course_id=exam.course_id, status='active').all()
+    if enrollments:
+        base_url = request.host_url.rstrip('/')
+        dashboard_url = f"{base_url}/student/dashboard?view=exams"
+        start_str = exam.start_time.strftime('%d %b %Y, %H:%M') if exam.start_time else 'TBA'
+        end_str   = exam.end_time.strftime('%d %b %Y, %H:%M')   if exam.end_time   else 'TBA'
+
+        def _send_exam_emails(app, exam_id, course_id, course_title, course_code,
+                              lecturer_name, start_str, end_str, enr_ids, dashboard_url):
+            from database.models import db, User, Enrollment, Exam
+            with app.app_context():
+                exam_obj  = Exam.query.get(exam_id)
+                for enr in Enrollment.query.filter(Enrollment.id.in_(enr_ids)).all():
+                    student = User.query.get(enr.student_id)
+                    if student and student.email:
+                        try:
+                            send_exam_published_email(
+                                first_name=student.first_name,
+                                to_email=student.email,
+                                exam_title=exam_obj.title,
+                                exam_type=exam_obj.exam_type or 'quiz',
+                                course_code=course_code,
+                                course_title=course_title,
+                                lecturer_name=lecturer_name,
+                                start_time=start_str,
+                                end_time=end_str,
+                                duration_minutes=exam_obj.duration_minutes,
+                                total_marks=exam_obj.total_marks,
+                                dashboard_url=dashboard_url,
+                            )
+                        except Exception:
+                            pass
+
+        enr_ids = [e.id for e in enrollments]
+        app = current_app._get_current_object()
+        threading.Thread(
+            target=_send_exam_emails,
+            args=(app, exam.id, course.id, course.title, course.code,
+                  lecturer_name, start_str, end_str, enr_ids, dashboard_url),
+            daemon=True,
+        ).start()
+
     return jsonify({'message': 'Exam published', 'exam': exam.to_dict()})
 
 
@@ -1566,6 +1626,51 @@ def create_live_class(course_id):
     )
     db.session.add(live_class)
     db.session.commit()
+
+    # ── Notify enrolled students ──
+    lecturer = User.query.get(identity['id'])
+    lecturer_name = f"{lecturer.first_name} {lecturer.last_name}" if lecturer else 'Your Lecturer'
+    enrollments = Enrollment.query.filter_by(course_id=course_id, status='active').all()
+    if enrollments:
+        base_url = request.host_url.rstrip('/')
+        dashboard_url = f"{base_url}/student/dashboard?view=classes"
+        scheduled_str = scheduled_at.strftime('%d %b %Y at %H:%M')
+
+        def _send_class_emails(app, lc_id, course_id, course_title, course_code,
+                               lecturer_name, scheduled_str, enr_ids, dashboard_url):
+            from database.models import db, User, Enrollment, LiveClass
+            with app.app_context():
+                lc = LiveClass.query.get(lc_id)
+                for enr in Enrollment.query.filter(Enrollment.id.in_(enr_ids)).all():
+                    student = User.query.get(enr.student_id)
+                    if student and student.email:
+                        try:
+                            send_live_class_email(
+                                first_name=student.first_name,
+                                to_email=student.email,
+                                class_title=lc.title,
+                                class_description=lc.description or '',
+                                course_code=course_code,
+                                course_title=course_title,
+                                lecturer_name=lecturer_name,
+                                platform=lc.platform or 'zoom',
+                                meeting_link=lc.meeting_link,
+                                scheduled_at=scheduled_str,
+                                duration_minutes=lc.duration_minutes,
+                                dashboard_url=dashboard_url,
+                            )
+                        except Exception:
+                            pass
+
+        enr_ids = [e.id for e in enrollments]
+        app = current_app._get_current_object()
+        threading.Thread(
+            target=_send_class_emails,
+            args=(app, live_class.id, course_id, course.title, course.code,
+                  lecturer_name, scheduled_str, enr_ids, dashboard_url),
+            daemon=True,
+        ).start()
+
     return jsonify({'message': 'Live class created', 'class': live_class.to_dict()}), 201
 
 
