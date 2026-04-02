@@ -392,8 +392,9 @@
             </div>
 
             <!-- User Detail Modal -->
-            <div id="user-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-50 flex items-center justify-center p-4" onclick="closeUserModalOnBackdrop(event)" style="overflow-y: auto;">
-                <div class="modal-glass rounded-[28px] shadow-2xl max-w-4xl w-full my-8 border border-white/60" onclick="event.stopPropagation()" style="max-height: calc(100vh - 4rem);">
+            <div id="user-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-50 overflow-y-auto" onclick="closeUserModalOnBackdrop(event)">
+                <div class="flex min-h-full items-center justify-center p-4">
+                <div class="modal-glass rounded-[28px] shadow-2xl max-w-4xl w-full border border-white/60" onclick="event.stopPropagation()">
                     <!-- Modal Header -->
                     <div class="bg-black text-white px-8 py-5 rounded-t-[28px]">
                         <div class="flex items-center justify-between">
@@ -408,11 +409,12 @@
                     </div>
                     
                     <!-- Modal Content -->
-                    <div class="overflow-y-auto rounded-b-[28px]" style="max-height: calc(100vh - 12rem);">
+                    <div class="rounded-b-[28px]">
                         <div id="user-modal-content" class="p-8">
                             <!-- Content loaded dynamically -->
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
 
