@@ -73,6 +73,19 @@
 {% endblock %}
 
 {% block body %}
+<!-- ─── Exam Start Gate ─── -->
+<div id="start-gate" class="fixed inset-0 z-[10000] bg-black flex flex-col items-center justify-center gap-5">
+    <div class="text-white/30 text-[11px] uppercase tracking-[0.35em]">MindStack Exam</div>
+    <h2 class="text-3xl font-bold text-white">Ready to continue?</h2>
+    <p class="text-slate-400 text-sm text-center max-w-xs leading-relaxed">
+        Camera and microphone will be activated.<br>The exam runs in fullscreen — do not exit.
+    </p>
+    <button id="start-exam-btn"
+            class="mt-3 bg-white text-black font-bold px-10 py-3.5 rounded-xl hover:bg-neutral-200 active:scale-95 transition-all text-base tracking-wide">
+        Continue Exam
+    </button>
+</div>
+
 <div id="exam-root"
      data-exam-id="{{ exam_id }}"
      data-submission-verified="{% if submission and submission.face_verified %}true{% else %}false{% endif %}"
@@ -85,10 +98,16 @@
         <h2 class="text-2xl font-bold text-red-400 text-center">You exited fullscreen!</h2>
         <p class="text-slate-300 text-center max-w-sm">This has been recorded as a violation. Return to fullscreen immediately to continue your exam.</p>
         <div class="text-slate-400 text-sm">Returning automatically in <span id="fs-countdown">10</span>s…</div>
-        <button onclick="reEnterFullscreen()"
-                class="bg-white text-black font-bold px-8 py-3 rounded-xl hover:bg-neutral-200 transition text-lg">
-            Return to Fullscreen
-        </button>
+        <div class="flex items-center gap-4 mt-2">
+            <button onclick="reEnterFullscreen()"
+                    class="bg-white text-black font-bold px-8 py-3 rounded-xl hover:bg-neutral-200 transition text-base">
+                Return to Fullscreen
+            </button>
+            <button onclick="exitExam()"
+                    class="border border-white/25 text-white/70 hover:text-white hover:border-white/50 px-6 py-3 rounded-xl transition text-base">
+                Exit Exam
+            </button>
+        </div>
     </div>
 
     <!-- ─── Exam Header ─── -->
@@ -387,7 +406,6 @@ async function loadVerifiedExam(preloadedSubmissionId) {
     setupKeyboardMonitoring();
     setupBeforeUnload();
     setupFullscreenGuard();
-    requestFullscreen();
 }
 
 // ─── Capture Frame ────────────────────────────────────────────────────────────
@@ -470,6 +488,21 @@ function hideFullscreenOverlay() {
 function reEnterFullscreen() {
     hideFullscreenOverlay();
     requestFullscreen();
+}
+
+function exitExam() {
+    // Bypass the beforeunload guard
+    examSubmitted = true;
+    clearInterval(fsAutoReturnTimer);
+    clearInterval(timerInterval);
+    clearInterval(proctorInterval);
+    clearInterval(screenshotInterval);
+    if (audioContext) { audioContext.close().catch(() => {}); audioContext = null; }
+    if (stream)       stream.getTracks().forEach(t => t.stop());
+    if (audioStream)  audioStream.getTracks().forEach(t => t.stop());
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if (exit) { try { exit.call(document); } catch(_){} }
+    window.location.href = '/student/dashboard?view=exams';
 }
 
 // ─── Window Blur Detection ────────────────────────────────────────────────────
@@ -874,6 +907,14 @@ document.getElementById('submit-confirm-modal').addEventListener('click', e => {
 document.getElementById('submit-success-modal').addEventListener('click', e => { if(e.target.id==='submit-success-modal') closeSubmitSuccess(); });
 document.getElementById('exam-notice-modal').addEventListener('click',   e => { if(e.target.id==='exam-notice-modal') closeExamNotice(); });
 
-initCamera();
+document.getElementById('start-exam-btn').addEventListener('click', () => {
+    document.getElementById('start-gate').remove();
+    // Request fullscreen immediately — this MUST be inside a direct user gesture
+    const el  = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req) req.call(el).then(() => setBadge('badge-fs', true)).catch(() => setBadge('badge-fs', false));
+    // Now start camera, audio and load the exam
+    initCamera();
+});
 </script>
 {% endblock %}
