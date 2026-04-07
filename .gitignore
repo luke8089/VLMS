@@ -12,25 +12,30 @@ __pycache__/
 # Environment variables
 .env
 
-# IDE
+# IDE / Editor
 .vscode/
 .idea/
 *.swp
 *.swo
 
+# Claude Code
+.claude/
+
 # OS files
 Thumbs.db
 .DS_Store
 
-# Uploads (user-generated content)
+# Uploads (user-generated content — stored locally only)
 uploads/courses/*/
 uploads/profiles/*
 !uploads/courses/.gitkeep
 !uploads/profiles/.gitkeep
 
-# Screenshots (proctoring)
+# Proctoring data (generated at runtime — stored locally only)
 screenshots/*
 !screenshots/.gitkeep
+recordings/*
+!recordings/.gitkeep
 
 # AI models (large files)
 ai_models/
@@ -42,3 +47,7 @@ build/
 
 # Logs
 *.log
+
+# Database
+*.db
+*.sqlite3

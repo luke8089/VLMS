@@ -1,84 +1,68 @@
-# VLMS (Virtual Learning Management System) — Complete Setup Guide (New Laptop)
+# MindStack VLMS — Setup Guide
 
-This guide is a full, start-to-finish setup for running this project on a **new laptop**.
-Follow each step in order. No steps are optional unless marked as optional.
-
----
-
-## 1) What You Need Before Starting
-
-Install these first:
-
-1. **Git**
-   - Download: https://git-scm.com/downloads
-   - Verify:
-     ```powershell
-     git --version
-     ```
-
-2. **Python 3.11 (recommended)**
-   - Download: https://www.python.org/downloads/
-   - During install, enable **Add Python to PATH**.
-   - Verify:
-     ```powershell
-     python --version
-     ```
-
-3. **XAMPP (MySQL)**
-   - Download: https://www.apachefriends.org/download.html
-   - Install and open **XAMPP Control Panel**.
-   - Start **MySQL** (Apache is optional for this Flask app).
-
-4. **Microsoft Visual C++ Build Tools** (Windows)
-   - Needed for compiling `mysqlclient`.
-   - Download: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-   - Install workload: **Desktop development with C++**.
-
-5. **Ollama** (optional, only for AI features)
-   - Download: https://ollama.com/download
-   - After install, pull at least one model:
-     ```powershell
-     ollama pull llama3.2:1b
-     ```
-   - `mistral` or `llama3.2:3b` also works (slower but higher quality):
-     ```powershell
-     ollama pull mistral
-     ```
-
-6. **Tesseract OCR** (recommended for scanned PDFs)
-   - Required to summarize image-based PDFs.
-   - Install via winget:
-     ```powershell
-     winget install --id UB-Mannheim.TesseractOCR -e
-     ```
+A complete start-to-finish guide for running this project on a new machine.
+Follow each step in order.
 
 ---
 
-## 2) Get the Project on the New Laptop
+## 1) Prerequisites
 
-### Option A — Clone from Git
+Install the following before cloning the project:
+
+### 1.1 Git
+- Download: https://git-scm.com/downloads
+- Verify: `git --version`
+
+### 1.2 Python 3.11
+- Download: https://www.python.org/downloads/
+- Enable **Add Python to PATH** during install.
+- Verify: `python --version`
+
+### 1.3 XAMPP (MySQL)
+- Download: https://www.apachefriends.org/download.html
+- Open **XAMPP Control Panel** and start **MySQL**.
+- Apache is not required for this Flask app.
+
+### 1.4 Microsoft Visual C++ Build Tools (Windows)
+- Required to compile `mysqlclient`.
+- Download: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+- Install workload: **Desktop development with C++**.
+
+### 1.5 Ollama (optional — for AI features)
+- Download: https://ollama.com/download
+- After install, pull a model:
+  ```powershell
+  ollama pull llama3.2:1b
+  ```
+- `llama3` or `mistral` also work (larger, higher quality):
+  ```powershell
+  ollama pull mistral
+  ```
+
+### 1.6 Tesseract OCR (optional — for scanned PDFs)
+- Required to extract text from image-based PDFs.
+  ```powershell
+  winget install --id UB-Mannheim.TesseractOCR -e
+  ```
+
+---
+
+## 2) Clone the Project
 
 ```powershell
-git clone <your-repository-url>
-cd lms
+git clone https://github.com/luke8089/VLMS.git
+cd VLMS
 ```
-
-### Option B — Copy from external drive/zip
-
-- Copy the project folder to your laptop.
-- Open terminal in the project root (the folder containing `app.py`).
 
 ---
 
 ## 3) Create and Activate Virtual Environment
 
-From the project root:
-
 ```powershell
 python -m venv .venv
 ```
 
-Activate it:
+Activate:
 
 - **PowerShell**
   ```powershell
@@ -89,7 +73,7 @@ Activate it:
   .\.venv\Scripts\activate.bat
   ```
 
-Upgrade pip (recommended):
+Upgrade pip:
 
 ```powershell
 python -m pip install --upgrade pip
@@ -97,42 +81,38 @@ python -m pip install --upgrade pip
 
 ---
 
-## 4) Install Python Dependencies
+## 4) Install Dependencies
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-Notes:
-- First install can take time because of heavy packages (`torch`, `opencv-python`).
-- If `mysqlclient` fails to build, install the Visual C++ tools from step 1.4, then retry.
-- If PDF summarization fails on scanned files, ensure Tesseract is installed (step 1.6).
+> First install can take a few minutes due to `torch` and `opencv-python`.
+> If `mysqlclient` fails, ensure Visual C++ Build Tools (step 1.4) are installed.
 
 ---
 
 ## 5) Create the MySQL Database
 
-Make sure **XAMPP MySQL is running**.
+Ensure XAMPP MySQL is running, then create the database:
 
-Create database `aura_edu`:
-
-### Using phpMyAdmin
+### Via phpMyAdmin
 1. Open `http://localhost/phpmyadmin`
 2. Click **New**
 3. Database name: `aura_edu`
 4. Collation: `utf8mb4_general_ci`
 5. Click **Create**
 
-### Or via SQL
+### Via SQL
 ```sql
 CREATE DATABASE aura_edu CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 ```
 
 ---
 
-## 6) Configure Environment Variables (`.env`)
+## 6) Configure Environment Variables
 
-Create a file named `.env` in the project root:
+Create a `.env` file in the project root:
 
 ```env
 SECRET_KEY=change-this-secret-key
@@ -148,75 +128,66 @@ TESSERACT_CMD=C:\\Program Files\\Tesseract-OCR\\tesseract.exe
 ```
 
 If MySQL `root` has a password:
-
 ```env
 DATABASE_URL=mysql://root:YOUR_PASSWORD@localhost/aura_edu
 ```
 
 ---
 
-## 7) Initialize or Migrate Database (Only If Needed)
-
-If you are reusing an **old existing** `aura_edu` database (from older project versions), run:
-
-```powershell
-python _migrate.py
-```
-
-For a brand-new database, you can skip this step.
-
----
-
-## 8) Run the App
+## 7) Run the App
 
 ```powershell
 python app.py
 ```
 
-Expected behavior on first run:
-- Creates all DB tables automatically.
-- Seeds default admin account if none exists.
-- Starts server at `http://localhost:5000`.
-
-Open browser:
-- `http://localhost:5000`
+On first run the app will:
+- Create all database tables automatically
+- Seed a default admin account
+- Start the server at `http://localhost:5000`
 
 ---
 
-## 9) Default Admin Login (First Run)
+## 8) Default Admin Login
 
-The app seeds this admin user automatically:
+| Role  | Email               | Password  |
+|-------|---------------------|-----------|
+| Admin | admin@mindstack.com | admin123  |
 
-| Role  | Email                | Password |
-|-------|----------------------|----------|
-| Admin | admin@mindstack.com  | admin123 |
-
-Change credentials after first login for security.
+> Change credentials after first login.
 
 ---
 
-## 10) Optional AI Setup (Ollama Features)
+## 9) AI Features (Ollama)
 
-AI-powered summarization/question generation will use Ollama if available.
+The app uses a locally-running Ollama instance for:
+- Document summarization when uploading course materials
+- Exam question generation from course content
+- AI response time is tracked and displayed in the Admin panel
 
-1. Start Ollama app/service.
-2. Confirm Ollama endpoint is available (`http://localhost:11434`).
-3. Ensure at least one model is pulled (recommended: `llama3.2:1b` for speed).
+To use AI features:
+1. Start Ollama
+2. Confirm it's reachable at `http://localhost:11434`
+3. Ensure at least one model is pulled (recommended: `llama3.2:1b`)
 
-If Ollama is not available, the app still runs; AI features fall back or become limited.
+If Ollama is not running, the app continues to work — AI features fall back gracefully.
 
-### OCR Notes (Scanned PDFs)
-- For image-based PDFs, OCR is required to extract text.
-- Tesseract path is set via `TESSERACT_CMD` (defaults to `C:\Program Files\Tesseract-OCR\tesseract.exe`).
-- You can tune OCR performance using:
-  - `OCR_MAX_PAGES` (default 5)
-  - `OCR_SCALE` (default 1.5)
+---
+
+## 10) Face Registration & Exam Proctoring
+
+Students must register their face before sitting a proctored exam:
+
+- Navigate to `http://localhost:5000/face-registration`
+- Capture 3 samples (front, left, right)
+- Face verification runs at exam start and during the exam
+
+Proctoring captures:
+- Screenshots stored in `screenshots/` (local only, not committed to git)
+- Screen recordings stored in `recordings/` (local only, not committed to git)
 
 ---
 
 ## 11) Daily Run Commands
-
-From project root each time:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -227,78 +198,101 @@ python app.py
 
 ## 12) Troubleshooting
 
-### A) PowerShell blocks venv activation
+### PowerShell blocks venv activation
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
-Then reactivate:
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
 
-### B) `ModuleNotFoundError: No module named 'MySQLdb'`
-- Reinstall dependencies with venv activated:
-  ```powershell
-  pip install -r requirements.txt
-  ```
+### `ModuleNotFoundError: No module named 'MySQLdb'`
+- Ensure venv is activated, then: `pip install -r requirements.txt`
 - Ensure Visual C++ Build Tools are installed.
 
-### C) `Access denied for user 'root'@'localhost'`
-- Update `.env` `DATABASE_URL` with correct MySQL password.
-- Confirm MySQL user credentials in XAMPP/phpMyAdmin.
+### `Access denied for user 'root'@'localhost'`
+- Update `DATABASE_URL` in `.env` with the correct MySQL password.
 
-### D) `Can't connect to MySQL server on 'localhost'`
+### `Can't connect to MySQL server on 'localhost'`
 - Start MySQL in XAMPP Control Panel.
-- Check port conflicts (default MySQL: `3306`).
 
-### E) Port 5000 already in use
-- Stop the other process using port 5000, or run with a different port by editing `app.py`.
+### Port 5000 already in use
+- Stop the conflicting process or change the port in `app.py`.
 
-### F) AI features not working
-- Ensure Ollama is running.
-- Pull a model:
+### AI features not working
+- Ensure Ollama is running and a model is pulled:
   ```powershell
   ollama pull llama3.2:1b
   ```
 
-### G) OCR not working on scanned PDFs
-- Ensure Tesseract is installed and `TESSERACT_CMD` points to the correct path.
-- Confirm `pytesseract` is installed via `pip install -r requirements.txt`.
+### OCR not working on scanned PDFs
+- Confirm Tesseract is installed.
+- Check `TESSERACT_CMD` path in `.env`.
 
 ---
 
-## 13) Quick Verification Checklist
+## 13) Setup Checklist
 
-Use this to confirm setup is complete:
-
+- [ ] Python 3.11 installed
 - [ ] `.venv` created and activated
 - [ ] `pip install -r requirements.txt` succeeded
 - [ ] XAMPP MySQL is running
 - [ ] Database `aura_edu` exists
-- [ ] `.env` exists in project root
+- [ ] `.env` file created in project root
 - [ ] `python app.py` starts without errors
 - [ ] Login works at `http://localhost:5000`
-- [ ] AI summary works on a text-based PDF (optional)
-- [ ] OCR works on a scanned PDF (optional)
+- [ ] Face registration works at `http://localhost:5000/face-registration`
+- [ ] Ollama running (optional — for AI features)
+- [ ] Tesseract installed (optional — for scanned PDFs)
 
 ---
 
-## 14) Project Root Reference
-
-Expected key folders/files:
+## 14) Project Structure
 
 ```
-lms/
-├── app.py
-├── config.py
-├── requirements.txt
-├── _migrate.py
+VLMS/
+├── app.py                    # Flask entry point
+├── config.py                 # App configuration
+├── requirements.txt          # Python dependencies
+├── _migrate.py               # DB migration helper (existing installs)
+├── .env                      # Environment variables (not committed)
+│
 ├── database/
+│   ├── models.py             # SQLAlchemy models
+│   └── db_init.py            # DB initialisation & seeding
+│
 ├── routes/
+│   ├── auth_routes.py        # Login, register, face registration
+│   ├── student_routes.py     # Student dashboard & portal
+│   ├── lecturer_routes.py    # Lecturer panel & content
+│   ├── exam_routes.py        # Exam creation & submission
+│   ├── admin_routes.py       # Admin management
+│   └── analytics_routes.py  # Analytics & reporting API
+│
 ├── services/
+│   ├── authentication_service.py
+│   ├── analytics_service.py
+│   └── exam_service.py
+│
 ├── ai_modules/
-├── templates/
-├── static/
-├── uploads/
-└── screenshots/
+│   ├── ollama_service.py          # LLM integration (summarization, Q gen)
+│   ├── assessment_ai/             # Quiz generation, essay grading
+│   ├── exam_proctoring/           # Face auth, risk scoring, eye tracking
+│   └── learning_ai/               # Flashcards, summarizer, adaptive learning
+│
+├── templates/                # Jinja2 HTML templates
+├── static/                   # Static JS assets
+│
+├── landing/                  # Public landing page
+│   ├── index.html
+│   ├── style.css
+│   ├── script.js
+│   └── images/               # Landing page images
+│
+├── mail/                     # Email service (OAuth mailer)
+├── migrations/               # SQL schema reference
+│
+├── uploads/                  # User-uploaded files (not committed)
+│   ├── courses/
+│   └── profiles/
+│
+├── screenshots/              # Proctoring screenshots (not committed)
+└── recordings/               # Proctoring recordings (not committed)
 ```
