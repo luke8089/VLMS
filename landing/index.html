@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>MindStack — Virtual Learning Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"><link rel="stylesheet" href="/landing/style.css">
+
+  </head>
+    
+  <body>
+  <div id="scene">
+  <div id="cube">
+    <div class="face" data-face="top" data-i="0"><span class="face-ph">LEARN</span></div>
+    <div class="face" data-face="front" data-i="1"><span class="face-ph">ASSESS</span></div>
+    <div class="face" data-face="right" data-i="2"><span class="face-ph">VERIFY</span></div>
+    <div class="face" data-face="back" data-i="3"><span class="face-ph">TRACK</span></div>
+    <div class="face" data-face="left" data-i="4"><span class="face-ph">GROW</span></div>
+    <div class="face" data-face="bottom" data-i="5"><span class="face-ph">ACHIEVE</span></div>
+  </div>
+</div>
+
+<div id="hud">
+  <div id="hud_pct">000%</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="prog_fill"></div>
+  </div>
+  <div class="scene-label" id="scene_name">LEARN</div>
+</div>
+
+<button id="theme_toggle" aria-label="Toggle light/dark mode">
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+  </svg>
+</button>
+
+<div id="scene_strip">
+  <a href="#s0" class="scene-dot active"></a>
+  <a href="#s1" class="scene-dot"></a>
+  <a href="#s2" class="scene-dot"></a>
+  <a href="#s3" class="scene-dot"></a>
+  <a href="#s4" class="scene-dot"></a>
+  <a href="#s5" class="scene-dot"></a>
+</div>
+
+<div id="face_caption">
+  <div id="face_caption_num">01</div>
+  <div id="face_caption_name">LEARN</div>
+</div>
+
+<div id="scroll_container">
+
+  <section id="s0">
+    <div class="text-card">
+      <div class="tag">MindStack — Virtual LMS</div>
+      <h1>LEARN<br>SMARTER<br>TOGETHER</h1>
+      <p class="body-text">
+        A complete virtual learning management system.
+        Courses, live assessments, AI-powered recommendations,
+        and secure exam proctoring —
+        built for the modern campus.
+      </p>
+      <div class="cta-row">
+        <a class="cta" href="#s1">
+          Explore
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M1 6h10M6 1l5 5-5 5" />
+          </svg>
+        </a>
+        <a class="cta-back" href="/login">
+          Login
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="s1">
+    <div class="text-card right">
+      <div class="h-line"></div>
+      <div class="tag">01 — Course Management</div>
+      <h2>STRUCTURED<br>LEARNING<br>PATHS</h2>
+      <p class="body-text">
+        Enroll in courses, access lecture materials,
+        and track your progress in real time.
+        Lecturers manage content, assignments,
+        and enrollments from a single dashboard.
+      </p>
+      <div class="cta-row">
+        <a class="cta-back" href="#s0">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M11 6H1M6 11L1 6l5-5" />
+          </svg>
+          Back
+        </a>
+        <a class="cta" href="#s2">
+          Next
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M1 6h10M6 1l5 5-5 5" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="s2">
+    <div class="text-card">
+      <div class="h-line"></div>
+      <div class="tag">02 — Smart Assessments</div>
+      <h2>EXAMS<br>BUILT<br>TO SCALE</h2>
+      <p class="body-text">
+        Timed assessments with auto-grading,
+        randomised question banks, and instant feedback.
+        Multiple formats — quiz, written, and proctored —
+        built for every course type.
+      </p>
+      <div class="cta-row">
+        <a class="cta-back" href="#s1">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M11 6H1M6 11L1 6l5-5" />
+          </svg>
+          Back
+        </a>
+        <a class="cta" href="#s3">
+          Next
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M1 6h10M6 1l5 5-5 5" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="s3">
+    <div class="text-card right">
+      <div class="h-line"></div>
+      <div class="tag">03 — Exam Integrity</div>
+      <h2>SECURE<br>AT EVERY<br>STEP</h2>
+      <p class="body-text">
+        Face verification, tab-switch detection,
+        and AI risk scoring keep every submission honest.
+        Violations are flagged and logged in real time
+        so nothing slips through.
+      </p>
+      <div class="stat-row" style="justify-content: flex-end">
+        <div class="stat">
+          <span class="stat-num">3</span>
+          <span class="stat-label">Exam Types</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">6</span>
+          <span class="stat-label">Flag Triggers</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">AI</span>
+          <span class="stat-label">Risk Score</span>
+        </div>
+      </div>
+      <div class="cta-row">
+        <a class="cta-back" href="#s2">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M11 6H1M6 11L1 6l5-5" />
+          </svg>
+          Back
+        </a>
+        <a class="cta" href="#s4">
+          Next
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M1 6h10M6 1l5 5-5 5" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="s4">
+    <div class="text-card">
+      <div class="h-line"></div>
+      <div class="tag">04 — AI Recommendations</div>
+      <h2>GUIDED<br>BY<br>INSIGHT</h2>
+      <p class="body-text">
+        Personalised study recommendations
+        based on your performance history.
+        The system surfaces what you need
+        before you think to ask for it.
+      </p>
+      <div class="cta-row">
+        <a class="cta-back" href="#s3">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M11 6H1M6 11L1 6l5-5" />
+          </svg>
+          Back
+        </a>
+        <a class="cta" href="#s5">
+          Next
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M1 6h10M6 1l5 5-5 5" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="s5">
+    <div class="text-card right">
+      <div class="h-line"></div>
+      <div class="tag">05 — Get Started</div>
+      <h2>YOUR<br>JOURNEY<br>STARTS NOW</h2>
+      <p class="body-text">
+        Join students and educators on MindStack.
+        Sign in to continue where you left off,
+        or create your account today
+        and get learning immediately.
+      </p>
+      <div class="cta-row">
+        <a class="cta-back" href="#s4">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M11 6H1M6 11L1 6l5-5" />
+          </svg>
+          Back
+        </a>
+        <a class="cta" href="/register">
+          Sign Up
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M1 6h10M6 1l5 5-5 5" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="credit">
+  <a href="/login">MindStack VLMS</a>
+</div>
+    <script src="/landing/script.js"></script>
+
+  </body>
+  
+</html>

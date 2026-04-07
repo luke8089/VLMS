@@ -71,10 +71,15 @@ def create_app(config_name='development'):
     app.register_blueprint(analytics_bp)
     app.register_blueprint(admin_bp)
 
-    # Root route
+    # Root route — serve landing page
     @app.route('/')
     def index():
-        return redirect(url_for('auth.login_page'))
+        return send_from_directory('landing', 'index.html')
+
+    # Serve landing page static assets (style.css, script.js)
+    @app.route('/landing/<path:filename>')
+    def landing_static(filename):
+        return send_from_directory('landing', filename)
 
     # Serve uploaded files
     @app.route('/uploads/<path:filename>')
