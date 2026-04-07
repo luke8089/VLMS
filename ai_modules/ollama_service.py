@@ -12,11 +12,15 @@ Install: https://ollama.com   then `ollama pull llama3` or `ollama pull mistral`
 import json
 import os
 import re
+import time
 import requests
 
 OLLAMA_BASE = "http://localhost:11434"
 DEFAULT_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 REQUEST_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "15"))
+
+_response_times: list[float] = []  # rolling window of last 20 generate() durations (seconds)
+_MAX_SAMPLES = 20
 
 
 # ───────────────────── helpers ─────────────────────
@@ -55,13 +59,42 @@ def _generate(prompt: str, model: str | None = None, temperature: float = 0.7) -
         "stream": False,
         "options": {"temperature": temperature},
     }
+    t0 = time.time()
     resp = requests.post(
         f"{OLLAMA_BASE}/api/generate",
         json=payload,
         timeout=REQUEST_TIMEOUT,
     )
+    elapsed = time.time() - t0
+    _response_times.append(elapsed)
+    if len(_response_times) > _MAX_SAMPLES:
+        _response_times.pop(0)
     resp.raise_for_status()
     return resp.json().get("response", "").strip()
+
+
+def get_avg_response_time() -> str | None:
+    """Return the average AI response time as a formatted string.
+
+    Falls back to timing an Ollama /api/tags ping if no generate calls have
+    been recorded yet.  Returns None only if Ollama is unreachable.
+    """
+    if _response_times:
+        avg_s = sum(_response_times) / len(_response_times)
+    else:
+        # No generate calls yet — use a lightweight ping as a proxy
+        try:
+            t0 = time.time()
+            resp = requests.get(f"{OLLAMA_BASE}/api/tags", timeout=5)
+            if resp.status_code != 200:
+                return None
+            avg_s = time.time() - t0
+        except Exception:
+            return None
+
+    if avg_s >= 1:
+        return f"{avg_s:.1f}s"
+    return f"{int(avg_s * 1000)}ms"
 
 
 # ───────────────────── public API ─────────────────────

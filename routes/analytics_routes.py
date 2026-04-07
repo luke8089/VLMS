@@ -429,6 +429,8 @@ def predict_performance(student_id, course_id):
 @jwt_required()
 @role_required('admin')
 def admin_overview():
+    from ai_modules.ollama_service import get_avg_response_time
+
     total_users = User.query.count()
     total_students = User.query.filter_by(role='student').count()
     total_lecturers = User.query.filter_by(role='lecturer').count()
@@ -445,4 +447,5 @@ def admin_overview():
         'total_exams': total_exams,
         'total_submissions': total_submissions,
         'flagged_submissions': flagged_submissions,
+        'avg_ai_response': get_avg_response_time(),
     })
