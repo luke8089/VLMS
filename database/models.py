@@ -356,6 +356,7 @@ class Violation(db.Model):
         'lip_movement', 'phone_detected', 'tab_switch',
         'background_person', 'other',
         'fullscreen_exit', 'noise_detected', 'window_blur', 'keyboard_shortcut',
+        'face_mismatch',
         name='violation_types'
     ), nullable=False)
     severity = db.Column(db.Integer, default=5)  # Risk points added

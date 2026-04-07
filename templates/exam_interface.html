@@ -400,6 +400,7 @@ async function loadVerifiedExam(preloadedSubmissionId) {
     startTimer(startData.remaining_seconds ?? (startData.exam.duration_minutes * 60));
     startProctoring();
     startPeriodicScreenshots();
+    startFaceIdentityChecks();
     setupTabDetection();
     setupCopyProtection();
     setupWindowBlurDetection();
@@ -613,6 +614,41 @@ function startPeriodicScreenshots() {
             if (el) el.textContent = `${snapCount} snapshot${snapCount !== 1 ? 's' : ''}`;
         }
     }, 30000); // every 30 s
+}
+
+// ─── Face Identity Checks ─────────────────────────────────────────────────────
+let lastFaceCheckTime = 0;
+function startFaceIdentityChecks() {
+    // Run first check after 30 s, then every 60 s
+    setTimeout(async function runCheck() {
+        if (examSubmitted || !submissionId || !stream) return;
+        const now = Date.now();
+        if (now - lastFaceCheckTime < 55000) { setTimeout(runCheck, 60000); return; }
+        lastFaceCheckTime = now;
+
+        const frame = captureFrame();
+        try {
+            const resp = await AUTH.fetch(`/api/exam/${submissionId}/face-identity-check`, {
+                method: 'POST',
+                body: JSON.stringify({ image: frame }),
+            });
+            if (!resp.ok) { setTimeout(runCheck, 60000); return; }
+            const data = await resp.json();
+
+            if (data.skipped) { setTimeout(runCheck, 60000); return; }
+
+            updateRisk(data);
+
+            if (!data.verified) {
+                showViolationAlert(
+                    `⚠ Face identity mismatch — ${data.mismatch_pct}% mismatch detected. ` +
+                    `Match confidence: ${data.match_pct}%. This has been reported to your lecturer.`
+                );
+            }
+        } catch (_) {}
+
+        if (!examSubmitted) setTimeout(runCheck, 60000);
+    }, 30000);
 }
 
 // ─── Proctoring (frame analysis) ─────────────────────────────────────────────

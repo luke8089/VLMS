@@ -1407,7 +1407,7 @@ function renderExamItem(e, index = 0) {
     } else if (done && hasScore) {
         btn = `<div class="text-right">
             <div class="text-lg font-bold text-white">${e.total_score}<span class="text-sm font-normal text-neutral-400">/${e.total_marks}</span></div>
-            <button onclick="switchView('grades')" class="text-xs text-neutral-400 hover:text-white underline underline-offset-2 transition-colors">View grades</button>
+            <button onclick="navigateTo('grades')" class="text-xs text-neutral-400 hover:text-white underline underline-offset-2 transition-colors">View grades</button>
         </div>`;
     } else if (done) {
         btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';

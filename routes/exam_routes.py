@@ -245,6 +245,105 @@ def process_proctor_frame(submission_id):
     })
 
 
+@exam_bp.route('/api/exam/<int:submission_id>/face-identity-check', methods=['POST'])
+@jwt_required()
+@role_required('student')
+def face_identity_check(submission_id):
+    """Periodic face identity check during exam — compares live frame to registered encoding."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+
+    if not submission or submission.student_id != identity['id']:
+        return jsonify({'error': 'Submission not found'}), 404
+    if submission.status != 'in_progress':
+        return jsonify({'error': 'Exam not in progress'}), 400
+
+    data = request.get_json()
+    image_data = data.get('image')
+    if not image_data:
+        return jsonify({'error': 'No image provided'}), 400
+
+    try:
+        from ai_modules.exam_proctoring.face_auth import FaceAuthenticator
+        from database.models import User
+        authenticator = FaceAuthenticator()
+
+        user = User.query.get(identity['id'])
+        if not user or not user.face_encoding:
+            # No face registered — skip silently
+            return jsonify({'verified': True, 'skipped': True, 'reason': 'no_registration'})
+
+        result = authenticator.verify_face(
+            user_id=identity['id'],
+            base64_image=image_data,
+            exam_id=submission.exam_id,
+            submission_id=submission_id,
+        )
+
+        confidence = result.get('confidence', 0.0)
+        verified   = result.get('verified', False)
+        match_pct  = round(confidence * 100)
+        mismatch_pct = 100 - match_pct
+
+        if not verified:
+            severity = 45
+            description = (
+                f"Face identity mismatch detected during exam. "
+                f"Match confidence: {match_pct}% — Mismatch: {mismatch_pct}%. "
+                f"The person in front of the camera does not match the registered student."
+            )
+
+            violation = Violation(
+                submission_id=submission_id,
+                violation_type='face_mismatch',
+                severity=severity,
+                description=description,
+            )
+
+            # Always save a screenshot for face mismatches
+            try:
+                screenshot_dir = current_app.config.get('SCREENSHOT_FOLDER', 'screenshots')
+                os.makedirs(screenshot_dir, exist_ok=True)
+                filename = f"facemismatch_{submission_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.png"
+                filepath = os.path.join(screenshot_dir, filename)
+                img_bytes = base64.b64decode(image_data.split(',')[-1])
+                with open(filepath, 'wb') as f:
+                    f.write(img_bytes)
+                violation.screenshot_path = filename
+            except Exception:
+                pass
+
+            db.session.add(violation)
+            submission.risk_score = (submission.risk_score or 0) + severity
+
+            exam = Exam.query.get(submission.exam_id)
+            if submission.risk_score >= (exam.risk_threshold or 100):
+                submission.is_flagged = True
+
+            db.session.commit()
+
+            return jsonify({
+                'verified': False,
+                'match_pct': match_pct,
+                'mismatch_pct': mismatch_pct,
+                'risk_score': submission.risk_score,
+                'is_flagged': submission.is_flagged,
+                'violation_id': violation.id,
+            })
+
+        return jsonify({
+            'verified': True,
+            'match_pct': match_pct,
+            'mismatch_pct': mismatch_pct,
+            'risk_score': submission.risk_score,
+            'is_flagged': submission.is_flagged,
+        })
+
+    except Exception as e:
+        current_app.logger.error(f'Face identity check error: {e}')
+        return jsonify({'verified': True, 'skipped': True, 'reason': 'system_error'})
+
+
 @exam_bp.route('/api/exam/violations/<int:violation_id>/clip', methods=['POST'])
 @jwt_required()
 @role_required('student')

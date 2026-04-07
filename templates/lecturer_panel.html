@@ -2643,6 +2643,7 @@ async function openViolations(submissionId, studentName) {
         noise_detected:    'Noise / Voice Detected',
         window_blur:       'Window Left Focus',
         keyboard_shortcut: 'Suspicious Shortcut',
+        face_mismatch:     'Face Identity Mismatch',
     };
 
     contentEl.innerHTML = `
@@ -2661,13 +2662,18 @@ async function openViolations(submissionId, studentName) {
                 const time = v.timestamp ? new Date(v.timestamp).toLocaleString() : '—';
                 const screenshot = v.screenshot_path ? `/screenshots/${v.screenshot_path}` : null;
                 const video = v.video_path ? `/recordings/${v.video_path}` : null;
+                const isFaceMismatch = v.violation_type === 'face_mismatch';
                 return `
-                    <div class="border border-black/[0.06] rounded-xl p-4">
+                    <div class="border ${isFaceMismatch ? 'border-red-300/60 bg-red-50/40' : 'border-black/[0.06]'} rounded-xl p-4">
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                             <div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs px-2 py-0.5 rounded-full bg-black/[0.04] text-black/60 font-medium">${label}</span>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-xs px-2 py-0.5 rounded-full ${isFaceMismatch ? 'bg-red-100 text-red-700 font-semibold' : 'bg-black/[0.04] text-black/60 font-medium'}">${label}</span>
                                     <span class="text-[11px] text-black/40">Severity ${v.severity || 0}</span>
+                                    ${isFaceMismatch ? (() => {
+                                        const m = (v.description || '').match(/Mismatch: (\d+)%/);
+                                        return m ? `<span class="text-[11px] font-bold text-red-600">${m[1]}% mismatch</span>` : '';
+                                    })() : ''}
                                 </div>
                                 <p class="text-xs text-black/45 mt-2">${v.description || 'No description provided.'}</p>
                                 <p class="text-[11px] text-black/30 mt-2">${time}</p>
@@ -3329,6 +3335,7 @@ function generateAIRecommendation(violationsCount, violationTypes) {
     const lipMovement     = n('lip_movement');
     const phoneDetected   = n('phone_detected');
     const keyboardShortcut= n('keyboard_shortcut');
+    const faceMismatch    = n('face_mismatch');
 
     // ── Determine overall risk level ─────────────────────────────────────────
     let riskLevel = 'low';      // low | medium | high | critical
@@ -3341,6 +3348,11 @@ function generateAIRecommendation(violationsCount, violationTypes) {
         criticalFlags.push(`Face absent from camera in <strong>${noFace} consecutive checks</strong> — student may have left the seat or covered the camera.`);
     else if (noFace >= 2)
         warningFlags.push(`Face not detected in <strong>${noFace} checks</strong> — student may have moved away from the camera.`);
+
+    if (faceMismatch >= 2)
+        criticalFlags.push(`<strong>Face identity mismatch detected ${faceMismatch} times</strong> — the person in front of the camera does not match the registered student. This strongly suggests impersonation.`);
+    else if (faceMismatch === 1)
+        criticalFlags.push(`<strong>Face identity mismatch detected</strong> — the live face did not match the registered student profile. Review the screenshot evidence.`);
 
     if (multipleFaces >= 1)
         criticalFlags.push(`<strong>${multipleFaces} instance${multipleFaces>1?'s':''} of multiple faces</strong> detected — another person may be assisting the student.`);
