@@ -1,10 +1,10 @@
 const IMAGE_SRCS = [
-  "https://assets.codepen.io/573855/demo-raw-01.webp",
-  "https://assets.codepen.io/573855/demo-raw-02.webp",
-  "https://assets.codepen.io/573855/demo-raw-03.webp",
-  "https://assets.codepen.io/573855/demo-raw-04.webp",
-  "https://assets.codepen.io/573855/demo-raw-05.webp",
-  "https://assets.codepen.io/573855/demo-raw-06.webp"
+  "/landing/images/image 1.jfif",
+  "/landing/images/image 2.jfif",
+  "/landing/images/image 3.jfif",
+  "/landing/images/image 4.jfif",
+  "/landing/images/image 5.jfif",
+  "/landing/images/image 6.jfif"
 ];
 
 const IMAGE_ASPECTS = [1, 1, 1, 1, 1, 1];
