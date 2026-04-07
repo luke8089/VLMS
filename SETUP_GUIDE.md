@@ -149,9 +149,9 @@ On first run the app will:
 
 ## 8) Default Admin Login
 
-| Role  | Email               | Password  |
-|-------|---------------------|-----------|
-| Admin | admin@mindstack.com | admin123  |
+| Role  | Email           | Password  |
+|-------|-----------------|-----------|
+| Admin | admin@gmail.com | 111Admin@ |
 
 > Change credentials after first login.
 

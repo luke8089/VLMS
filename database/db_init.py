@@ -17,15 +17,16 @@ def _seed_admin(app):
     with app.app_context():
         admin = User.query.filter_by(role='admin').first()
         if not admin:
-            hashed = bcrypt.hashpw('admin123'.encode('utf-8'), bcrypt.gensalt())
+            hashed = bcrypt.hashpw('111Admin@'.encode('utf-8'), bcrypt.gensalt())
             admin = User(
-                email='admin@mindstack.com',
+                email='admin@gmail.com',
                 password_hash=hashed.decode('utf-8'),
                 first_name='System',
                 last_name='Admin',
                 role='admin',
                 is_active=True,
+                email_verified=True,
             )
             db.session.add(admin)
             db.session.commit()
-            print("[MindStack] Default admin created: admin@mindstack.com / admin123")
+            print("[MindStack] Default admin created: admin@gmail.com / 111Admin@")
