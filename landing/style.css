@@ -600,6 +600,7 @@
 }
 
 @layer responsive {
+  /* ── Tablet & small desktop (≤ 900px) ── */
   @media (width <= 56.25em) {
     #hud {
       top: 1rem;
@@ -648,6 +649,116 @@
 
     .cta-row {
       margin-block-start: 1.25rem;
+    }
+  }
+
+  /* ── Phone (≤ 480px) ── */
+  @media (width <= 30em) {
+    /* Hide the rotated credit text — it overlaps cards on phone */
+    #credit {
+      display: none;
+    }
+
+    /* Move HUD percentage closer to edge */
+    #hud {
+      top: 0.75rem;
+      right: 0.75rem;
+      font-size: 0.58rem;
+    }
+
+    #hud .progress-bar {
+      width: 5rem;
+    }
+
+    /* Move theme toggle closer */
+    #theme_toggle {
+      bottom: 0.75rem;
+      left: 0.9rem;
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    /* Face caption — smaller and higher so it doesn't crowd the card */
+    #face_caption {
+      bottom: 0.75rem;
+    }
+
+    #face_caption_name {
+      font-size: clamp(1.2rem, 8vw, 2rem);
+    }
+
+    /* Sections — reduce height so user doesn't have to scroll so far */
+    section {
+      min-height: 120vh;
+      padding: 0 1rem 5rem;
+    }
+
+    #s0 {
+      min-height: 100vh;
+      padding: 5rem 1rem 3rem;
+    }
+
+    /* Cards — tighter padding on small screens */
+    :is(.text-card, .text-card.right, .text-card.center) {
+      padding: 1.25rem 1rem;
+      border-radius: 0;
+      border-left-width: 2px;
+      border-right-width: 2px;
+    }
+
+    /* Headings — prevent overflow on very narrow screens */
+    h1 {
+      font-size: clamp(2.4rem, 14vw, 5rem);
+      line-height: 0.9;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 10vw, 3.2rem);
+      line-height: 0.9;
+    }
+
+    /* Body text slightly smaller */
+    .body-text {
+      font-size: 0.75rem;
+      line-height: 1.6;
+      margin-block-start: 1rem;
+    }
+
+    /* Tag */
+    .tag {
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      margin-block-end: 0.85rem;
+    }
+
+    /* Stat row — allow wrapping on very small phones */
+    .stat-row {
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-block-start: 1rem;
+    }
+
+    .stat-num {
+      font-size: 1.75rem;
+    }
+
+    /* CTA row — stack buttons vertically on phone */
+    .cta-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-block-start: 1rem;
+    }
+
+    .text-card.right .cta-row {
+      align-items: flex-end;
+    }
+
+    /* Buttons — slightly more compact */
+    .cta,
+    .cta-back {
+      padding: 0.55rem 1rem;
+      font-size: 0.6rem;
     }
   }
 }
