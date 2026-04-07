@@ -564,7 +564,7 @@
                             <input id="profile-lname" type="text" placeholder="Last name" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/30">
                         </div>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-4" id="profile-department-wrapper">
                         <label class="block text-sm font-medium text-neutral-400 mb-1">Department</label>
                         <select id="profile-department" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/30">
                             <option value="">Select your department</option>
@@ -596,7 +596,7 @@
                 </div>
 
                 <!-- Face Registration -->
-                <div class="dark-card p-6 mt-6">
+                <div id="face-section" class="dark-card p-6 mt-6">
                     <h3 class="text-lg font-semibold text-white mb-2">Face Verification</h3>
                     <p class="text-sm text-neutral-500 mb-4">Register your face for exam identity verification. Look directly at the camera.</p>
                     <div class="flex items-start gap-6">
@@ -830,8 +830,9 @@
     <div class="bg-neutral-950 rounded-2xl border border-white/10 w-full max-w-md p-6">
         <h3 id="student-notice-title" class="text-lg font-semibold text-white">Notice</h3>
         <p id="student-notice-message" class="text-sm text-neutral-300 mt-2">Message</p>
-        <div class="mt-5 flex justify-end">
-            <button onclick="closeStudentNotice()" class="px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition">OK</button>
+        <div class="mt-5 flex items-center justify-end gap-3">
+            <button id="student-notice-action" class="hidden px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition"></button>
+            <button onclick="closeStudentNotice()" id="student-notice-dismiss" class="px-4 py-2 rounded-lg border border-white/15 text-neutral-300 hover:bg-white/5 transition">Dismiss</button>
         </div>
     </div>
 </div>
@@ -2512,9 +2513,20 @@ async function enrollCourse(courseId) {
     }
 }
 
-function showStudentNotice(message, title = 'Notice') {
+function showStudentNotice(message, title = 'Notice', action = null) {
     document.getElementById('student-notice-title').textContent = title;
     document.getElementById('student-notice-message').textContent = message;
+    const actionBtn = document.getElementById('student-notice-action');
+    const dismissBtn = document.getElementById('student-notice-dismiss');
+    if (action) {
+        actionBtn.textContent = action.label;
+        actionBtn.onclick = () => { closeStudentNotice(); action.fn(); };
+        actionBtn.classList.remove('hidden');
+        dismissBtn.textContent = 'Cancel';
+    } else {
+        actionBtn.classList.add('hidden');
+        dismissBtn.textContent = 'OK';
+    }
     document.getElementById('student-notice-modal').classList.remove('hidden');
 }
 
@@ -2523,11 +2535,29 @@ function closeStudentNotice() {
 }
 
 function startExam(examId) {
+    // Block if face not registered
+    const u = AUTH.getUser();
+    if (!u || !u.face_registered) {
+        showStudentNotice(
+            'You must register your face before attempting any exam. This is required for identity verification during proctoring.',
+            'Face Registration Required',
+            {
+                label: 'Register Now',
+                fn: () => {
+                    navigateTo('profile');
+                    setTimeout(() => {
+                        const el = document.getElementById('face-section');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 400);
+                }
+            }
+        );
+        return;
+    }
+
     // Double-check via API that exam is open before navigating
     AUTH.fetch(`/api/student/exams/${examId}/start`, { method: 'POST' }).then(resp => {
         if (resp.ok) {
-            // Route through /exam/<id> so it handles face-registration check,
-            // existing verified submissions, and redirect to verify-face as needed.
             window.location.href = `/exam/${examId}`;
         } else {
             resp.json().then(d => showStudentNotice(d.error || 'Cannot start exam.')).catch(() => showStudentNotice('Cannot start this exam yet.'));
@@ -2801,7 +2831,26 @@ async function loadProfilePage() {
     // Fill form fields
     document.getElementById('profile-fname').value = u.first_name || '';
     document.getElementById('profile-lname').value = u.last_name || '';
-    document.getElementById('profile-department').value = u.department || '';
+    const deptSelect = document.getElementById('profile-department');
+    const deptWrapper = document.getElementById('profile-department-wrapper');
+    if (u.department) {
+        // Department already set — show as locked, only admin can change
+        deptSelect.value = u.department;
+        deptSelect.disabled = true;
+        deptSelect.classList.add('opacity-50', 'cursor-not-allowed');
+        if (deptWrapper) {
+            let lockNote = deptWrapper.querySelector('.dept-lock-note');
+            if (!lockNote) {
+                lockNote = document.createElement('p');
+                lockNote.className = 'dept-lock-note text-[11px] text-neutral-500 mt-1 flex items-center gap-1';
+                lockNote.innerHTML = `<svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Contact an admin to change your department.`;
+                deptWrapper.appendChild(lockNote);
+            }
+        }
+    } else {
+        deptSelect.disabled = false;
+        deptSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
     document.getElementById('profile-phone').value = u.phone_number || '';
     document.getElementById('profile-bio').value = u.bio || '';
 
@@ -2860,13 +2909,17 @@ async function uploadProfilePhoto(input) {
 }
 
 async function saveProfile() {
+    const deptSelect = document.getElementById('profile-department');
     const body = {
         first_name: document.getElementById('profile-fname').value.trim(),
         last_name: document.getElementById('profile-lname').value.trim(),
-        department: document.getElementById('profile-department').value.trim(),
         phone_number: document.getElementById('profile-phone').value.trim(),
         bio: document.getElementById('profile-bio').value.trim(),
     };
+    // Only send department if the field is not locked (i.e. not yet set)
+    if (!deptSelect.disabled) {
+        body.department = deptSelect.value.trim();
+    }
     const resp = await AUTH.fetch('/api/auth/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

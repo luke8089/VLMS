@@ -121,10 +121,14 @@ class AuthenticationService:
         if not user:
             return None, 'User not found.'
 
-        allowed = ['first_name', 'last_name', 'profile_image', 'phone_number', 'bio', 'share_contact', 'department']
+        allowed = ['first_name', 'last_name', 'profile_image', 'phone_number', 'bio', 'share_contact']
         for key, value in kwargs.items():
             if key in allowed and value is not None:
                 setattr(user, key, value)
+
+        # Department can only be set once by the student; after that only admin can change it
+        if 'department' in kwargs and kwargs['department'] and not user.department:
+            user.department = kwargs['department']
 
         db.session.commit()
         return user, None

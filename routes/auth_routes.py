@@ -30,7 +30,7 @@ def register_page():
 @jwt_required()
 def face_registration_page():
     """Page for students to register their face."""
-    next_url = request.args.get('next', '/student')
+    next_url = request.args.get('next', '/student/dashboard?view=profile')
     return render_template('face_registration.html', next_url=next_url)
 
 

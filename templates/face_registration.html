@@ -1,622 +1,848 @@
 {% extends "base.html" %}
-{% block title %}Face Verification — MindStack{% endblock %}
+{% block title %}Face Registration — MindStack{% endblock %}
 
 {% block head %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: #0a0a0a; color: #fff; }
-    
-    .verification-container {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-    }
-    
-    .camera-wrapper {
-        position: relative;
-        width: 480px;
-        max-width: 90vw;
-        aspect-ratio: 4/3;
-        background: #111;
-        border-radius: 20px;
-        overflow: hidden;
-        border: 2px solid rgba(255,255,255,0.1);
-    }
-    
-    .camera-wrapper.verifying {
-        border-color: #fbbf24;
-        animation: pulse-border 1.5s ease-in-out infinite;
-    }
-    
-    .camera-wrapper.success {
-        border-color: #22c55e;
-    }
-    
-    .camera-wrapper.error {
-        border-color: #ef4444;
-    }
-    
-    @keyframes pulse-border {
-        0%, 100% { border-color: rgba(251, 191, 36, 0.5); }
-        50% { border-color: rgba(251, 191, 36, 1); }
-    }
-    
-    #video-feed {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transform: scaleX(-1); /* Mirror effect */
-    }
-    
-    .face-overlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 240px;
-        height: 240px;
-        border: 3px dashed rgba(255,255,255,0.3);
-        border-radius: 50%;
-        pointer-events: none;
-    }
-    
-    .face-overlay.detected {
-        border-color: rgba(34, 197, 94, 0.6);
-        border-style: solid;
-        box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
-    }
-    
-    .status-indicator {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(0,0,0,0.7);
-        padding: 8px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 500;
-    }
-    
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #6b7280;
-    }
-    
-    .status-dot.active { background: #22c55e; animation: pulse 1.5s ease-in-out infinite; }
-    .status-dot.processing { background: #fbbf24; animation: pulse 1s ease-in-out infinite; }
-    .status-dot.error { background: #ef4444; }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.4; }
-    }
-    
-    .instruction-box {
-        margin-top: 2rem;
-        text-align: center;
-        max-width: 480px;
-    }
-    
-    .instruction-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-    
-    .instruction-text {
-        color: rgba(255,255,255,0.6);
-        font-size: 0.95rem;
-        line-height: 1.5;
-    }
-    
-    .progress-bar {
-        width: 100%;
-        height: 4px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 2px;
-        margin-top: 1.5rem;
-        overflow: hidden;
-    }
-    
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #fff, rgba(255,255,255,0.7));
-        border-radius: 2px;
-        transition: width 0.3s ease;
-        width: 0%;
-    }
-    
-    .sample-counter {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 1.5rem;
-    }
-    
-    .sample-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.2);
-        transition: all 0.3s ease;
-    }
-    
-    .sample-dot.captured { background: #22c55e; }
-    .sample-dot.current { background: #fbbf24; animation: pulse 1s ease-in-out infinite; }
-    
-    .action-buttons {
-        display: flex;
-        gap: 12px;
-        margin-top: 2rem;
-    }
-    
-    .btn {
-        padding: 12px 24px;
-        border-radius: 12px;
-        font-size: 0.95rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: none;
-    }
-    
-    .btn-primary {
-        background: #fff;
-        color: #000;
-    }
-    
-    .btn-primary:hover { background: #e5e5e5; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    
-    .btn-secondary {
-        background: rgba(255,255,255,0.1);
-        color: #fff;
-    }
-    
-    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
-    
-    .liveness-checks {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 1rem;
-    }
-    
-    .check-badge {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        background: rgba(255,255,255,0.05);
-        border-radius: 20px;
-        font-size: 12px;
-        color: rgba(255,255,255,0.5);
-    }
-    
-    .check-badge.passed {
-        background: rgba(34, 197, 94, 0.15);
-        color: #22c55e;
-    }
-    
-    .check-badge.failed {
-        background: rgba(239, 68, 68, 0.15);
-        color: #ef4444;
-    }
-    
-    .result-modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.8);
-        backdrop-filter: blur(8px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease;
-    }
-    
-    .result-modal.visible {
-        opacity: 1;
-        pointer-events: auto;
-    }
-    
-    .result-card {
-        background: #111;
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 20px;
-        padding: 2.5rem;
-        text-align: center;
-        max-width: 400px;
-        width: 90%;
-        transform: scale(0.95);
-        transition: transform 0.3s ease;
-    }
-    
-    .result-modal.visible .result-card {
-        transform: scale(1);
-    }
-    
-    .result-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-    }
-    
-    .result-icon.success {
-        background: rgba(34, 197, 94, 0.15);
-        color: #22c55e;
-    }
-    
-    .result-icon.error {
-        background: rgba(239, 68, 68, 0.15);
-        color: #ef4444;
-    }
-    
-    .hidden-canvas { display: none; }
+* { font-family: 'Inter', -apple-system, sans-serif; box-sizing: border-box; }
+body, body.bg-gray-50 {
+    background: #000 !important;
+    color: #fff !important;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+.left-panel, .right-panel { color: #fff; }
+
+/* ── Background ── */
+.bg-layer {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(255,255,255,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(255,255,255,0.03) 0%, transparent 60%);
+}
+.grid-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+}
+
+/* ── Page Layout ── */
+.page-root {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+@media (max-width: 900px) {
+    .page-root { grid-template-columns: 1fr; }
+    .left-panel { padding: 2rem 1.5rem 1rem; }
+    .right-panel { padding: 1rem 1.5rem 3rem; }
+}
+
+/* ── Left Panel ── */
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 3rem 3rem 4rem;
+    border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── Camera Frame ── */
+.cam-frame {
+    position: relative;
+    width: 340px;
+    max-width: 100%;
+    aspect-ratio: 3/4;
+    animation: frameIn 0.7s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes frameIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.cam-video-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #0a0a0a;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.cam-video-wrap.state-active  { border-color: rgba(255,255,255,0.18); box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 30px 80px rgba(0,0,0,0.6); }
+.cam-video-wrap.state-ready   { border-color: rgba(255,255,255,0.35); box-shadow: 0 0 40px rgba(255,255,255,0.07); }
+.cam-video-wrap.state-capture { border-color: rgba(255,255,255,0.6);  box-shadow: 0 0 60px rgba(255,255,255,0.12), 0 0 0 3px rgba(255,255,255,0.08); animation: captureFlash 0.5s ease; }
+.cam-video-wrap.state-success { border-color: rgba(134,239,172,0.6);  box-shadow: 0 0 60px rgba(134,239,172,0.15); }
+.cam-video-wrap.state-error   { border-color: rgba(248,113,113,0.6);  box-shadow: 0 0 40px rgba(248,113,113,0.12); animation: shake 0.4s ease; }
+
+@keyframes captureFlash { 0%,100%{background:#0a0a0a} 30%{background:#1a1a1a} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+#video-feed {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+/* Face oval overlay */
+.face-oval {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 170px; height: 210px;
+    border: 2px dashed rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    pointer-events: none;
+}
+.face-oval.detected {
+    border-style: solid;
+    border-color: rgba(134,239,172,0.7);
+    box-shadow: 0 0 0 8px rgba(134,239,172,0.08), inset 0 0 40px rgba(134,239,172,0.05);
+}
+
+/* Scanning line */
+.scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    top: 0%;
+    animation: scanDown 2.5s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+.cam-video-wrap.state-active  .scan-line,
+.cam-video-wrap.state-ready   .scan-line { opacity: 1; }
+@keyframes scanDown {
+    0%   { top: 10%; }
+    50%  { top: 90%; }
+    100% { top: 10%; }
+}
+
+/* Corner brackets */
+.corners {
+    position: absolute; inset: -2px;
+    pointer-events: none;
+    border-radius: 24px;
+}
+.corner {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: rgba(255,255,255,0.5);
+    border-style: solid;
+    border-width: 0;
+    transition: border-color 0.4s ease;
+}
+.corner.tl { top:10px; left:10px;  border-top-width:2px; border-left-width:2px;  border-top-left-radius:8px; }
+.corner.tr { top:10px; right:10px; border-top-width:2px; border-right-width:2px; border-top-right-radius:8px; }
+.corner.bl { bottom:10px; left:10px;  border-bottom-width:2px; border-left-width:2px;  border-bottom-left-radius:8px; }
+.corner.br { bottom:10px; right:10px; border-bottom-width:2px; border-right-width:2px; border-bottom-right-radius:8px; }
+
+.cam-video-wrap.state-ready .corner  { border-color: rgba(255,255,255,0.8); animation: cornerPulse 2s ease-in-out infinite; }
+.cam-video-wrap.state-success .corner{ border-color: rgba(134,239,172,0.9); }
+@keyframes cornerPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* Live status pill */
+.live-pill {
+    position: absolute;
+    top: 14px; left: 14px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.03em;
+    transition: all 0.3s ease;
+}
+.live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #6b7280;
+    transition: background 0.3s;
+}
+.live-dot.on  { background: #4ade80; animation: blink 1.4s ease-in-out infinite; }
+.live-dot.proc{ background: #fbbf24; animation: blink 0.8s ease-in-out infinite; }
+.live-dot.err { background: #f87171; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* Sample tick strip */
+.tick-strip {
+    position: absolute;
+    bottom: 14px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 8px;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 7px 14px;
+    border-radius: 20px;
+}
+.tick {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: all 0.4s cubic-bezier(.4,0,.2,1);
+    position: relative;
+}
+.tick.done {
+    background: #4ade80;
+    box-shadow: 0 0 10px rgba(74,222,128,0.5);
+    animation: tickPop 0.4s cubic-bezier(.4,0,.2,1);
+}
+.tick.active {
+    background: rgba(255,255,255,0.5);
+    animation: tickBlink 1s ease-in-out infinite;
+}
+@keyframes tickPop  { 0%{transform:scale(0.5)} 60%{transform:scale(1.3)} 100%{transform:scale(1)} }
+@keyframes tickBlink{ 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── Right Panel ── */
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem 4rem 3rem 3rem;
+    animation: panelIn 0.8s 0.15s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes panelIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.step-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 1.5rem;
+}
+.step-tag::before {
+    content: '';
+    display: inline-block; width: 20px; height: 1px;
+    background: rgba(255,255,255,0.25);
+}
+
+.main-title {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+.main-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.7;
+    max-width: 360px;
+    margin-bottom: 2.5rem;
+    transition: all 0.4s ease;
+}
+
+/* Step progress */
+.steps-row {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+}
+.step-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+.step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 15px; left: calc(50% + 18px);
+    width: calc(100% - 36px); height: 1px;
+    background: rgba(255,255,255,0.1);
+    transition: background 0.4s ease;
+}
+.step-item.done:not(:last-child)::after { background: rgba(74,222,128,0.4); }
+
+.step-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    margin: 0 auto;
+    transition: all 0.4s cubic-bezier(.4,0,.2,1);
+    position: relative; z-index: 1;
+}
+.step-item.active .step-num {
+    border-color: rgba(255,255,255,0.7);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.06);
+    animation: stepPulse 2s ease-in-out infinite;
+}
+.step-item.done .step-num {
+    background: rgba(74,222,128,0.15);
+    border-color: rgba(74,222,128,0.6);
+    color: #4ade80;
+    box-shadow: 0 0 16px rgba(74,222,128,0.15);
+}
+@keyframes stepPulse { 0%,100%{box-shadow:0 0 0 4px rgba(255,255,255,0.06)} 50%{box-shadow:0 0 0 8px rgba(255,255,255,0.03)} }
+
+.step-label {
+    text-align: center;
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    transition: color 0.3s ease;
+}
+.step-item.active .step-label { color: rgba(255,255,255,0.6); }
+.step-item.done  .step-label  { color: rgba(74,222,128,0.7); }
+
+/* Progress bar */
+.prog-track {
+    height: 3px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+}
+.prog-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9));
+    width: 0%;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+}
+
+/* Liveness badges */
+.badges-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 2.5rem;
+}
+.badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.35);
+    transition: all 0.35s cubic-bezier(.4,0,.2,1);
+}
+.badge svg { width: 12px; height: 12px; }
+.badge.ok {
+    background: rgba(74,222,128,0.08);
+    border-color: rgba(74,222,128,0.3);
+    color: #4ade80;
+}
+.badge.fail {
+    background: rgba(248,113,113,0.08);
+    border-color: rgba(248,113,113,0.3);
+    color: #f87171;
+}
+
+/* Buttons */
+.btn-capture {
+    position: relative;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%;
+    padding: 16px 28px;
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+    transition: all 0.2s cubic-bezier(.4,0,.2,1);
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+.btn-capture::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0);
+    transition: background 0.2s;
+}
+.btn-capture:hover:not(:disabled)::before { background: rgba(0,0,0,0.06); }
+.btn-capture:active:not(:disabled) { transform: scale(0.98); }
+.btn-capture:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-capture .cam-icon {
+    width: 18px; height: 18px;
+    transition: transform 0.3s ease;
+}
+.btn-capture:hover:not(:disabled) .cam-icon { transform: scale(1.1); }
+
+.btn-skip {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: rgba(255,255,255,0.35);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+}
+.btn-skip:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); }
+
+/* Instruction text transition */
+.instruction-animate {
+    animation: instructionSwap 0.4s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes instructionSwap {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Success Modal ── */
+.result-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(16px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+.result-overlay.visible {
+    opacity: 1; pointer-events: auto;
+}
+.result-card {
+    background: #0e0e0e;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 2.5rem;
+    max-width: 400px; width: 100%;
+    text-align: center;
+    transform: translateY(16px) scale(0.97);
+    transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+}
+.result-overlay.visible .result-card {
+    transform: translateY(0) scale(1);
+}
+
+.result-ring {
+    position: relative;
+    width: 80px; height: 80px;
+    margin: 0 auto 1.75rem;
+}
+.result-ring svg { width: 80px; height: 80px; }
+.ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 3; }
+.ring-fill { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 226; stroke-dashoffset: 226; transition: stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1) 0.1s; }
+.ring-fill.success-ring { stroke: #4ade80; }
+.ring-fill.error-ring   { stroke: #f87171; }
+.result-overlay.visible .ring-fill { stroke-dashoffset: 0; }
+
+.ring-icon {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.4s cubic-bezier(.4,0,.2,1) 0.5s;
+}
+.result-overlay.visible .ring-icon { opacity: 1; transform: scale(1); }
+
+.result-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+.result-msg   { font-size: 0.9rem; color: rgba(255,255,255,0.45); line-height: 1.6; margin-bottom: 2rem; }
+
+.btn-continue {
+    width: 100%;
+    padding: 14px;
+    background: #fff; color: #000;
+    border: none; border-radius: 12px;
+    font-size: 0.95rem; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+}
+.btn-continue:hover { background: #e5e5e5; }
+
+.hidden-canvas { display: none; }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="verification-container">
-    <div class="camera-wrapper" id="camera-wrapper">
-        <video id="video-feed" autoplay playsinline></video>
-        <div class="face-overlay" id="face-overlay"></div>
-        
-        <div class="status-indicator">
-            <span class="status-dot" id="status-dot"></span>
-            <span id="status-text">Initializing...</span>
+<div class="bg-layer"></div>
+<div class="grid-bg"></div>
+
+<div class="page-root">
+
+    <!-- ── LEFT: Camera ── -->
+    <div class="left-panel">
+        <div class="cam-frame">
+            <div class="cam-video-wrap" id="camera-wrapper">
+                <video id="video-feed" autoplay playsinline></video>
+
+                <!-- Scanning line -->
+                <div class="scan-line"></div>
+
+                <!-- Face oval -->
+                <div class="face-oval" id="face-overlay"></div>
+
+                <!-- Corner brackets -->
+                <div class="corners">
+                    <div class="corner tl"></div>
+                    <div class="corner tr"></div>
+                    <div class="corner bl"></div>
+                    <div class="corner br"></div>
+                </div>
+
+                <!-- Live status -->
+                <div class="live-pill">
+                    <span class="live-dot" id="status-dot"></span>
+                    <span id="status-text">Initialising…</span>
+                </div>
+
+                <!-- Sample ticks -->
+                <div class="tick-strip">
+                    <div class="tick active" id="tick-0"></div>
+                    <div class="tick"        id="tick-1"></div>
+                    <div class="tick"        id="tick-2"></div>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <div class="instruction-box">
-        <h1 class="instruction-title" id="instruction-title">Face Registration</h1>
-        <p class="instruction-text" id="instruction-text">
-            Please look directly at the camera. We'll capture 3 samples of your face for secure verification during exams.
+
+    <!-- ── RIGHT: Controls ── -->
+    <div class="right-panel">
+        <div class="step-tag">Identity Setup</div>
+
+        <h1 class="main-title">Face<br>Registration</h1>
+        <p class="main-subtitle" id="instruction-text">
+            Position your face inside the oval and capture 3 samples for secure exam identity verification.
         </p>
-        
-        <div class="sample-counter" id="sample-counter">
-            <div class="sample-dot current"></div>
-            <div class="sample-dot"></div>
-            <div class="sample-dot"></div>
+
+        <!-- Step progress -->
+        <div class="steps-row" id="steps-row">
+            <div class="step-item active" id="step-0">
+                <div class="step-num">1</div>
+                <div class="step-label">Front</div>
+            </div>
+            <div class="step-item" id="step-1">
+                <div class="step-num">2</div>
+                <div class="step-label">Left</div>
+            </div>
+            <div class="step-item" id="step-2">
+                <div class="step-num">3</div>
+                <div class="step-label">Right</div>
+            </div>
         </div>
-        
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill"></div>
+
+        <!-- Progress bar -->
+        <div class="prog-track">
+            <div class="prog-fill" id="progress-fill"></div>
         </div>
-        
-        <div class="liveness-checks" id="liveness-checks">
-            <div class="check-badge" id="check-lighting">
-                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+
+        <!-- Liveness badges -->
+        <div class="badges-row">
+            <span class="badge" id="check-lighting">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                 Good lighting
-            </div>
-            <div class="check-badge" id="check-face">
-                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <span class="badge" id="check-face">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 Face detected
-            </div>
-            <div class="check-badge" id="check-liveness">
-                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Liveness check
-            </div>
+            </span>
+            <span class="badge" id="check-liveness">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Liveness
+            </span>
         </div>
-    </div>
-    
-    <div class="action-buttons">
-        <button class="btn btn-primary" id="capture-btn" onclick="captureSample()" disabled>
+
+        <!-- Buttons -->
+        <button class="btn-capture" id="capture-btn" onclick="captureSample()" disabled>
+            <svg class="cam-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+            </svg>
             Capture Sample
         </button>
-        <button class="btn btn-secondary" onclick="skipRegistration()" id="skip-btn">
+
+        <button class="btn-skip" id="skip-btn" onclick="skipRegistration()">
             Skip for now
         </button>
     </div>
 </div>
 
-<!-- Result Modal -->
-<div class="result-modal" id="result-modal">
+<!-- ── Result Modal ── -->
+<div class="result-overlay" id="result-modal">
     <div class="result-card">
-        <div class="result-icon" id="result-icon">
-            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6L9 17l-5-5"/>
+        <div class="result-ring">
+            <svg viewBox="0 0 80 80">
+                <circle class="ring-bg" cx="40" cy="40" r="36"/>
+                <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="36" transform="rotate(-90 40 40)"/>
             </svg>
+            <div class="ring-icon" id="ring-icon"></div>
         </div>
-        <h2 class="text-xl font-semibold mb-2" id="result-title">Success!</h2>
-        <p class="text-neutral-400 text-sm mb-6" id="result-message">Your face has been registered successfully.</p>
-        <button class="btn btn-primary w-full" onclick="closeResultModal()" id="result-action-btn">
-            Continue to Dashboard
-        </button>
+        <h2 class="result-title" id="result-title">Success!</h2>
+        <p class="result-msg" id="result-message">Your face has been registered successfully.</p>
+        <button class="btn-continue" onclick="closeResultModal()" id="result-action-btn">Continue to Profile</button>
     </div>
 </div>
 
 <canvas id="capture-canvas" class="hidden-canvas"></canvas>
 
 <script>
-// Configuration
 const REQUIRED_SAMPLES = 3;
-const CAPTURE_DELAY = 500; // ms between captures
 
-// State
 let stream = null;
 let samples = [];
 let isCapturing = false;
 let faceDetected = false;
-let currentStep = 0;
 
-// Get the redirect URL from query params or template variable
 const urlParams = new URLSearchParams(window.location.search);
-const redirectUrl = urlParams.get('next') || '{{ next_url }}' || '/student?view=profile';
+const redirectUrl = urlParams.get('next') || '{{ next_url }}' || '/student/dashboard?view=profile';
 
-// DOM Elements
-const video = document.getElementById('video-feed');
-const canvas = document.getElementById('capture-canvas');
-const cameraWrapper = document.getElementById('camera-wrapper');
-const faceOverlay = document.getElementById('face-overlay');
-const statusDot = document.getElementById('status-dot');
-const statusText = document.getElementById('status-text');
-const captureBtn = document.getElementById('capture-btn');
-const progressFill = document.getElementById('progress-fill');
-const sampleDots = document.querySelectorAll('.sample-dot');
-const instructionTitle = document.getElementById('instruction-title');
-const instructionText = document.getElementById('instruction-text');
+const video       = document.getElementById('video-feed');
+const canvas      = document.getElementById('capture-canvas');
+const camWrap     = document.getElementById('camera-wrapper');
+const faceOval    = document.getElementById('face-overlay');
+const statusDot   = document.getElementById('status-dot');
+const statusText  = document.getElementById('status-text');
+const captureBtn  = document.getElementById('capture-btn');
+const progFill    = document.getElementById('progress-fill');
+const instrText   = document.getElementById('instruction-text');
 
-// Check badges
-const checkLighting = document.getElementById('check-lighting');
-const checkFace = document.getElementById('check-face');
-const checkLiveness = document.getElementById('check-liveness');
+const instructions = [
+    'Position your face inside the oval and look directly at the camera.',
+    'Great! Now turn your head slightly to the left.',
+    'Almost done — turn slightly to the right for the final sample.',
+];
 
-// Initialize camera on page load
-window.addEventListener('DOMContentLoaded', initializeCamera);
+window.addEventListener('DOMContentLoaded', initCamera);
 
-async function initializeCamera() {
+async function initCamera() {
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                width: { ideal: 640 },
-                height: { ideal: 480 },
-                facingMode: 'user'
-            }, 
-            audio: false 
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+            audio: false,
         });
         video.srcObject = stream;
-        
-        statusDot.classList.add('active');
+        statusDot.classList.add('on');
         statusText.textContent = 'Camera active';
+        camWrap.classList.add('state-active');
         captureBtn.disabled = false;
-        
-        // Start face detection simulation
         startFaceDetection();
-        
     } catch (err) {
-        console.error('Camera error:', err);
-        statusDot.classList.add('error');
-        statusText.textContent = 'Camera access denied';
-        instructionText.textContent = 'Please allow camera access to register your face.';
+        statusDot.classList.add('err');
+        statusText.textContent = 'Camera denied';
+        instrText.textContent = 'Please allow camera access and reload.';
         captureBtn.disabled = true;
     }
 }
 
 function startFaceDetection() {
-    // Simple face detection simulation using canvas frame analysis
-    // In production, this could use face-api.js for real detection
     setInterval(() => {
         if (!video.videoWidth) return;
-        
-        // Check video brightness as a proxy for face presence
-        canvas.width = video.videoWidth;
+        canvas.width  = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Get center region brightness
-        const centerX = Math.floor(canvas.width / 2);
-        const centerY = Math.floor(canvas.height / 2);
-        const regionSize = 100;
-        
+        const cx = Math.floor(canvas.width / 2);
+        const cy = Math.floor(canvas.height / 2);
         try {
-            const frame = ctx.getImageData(
-                centerX - regionSize/2, 
-                centerY - regionSize/2, 
-                regionSize, 
-                regionSize
-            );
-            
+            const px = ctx.getImageData(cx - 50, cy - 50, 100, 100).data;
             let brightness = 0;
-            for (let i = 0; i < frame.data.length; i += 4) {
-                brightness += (frame.data[i] + frame.data[i+1] + frame.data[i+2]) / 3;
-            }
-            brightness /= (frame.data.length / 4);
-            
-            // Update liveness checks
-            updateLivenessChecks(brightness);
-            
-        } catch (e) {
-            // Ignore errors
-        }
+            for (let i = 0; i < px.length; i += 4)
+                brightness += (px[i] + px[i+1] + px[i+2]) / 3;
+            brightness /= px.length / 4;
+            updateChecks(brightness);
+        } catch (_) {}
     }, 500);
 }
 
-function updateLivenessChecks(brightness) {
-    // Check lighting
-    if (brightness > 40 && brightness < 200) {
-        checkLighting.classList.add('passed');
-        checkLighting.classList.remove('failed');
-    } else {
-        checkLighting.classList.remove('passed');
-        if (brightness <= 40) {
-            checkLighting.classList.add('failed');
+function updateChecks(brightness) {
+    const lightOk = brightness > 40 && brightness < 210;
+    setBadge('check-lighting', lightOk);
+
+    faceDetected = brightness > 30;
+    setBadge('check-face', faceDetected);
+    faceOval.classList.toggle('detected', faceDetected);
+
+    const liveOk = lightOk && faceDetected;
+    setBadge('check-liveness', liveOk);
+
+    if (!isCapturing) {
+        if (faceDetected) {
+            statusText.textContent = 'Face detected';
+            if (camWrap.classList.contains('state-active')) {
+                camWrap.classList.replace('state-active', 'state-ready');
+            }
+        } else {
+            statusText.textContent = 'Position your face';
+            if (camWrap.classList.contains('state-ready')) {
+                camWrap.classList.replace('state-ready', 'state-active');
+            }
         }
     }
-    
-    // Simulate face detection based on variance in the frame
-    // This is a simplified check - in production use proper face detection
-    faceDetected = brightness > 30; // Basic threshold
-    
-    if (faceDetected) {
-        faceOverlay.classList.add('detected');
-        checkFace.classList.add('passed');
-        checkFace.classList.remove('failed');
-        statusText.textContent = 'Face detected';
-    } else {
-        faceOverlay.classList.remove('detected');
-        checkFace.classList.remove('passed');
-        statusText.textContent = 'Position your face';
-    }
-    
-    // Liveness is assumed if lighting and face are good
-    if (checkLighting.classList.contains('passed') && checkFace.classList.contains('passed')) {
-        checkLiveness.classList.add('passed');
-    } else {
-        checkLiveness.classList.remove('passed');
-    }
+}
+
+function setBadge(id, ok) {
+    const el = document.getElementById(id);
+    el.classList.toggle('ok',   ok);
+    el.classList.toggle('fail', !ok && el.classList.contains('ok') === false);
+    if (ok)  el.classList.remove('fail');
+    if (!ok) el.classList.remove('ok');
 }
 
 async function captureSample() {
     if (isCapturing || samples.length >= REQUIRED_SAMPLES) return;
-    
     if (!faceDetected) {
-        showError('Please position your face in the circle');
+        flashError('Position your face in the oval first');
         return;
     }
-    
+
     isCapturing = true;
     captureBtn.disabled = true;
-    cameraWrapper.classList.add('verifying');
-    statusDot.classList.remove('active');
-    statusDot.classList.add('processing');
-    statusText.textContent = 'Capturing...';
-    
-    // Wait a moment for user to stabilize
-    await new Promise(r => setTimeout(r, 500));
-    
-    // Capture frame
-    canvas.width = video.videoWidth;
+    statusDot.classList.replace('on', 'proc');
+    statusText.textContent = 'Capturing…';
+    camWrap.classList.remove('state-ready', 'state-active');
+    camWrap.classList.add('state-capture');
+
+    await delay(500);
+
+    canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Convert to base64
-    const imageData = canvas.toDataURL('image/jpeg', 0.9);
-    samples.push(imageData);
-    
-    // Update UI
-    updateSampleUI();
-    
-    // Reset state
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    samples.push(canvas.toDataURL('image/jpeg', 0.9));
+
+    updateUI();
+
+    await delay(300);
+    camWrap.classList.remove('state-capture');
+    camWrap.classList.add('state-ready');
+    statusDot.classList.replace('proc', 'on');
     isCapturing = false;
-    cameraWrapper.classList.remove('verifying');
-    statusDot.classList.remove('processing');
-    statusDot.classList.add('active');
-    
+
     if (samples.length < REQUIRED_SAMPLES) {
         statusText.textContent = `Sample ${samples.length} captured`;
         captureBtn.disabled = false;
-        captureBtn.textContent = `Capture Sample ${samples.length + 1}`;
-        
-        // Auto-advance hint
-        setTimeout(() => {
-            if (samples.length < REQUIRED_SAMPLES) {
-                statusText.textContent = 'Ready for next sample';
-            }
-        }, 1500);
     } else {
-        // All samples captured
-        statusText.textContent = 'All samples captured';
+        statusText.textContent = 'Processing…';
         submitRegistration();
     }
 }
 
-function updateSampleUI() {
-    // Update progress bar
-    const progress = (samples.length / REQUIRED_SAMPLES) * 100;
-    progressFill.style.width = `${progress}%`;
-    
-    // Update sample dots
-    sampleDots.forEach((dot, index) => {
-        dot.classList.remove('current', 'captured');
-        if (index < samples.length) {
-            dot.classList.add('captured');
-        } else if (index === samples.length) {
-            dot.classList.add('current');
+function updateUI() {
+    // Progress bar
+    progFill.style.width = `${(samples.length / REQUIRED_SAMPLES) * 100}%`;
+
+    // Tick strip
+    for (let i = 0; i < 3; i++) {
+        const t = document.getElementById(`tick-${i}`);
+        t.classList.remove('done', 'active');
+        if (i < samples.length)       t.classList.add('done');
+        else if (i === samples.length) t.classList.add('active');
+    }
+
+    // Step indicators
+    for (let i = 0; i < 3; i++) {
+        const s = document.getElementById(`step-${i}`);
+        s.classList.remove('done', 'active');
+        if (i < samples.length) {
+            s.classList.add('done');
+            s.querySelector('.step-num').innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`;
+        } else if (i === samples.length) {
+            s.classList.add('active');
         }
-    });
-    
-    // Update instructions
-    if (samples.length === 1) {
-        instructionText.textContent = 'Great! Now turn slightly to your left and capture again.';
-    } else if (samples.length === 2) {
-        instructionText.textContent = 'Almost done! Turn slightly to your right for the final sample.';
+    }
+
+    // Instruction text
+    const next = instructions[samples.length] || '';
+    if (next) {
+        instrText.classList.remove('instruction-animate');
+        void instrText.offsetWidth;
+        instrText.textContent = next;
+        instrText.classList.add('instruction-animate');
     }
 }
 
 async function submitRegistration() {
-    captureBtn.textContent = 'Processing...';
-    statusText.textContent = 'Registering face...';
-    
+    camWrap.classList.remove('state-ready', 'state-active');
+    captureBtn.textContent = 'Registering…';
     try {
-        const response = await fetch('/api/auth/profile/face', {
+        const resp = await fetch('/api/auth/profile/face', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ images: samples })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ images: samples }),
         });
-        
-        const result = await response.json();
-        
-        if (response.ok) {
-            showSuccess(result.message || 'Face registered successfully!');
+        const data = await resp.json();
+        if (resp.ok) {
+            camWrap.classList.add('state-success');
+            showModal(true, data.message || 'Face registered successfully!');
         } else {
-            showError(result.error || 'Registration failed. Please try again.');
-            // Reset for retry
-            samples = [];
-            updateSampleUI();
-            progressFill.style.width = '0%';
-            captureBtn.disabled = false;
-            captureBtn.textContent = 'Capture Sample 1';
-            instructionText.textContent = 'Please look directly at the camera. We\'ll capture 3 samples of your face.';
+            showModal(false, data.error || 'Registration failed. Please try again.');
+            resetCapture();
         }
-    } catch (err) {
-        showError('Network error. Please try again.');
-        captureBtn.disabled = false;
+    } catch (_) {
+        showModal(false, 'Network error. Please try again.');
+        resetCapture();
     }
 }
 
-function showSuccess(message) {
-    document.getElementById('result-icon').classList.add('success');
-    document.getElementById('result-icon').classList.remove('error');
-    document.getElementById('result-title').textContent = 'Success!';
-    document.getElementById('result-message').textContent = message;
-    document.getElementById('result-action-btn').textContent = 'Continue to Dashboard';
-    document.getElementById('result-modal').classList.add('visible');
+function resetCapture() {
+    samples = [];
+    progFill.style.width = '0%';
+    captureBtn.disabled = false;
+    captureBtn.innerHTML = `<svg class="cam-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Capture Sample`;
+    camWrap.classList.remove('state-capture', 'state-success', 'state-error');
+    camWrap.classList.add('state-active');
+    for (let i = 0; i < 3; i++) {
+        const t = document.getElementById(`tick-${i}`);
+        t.classList.remove('done', 'active');
+        if (i === 0) t.classList.add('active');
+        const s = document.getElementById(`step-${i}`);
+        s.classList.remove('done', 'active');
+        if (i === 0) { s.classList.add('active'); s.querySelector('.step-num').textContent = '1'; }
+        else s.querySelector('.step-num').textContent = String(i + 1);
+    }
+    instrText.textContent = instructions[0];
 }
 
-function showError(message) {
-    cameraWrapper.classList.add('error');
-    setTimeout(() => cameraWrapper.classList.remove('error'), 1000);
-    
-    statusText.textContent = message;
-    statusDot.classList.add('error');
+function flashError(msg) {
+    camWrap.classList.add('state-error');
+    statusText.textContent = msg;
     setTimeout(() => {
-        statusDot.classList.remove('error');
-        statusDot.classList.add('active');
+        camWrap.classList.remove('state-error');
+        camWrap.classList.add(faceDetected ? 'state-ready' : 'state-active');
         statusText.textContent = faceDetected ? 'Face detected' : 'Position your face';
-    }, 2000);
+    }, 1800);
+}
+
+function showModal(success, message) {
+    const ring = document.getElementById('ring-fill');
+    const icon = document.getElementById('ring-icon');
+    ring.className = `ring-fill ${success ? 'success-ring' : 'error-ring'}`;
+    icon.textContent = success ? '✓' : '✕';
+    document.getElementById('result-title').textContent   = success ? 'Registered!' : 'Failed';
+    document.getElementById('result-message').textContent = message;
+    document.getElementById('result-action-btn').textContent = success ? 'Continue to Profile' : 'Try Again';
+    if (!success) {
+        document.getElementById('result-action-btn').onclick = () => {
+            document.getElementById('result-modal').classList.remove('visible');
+        };
+    }
+    setTimeout(() => document.getElementById('result-modal').classList.add('visible'), 50);
 }
 
 function closeResultModal() {
@@ -624,16 +850,15 @@ function closeResultModal() {
 }
 
 function skipRegistration() {
-    if (confirm('Face verification is required for exams. Skip registration?')) {
+    if (confirm('Face verification is required for exams. Skip for now?')) {
         window.location.href = redirectUrl;
     }
 }
 
-// Cleanup on page unload
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
 window.addEventListener('beforeunload', () => {
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
+    if (stream) stream.getTracks().forEach(t => t.stop());
 });
 </script>
 {% endblock %}
