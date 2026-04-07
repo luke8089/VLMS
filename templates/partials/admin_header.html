@@ -58,7 +58,59 @@
                         </button>
                     </div>
                 </div>
+                <!-- Mobile hamburger -->
+                <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl hover:bg-black/[0.05] transition-colors duration-150">
+                    <svg id="hamburger-icon" class="w-5 h-5 text-black/70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <svg id="close-icon" class="w-5 h-5 text-black/70 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
         </div>
     </div>
+
+    <!-- Mobile menu drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-black/[0.06] bg-white/95 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col space-y-1">
+            <a href="/admin/dashboard?view=overview"
+               class="nav-link nav-pill px-4 py-2.5 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'overview' else 'text-black/50 hover:text-black' }}">
+                Overview
+            </a>
+            <a href="/admin/dashboard?view=users"
+               class="nav-link nav-pill px-4 py-2.5 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'users' else 'text-black/50 hover:text-black' }}">
+                Users
+            </a>
+            <a href="/admin/dashboard?view=courses"
+               class="nav-link nav-pill px-4 py-2.5 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'courses' else 'text-black/50 hover:text-black' }}">
+                Courses
+            </a>
+            <a href="/admin/dashboard?view=exams"
+               class="nav-link nav-pill px-4 py-2.5 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'exams' else 'text-black/50 hover:text-black' }}">
+                Exams
+            </a>
+            <a href="/admin/dashboard?view=system"
+               class="nav-link nav-pill px-4 py-2.5 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'system' else 'text-black/50 hover:text-black' }}">
+                System
+            </a>
+        </div>
+    </div>
 </nav>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const hamburger = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    menu.classList.toggle('hidden');
+    hamburger.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
+}
+// Close mobile menu on outside click
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('mobile-menu-btn');
+    if (!menu.classList.contains('hidden') && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.add('hidden');
+        document.getElementById('hamburger-icon').classList.remove('hidden');
+        document.getElementById('close-icon').classList.add('hidden');
+    }
+});
+</script>

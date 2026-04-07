@@ -467,6 +467,130 @@ def system_health():
     })
 
 
+# ──────────────── ANALYTICS PAGE ────────────────
+
+@admin_bp.route('/admin/analytics')
+@jwt_required()
+@role_required('admin')
+def analytics_page():
+    return render_template('admin_analytics.html', admin_active_page='analytics')
+
+
+@admin_bp.route('/api/admin/analytics', methods=['GET'])
+@jwt_required()
+@role_required('admin')
+def admin_analytics():
+    from database.models import (User, Course, Exam, Submission, Violation,
+                                  Enrollment, Material, LearningProgress, db)
+    from sqlalchemy import func
+
+    now = datetime.utcnow()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # ── Totals ──
+    total_students  = User.query.filter_by(role='student').count()
+    total_lecturers = User.query.filter_by(role='lecturer').count()
+    total_admins    = User.query.filter_by(role='admin').count()
+    total_courses   = Course.query.count()
+    total_exams     = Exam.query.count()
+    total_submissions = Submission.query.count()
+    total_enrollments = Enrollment.query.count()
+    total_materials   = Material.query.count()
+
+    # ── Integrity ──
+    flagged_submissions = Submission.query.filter_by(is_flagged=True).count()
+    flags_today = Violation.query.filter(Violation.timestamp >= today_start).count()
+    avg_risk = db.session.query(func.avg(Submission.risk_score)).scalar()
+    avg_risk_score = round(float(avg_risk), 1) if avg_risk else 0
+    face_registered = User.query.filter(
+        User.role == 'student', User.face_encoding.isnot(None)
+    ).count()
+
+    # ── Growth: new users per day for last 30 days ──
+    thirty_ago = now - timedelta(days=29)
+    new_users_raw = db.session.query(
+        func.date(User.created_at).label('day'),
+        func.count(User.id).label('count')
+    ).filter(User.created_at >= thirty_ago).group_by(func.date(User.created_at)).all()
+    new_users_by_day = {str(r.day): r.count for r in new_users_raw}
+
+    # Fill all 30 days
+    growth_series = []
+    for i in range(29, -1, -1):
+        d = (now - timedelta(days=i)).strftime('%Y-%m-%d')
+        growth_series.append({'date': d, 'count': new_users_by_day.get(d, 0)})
+
+    # ── Exam status breakdown ──
+    active_exams   = Exam.query.filter(Exam.is_published==True, Exam.start_time<=now, Exam.end_time>=now).count()
+    upcoming_exams = Exam.query.filter(Exam.is_published==True, Exam.start_time>now).count()
+    ended_exams    = Exam.query.filter(Exam.end_time<now).count()
+    draft_exams    = total_exams - active_exams - upcoming_exams - ended_exams
+
+    # ── Top courses by enrollment ──
+    top_courses_raw = db.session.query(
+        Course.id, Course.title, Course.code,
+        func.count(Enrollment.id).label('enrollments')
+    ).outerjoin(Enrollment, Enrollment.course_id == Course.id
+    ).group_by(Course.id).order_by(func.count(Enrollment.id).desc()).limit(8).all()
+
+    top_courses = [{'id': r.id, 'title': r.title, 'code': r.code or '', 'enrollments': r.enrollments}
+                   for r in top_courses_raw]
+    max_enroll = max((c['enrollments'] for c in top_courses), default=1) or 1
+
+    # ── Submission pass/fail ratio ──
+    graded_subs = Submission.query.filter(Submission.total_score.isnot(None)).all()
+    passed = sum(1 for s in graded_subs if s.total_score and s.total_score >= 50)
+    failed = len(graded_subs) - passed
+
+    # ── Recent violations ──
+    recent_violations = Violation.query.order_by(Violation.timestamp.desc()).limit(10).all()
+    violation_types = {}
+    for v in Violation.query.all():
+        t = v.violation_type or 'unknown'
+        violation_types[t] = violation_types.get(t, 0) + 1
+
+    # ── Submissions per exam type ──
+    exam_type_stats = db.session.query(
+        Exam.exam_type,
+        func.count(Submission.id).label('submissions')
+    ).outerjoin(Submission, Submission.exam_id == Exam.id
+    ).group_by(Exam.exam_type).all()
+    exam_type_breakdown = [{'type': r.exam_type or 'unknown', 'submissions': r.submissions}
+                            for r in exam_type_stats]
+
+    return jsonify({
+        'totals': {
+            'students': total_students,
+            'lecturers': total_lecturers,
+            'admins': total_admins,
+            'courses': total_courses,
+            'exams': total_exams,
+            'submissions': total_submissions,
+            'enrollments': total_enrollments,
+            'materials': total_materials,
+        },
+        'integrity': {
+            'flagged': flagged_submissions,
+            'flags_today': flags_today,
+            'avg_risk_score': avg_risk_score,
+            'face_registered': face_registered,
+            'face_rate': round(face_registered / total_students * 100, 1) if total_students else 0,
+        },
+        'growth_series': growth_series,
+        'exam_status': {
+            'active': active_exams,
+            'upcoming': upcoming_exams,
+            'ended': ended_exams,
+            'draft': draft_exams,
+        },
+        'top_courses': top_courses,
+        'max_enroll': max_enroll,
+        'submission_outcomes': {'passed': passed, 'failed': failed, 'total': len(graded_subs)},
+        'violation_types': violation_types,
+        'exam_type_breakdown': exam_type_breakdown,
+    })
+
+
 # ──────────────── FACE VERIFICATION ADMIN ────────────────
 
 @admin_bp.route('/admin/face-verification')

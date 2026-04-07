@@ -165,8 +165,8 @@
 <body>
     {% include 'partials/admin_header.html' %}
 
-    <main class="px-4 sm:px-6 lg:px-10 py-10">
-        <section class="max-w-7xl mx-auto admin-shell rounded-[32px] px-6 sm:px-10 py-10 slide-up">
+    <main class="px-3 sm:px-6 lg:px-10 py-6 sm:py-10">
+        <section class="max-w-7xl mx-auto admin-shell rounded-[24px] sm:rounded-[32px] px-4 sm:px-6 lg:px-10 py-6 sm:py-10 slide-up">
             <div class="grid lg:grid-cols-[1.2fr_0.8fr] gap-8" id="dashboard-overview">
                 <div class="space-y-6">
                     <div>
@@ -314,16 +314,16 @@
             <!-- Users Management Section -->
             <div class="mt-10 hidden" id="users-section">
                 <div class="ghost-card rounded-3xl p-6 mb-6">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
                         <div>
                             <h3 class="text-2xl font-semibold">Users Management</h3>
                             <p class="text-sm text-black/60 mt-1">View and manage all users in the system</p>
                         </div>
-                        <a href="/admin/dashboard" class="text-sm text-black/60 hover:text-black">&larr; Back to Dashboard</a>
+                        <a href="/admin/dashboard" class="text-sm text-black/60 hover:text-black shrink-0">&larr; Back to Dashboard</a>
                     </div>
 
                     <!-- Stats Cards -->
-                    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                         <div class="dashboard-card rounded-2xl p-4">
                             <p class="text-xs text-white/50 uppercase tracking-wider">Total Users</p>
                             <p class="text-2xl font-semibold mt-1 text-white" id="users-total">0</p>
@@ -344,8 +344,8 @@
 
                     <!-- Filters -->
                     <div class="flex flex-wrap gap-3 mb-4">
-                        <input type="text" id="users-search" placeholder="Search users..." 
-                               class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30 w-64">
+                        <input type="text" id="users-search" placeholder="Search users..."
+                               class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30 flex-1 min-w-[160px]">
                         <select id="users-role-filter" class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30">
                             <option value="all">All Roles</option>
                             <option value="student">Students</option>
@@ -394,16 +394,16 @@
             <!-- Face Verification Management Section -->
             <div class="mt-10 hidden" id="face-verification-section">
                 <div class="ghost-card rounded-3xl p-6 mb-6">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
                         <div>
                             <h3 class="text-2xl font-semibold">Face Verification Management</h3>
                             <p class="text-sm text-black/60 mt-1">Manage student face registrations and verification logs</p>
                         </div>
-                        <a href="/admin/dashboard" class="text-sm text-black/60 hover:text-black">&larr; Back to Dashboard</a>
+                        <a href="/admin/dashboard" class="text-sm text-black/60 hover:text-black shrink-0">&larr; Back to Dashboard</a>
                     </div>
 
                     <!-- Stats Cards -->
-                    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                         <div class="dashboard-card rounded-2xl p-4">
                             <p class="text-xs text-white/50 uppercase tracking-wider">Total Students</p>
                             <p class="text-2xl font-semibold mt-1 text-white" id="fv-total-students">0</p>
@@ -424,8 +424,8 @@
 
                     <!-- Filters -->
                     <div class="flex flex-wrap gap-3 mb-4">
-                        <input type="text" id="fv-search" placeholder="Search students..." 
-                               class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30 w-64">
+                        <input type="text" id="fv-search" placeholder="Search students..."
+                               class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30 flex-1 min-w-[160px]">
                         <select id="fv-status-filter" class="px-4 py-2 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:border-black/30">
                             <option value="all">All Status</option>
                             <option value="registered">Registered</option>
@@ -539,7 +539,7 @@
                             <p class="text-sm text-black/50 mt-1">Monitor all assessments, submissions and integrity flags</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+                    <div class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-4 mb-6">
                         <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
                             <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Total</p>
                             <p class="text-3xl font-bold mt-1 text-white" id="e-total">0</p>
@@ -648,7 +648,7 @@
                     </div>
 
                     <!-- Storage row -->
-                    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                         <div class="dashboard-card rounded-2xl p-4 shadow-sheen">
                             <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Total Storage</p>
                             <p class="text-2xl font-bold mt-1 text-white" id="sys-storage-total">—</p>
@@ -736,12 +736,12 @@
 
     <!-- User Detail Modal -->
     <div id="user-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-6" onclick="if(event.target===this)closeUserModal()">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6" onclick="if(event.target===this)closeUserModal()">
             <div class="modal-glass rounded-[28px] shadow-2xl max-w-4xl w-full border border-white/60">
-                <div class="bg-black text-white px-8 py-5 rounded-t-[28px]">
+                <div class="bg-black text-white px-5 sm:px-8 py-5 rounded-t-[28px]">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-2xl font-bold" id="user-modal-title">User Details</h3>
+                            <h3 class="text-xl sm:text-2xl font-bold" id="user-modal-title">User Details</h3>
                             <p class="text-white/60 text-sm mt-0.5" id="user-modal-subtitle"></p>
                         </div>
                         <button onclick="closeUserModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all flex-shrink-0">
@@ -750,7 +750,7 @@
                     </div>
                 </div>
                 <div class="rounded-b-[28px]">
-                    <div id="user-modal-content" class="p-8"></div>
+                    <div id="user-modal-content" class="p-4 sm:p-8"></div>
                 </div>
             </div>
         </div>
@@ -758,24 +758,24 @@
 
     <!-- Face Verification Logs Modal -->
     <div id="fv-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-6">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6">
             <div class="modal-glass rounded-[28px] shadow-2xl max-w-lg w-full border border-white/60">
-                <div class="bg-black text-white px-6 py-5 rounded-t-[28px] flex items-center justify-between">
+                <div class="bg-black text-white px-5 sm:px-6 py-5 rounded-t-[28px] flex items-center justify-between">
                     <h3 class="text-lg font-bold" id="fv-modal-title">Verification Logs</h3>
                     <button onclick="closeFvModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition flex-shrink-0">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <div id="fv-modal-content" class="p-6 space-y-3 rounded-b-[28px]"></div>
+                <div id="fv-modal-content" class="p-4 sm:p-6 space-y-3 rounded-b-[28px]"></div>
             </div>
         </div>
     </div>
 
     <!-- Course Detail Modal -->
     <div id="course-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-6" onclick="if(event.target===this)closeCourseModal()">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6" onclick="if(event.target===this)closeCourseModal()">
             <div class="modal-glass rounded-[28px] shadow-2xl max-w-3xl w-full border border-white/60">
-                <div class="bg-black text-white px-8 py-5 rounded-t-[28px] flex items-center justify-between">
+                <div class="bg-black text-white px-5 sm:px-8 py-5 rounded-t-[28px] flex items-center justify-between">
                     <div>
                         <h3 class="text-xl font-bold" id="cm-title">Course Details</h3>
                         <p class="text-white/60 text-sm mt-0.5" id="cm-subtitle"></p>
@@ -784,16 +784,16 @@
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <div id="cm-content" class="p-8 rounded-b-[28px]"></div>
+                <div id="cm-content" class="p-4 sm:p-8 rounded-b-[28px]"></div>
             </div>
         </div>
     </div>
 
     <!-- Exam Detail Modal -->
     <div id="exam-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-6" onclick="if(event.target===this)closeExamModal()">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6" onclick="if(event.target===this)closeExamModal()">
             <div class="modal-glass rounded-[28px] shadow-2xl max-w-4xl w-full border border-white/60">
-                <div class="bg-black text-white px-8 py-5 rounded-t-[28px] flex items-center justify-between">
+                <div class="bg-black text-white px-5 sm:px-8 py-5 rounded-t-[28px] flex items-center justify-between">
                     <div>
                         <h3 class="text-xl font-bold" id="em-title">Exam Details</h3>
                         <p class="text-white/60 text-sm mt-0.5" id="em-subtitle"></p>
@@ -802,7 +802,7 @@
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <div id="em-content" class="p-8 rounded-b-[28px]"></div>
+                <div id="em-content" class="p-4 sm:p-8 rounded-b-[28px]"></div>
             </div>
         </div>
     </div>
