@@ -332,8 +332,8 @@
 
 @layer cards {
   .text-card {
-    max-width: 23.75rem;
-    padding: 2.25rem 2rem;
+    max-width: 32rem;
+    padding: 3rem 2.75rem;
     background: var(--card-bg);
     border-left: var(--hairline) solid var(--card-border);
     backdrop-filter: blur(6px) saturate(120%);
@@ -368,11 +368,11 @@
   }
 
   .tag {
-    font-size: 0.6rem;
+    font-size: 0.72rem;
     letter-spacing: 0.25em;
     text-transform: uppercase;
     color: var(--accent);
-    margin-block-end: 1.1rem;
+    margin-block-end: 1.4rem;
   }
 
   :where(h1, h2) {
@@ -383,17 +383,17 @@
   }
 
   h1 {
-    font-size: clamp(3rem, 8vw, 6.5rem);
+    font-size: clamp(3.8rem, 10vw, 8rem);
   }
   h2 {
-    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-size: clamp(2.8rem, 6vw, 5rem);
   }
 
   .body-text {
-    font-size: 0.78rem;
+    font-size: 0.92rem;
     line-height: 1.8;
     color: color-mix(in srgb, var(--fg) 55%, transparent);
-    margin-block-start: 1.25rem;
+    margin-block-start: 1.5rem;
   }
 
   .stat-row {
@@ -435,8 +435,8 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 0.75rem;
-    margin-block-start: 1.75rem;
+    gap: 1rem;
+    margin-block-start: 2.25rem;
   }
 
   .text-card.right .cta-row {
