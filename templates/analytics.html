@@ -215,7 +215,7 @@
 {% block scripts %}
 <script>
 const user = AUTH.getUser();
-if (!user || (user.role !== 'lecturer' && user.role !== 'admin')) {
+if (!user || user.role !== 'lecturer') {
     window.location.href = '/login';
 }
 document.getElementById('user-name').textContent = `${user.first_name} ${user.last_name}`;

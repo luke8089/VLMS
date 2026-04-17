@@ -58,6 +58,10 @@ def admin_overview():
     week_ago = now - timedelta(days=7)
     new_users_week = User.query.filter(User.created_at >= week_ago).count()
 
+    # AI response time
+    from ai_modules.ollama_service import get_avg_response_time
+    avg_ai_response = get_avg_response_time()
+
     return jsonify({
         'total_students': total_students,
         'total_lecturers': total_lecturers,
@@ -71,6 +75,7 @@ def admin_overview():
         'avg_risk_score': avg_risk_score,
         'face_registered': face_registered,
         'new_users_week': new_users_week,
+        'avg_ai_response': avg_ai_response,
     })
 
 
@@ -473,7 +478,7 @@ def system_health():
 @jwt_required()
 @role_required('admin')
 def analytics_page():
-    return render_template('admin_analytics.html', admin_active_page='analytics')
+    return render_template('admin_analytics.html')
 
 
 @admin_bp.route('/api/admin/analytics', methods=['GET'])

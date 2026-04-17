@@ -34,6 +34,10 @@
                        class="nav-link nav-pill px-4 py-2 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'system' else 'text-black/50 hover:text-black' }}">
                         System
                     </a>
+                    <a href="/admin/analytics" id="nav-analytics"
+                       class="nav-link nav-pill px-4 py-2 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'analytics' else 'text-black/50 hover:text-black' }}">
+                        Analytics
+                    </a>
                 </div>
             </div>
 
@@ -49,7 +53,7 @@
                             <p class="text-sm font-semibold text-black" id="dropdown-name"></p>
                             <p class="text-xs text-black/40 mt-0.5" id="dropdown-email"></p>
                         </div>
-                        <a href="/analytics" class="w-full flex items-center gap-3 text-left px-4 py-2.5 text-sm text-black/60 hover:text-black hover:bg-black/[0.03] transition-colors duration-150">
+                        <a href="/admin/analytics" class="w-full flex items-center gap-3 text-left px-4 py-2.5 text-sm text-black/60 hover:text-black hover:bg-black/[0.03] transition-colors duration-150">
                             Analytics
                         </a>
                         <div class="my-1 border-t border-black/5"></div>
@@ -89,6 +93,10 @@
             <a href="/admin/dashboard?view=system"
                class="nav-link nav-pill px-4 py-2.5 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'system' else 'text-black/50 hover:text-black' }}">
                 System
+            </a>
+            <a href="/admin/analytics"
+               class="nav-link nav-pill px-4 py-2.5 text-sm font-semibold rounded-xl {{ 'active text-black' if active_page == 'analytics' else 'text-black/50 hover:text-black' }}">
+                Analytics
             </a>
         </div>
     </div>

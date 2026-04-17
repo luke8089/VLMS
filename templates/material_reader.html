@@ -4,10 +4,12 @@
 {% block head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
+    html, body { background: #0b0b0b !important; }
     .reader-shell { background: #0b0b0b; color: #fff; }
     .reader-card { background: #151515; border: 1px solid rgba(255,255,255,0.08); }
     .reader-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12); }
     .reader-btn:hover { background: rgba(255,255,255,0.16); }
+    #pdf-canvas { display: block; width: 100% !important; height: auto !important; }
 </style>
 {% endblock %}
 
@@ -46,8 +48,8 @@
         {% endif %}
 
         <div class="reader-card rounded-xl p-3 md:p-5">
-            <div class="overflow-auto">
-                <canvas id="pdf-canvas" class="mx-auto max-w-full rounded-lg"></canvas>
+            <div>
+                <canvas id="pdf-canvas" class="mx-auto w-full rounded-lg"></canvas>
             </div>
         </div>
 
@@ -100,7 +102,10 @@ function queueRender(pageNumber) {
 async function renderPage(pageNumber) {
     renderInProgress = true;
     const page = await pdfDoc.getPage(pageNumber);
-    const viewport = page.getViewport({ scale: 1.25 });
+    const naturalViewport = page.getViewport({ scale: 1 });
+    const containerWidth = canvas.parentElement.clientWidth || window.innerWidth - 32;
+    const scale = Math.min(1.5, containerWidth / naturalViewport.width);
+    const viewport = page.getViewport({ scale });
     canvas.height = viewport.height;
     canvas.width = viewport.width;
     await page.render({ canvasContext: ctx, viewport }).promise;

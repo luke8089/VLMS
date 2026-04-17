@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics — MindStack Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Space Grotesk', sans-serif; }
+        body {
+            background:
+                radial-gradient(ellipse at 15% 10%, rgba(10,10,10,0.055), transparent 50%),
+                radial-gradient(ellipse at 85% 5%,  rgba(10,10,10,0.04),  transparent 55%),
+                radial-gradient(ellipse at 50% 90%, rgba(10,10,10,0.03),  transparent 60%),
+                linear-gradient(180deg, #ffffff 0%, #f7f7f5 55%, #efefec 100%);
+            min-height: 100vh;
+            color: #0a0a0a;
+        }
+        .admin-nav {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.65);
+            box-shadow: 0 1px 0 rgba(10,10,10,0.06), 0 4px 20px rgba(10,10,10,0.04);
+        }
+        .logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
+        .nav-pill { position: relative; transition: all 0.3s cubic-bezier(.4,0,.2,1); }
+        .nav-pill::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 50%;
+            width: 0; height: 2px;
+            background: #000;
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(.4,0,.2,1);
+            transform: translateX(-50%);
+        }
+        .nav-pill.active::after,
+        .nav-pill:hover::after { width: 60%; }
+        .nav-pill.active { color: #000 !important; }
+        .nav-pill:hover { transform: translateY(-1px); color: #000 !important; }
+
+        .glass-card {
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(10,10,10,0.07);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 24px rgba(10,10,10,0.05);
+        }
+        .kpi-dark {
+            background: #0a0a0a;
+            color: #fff;
+        }
+        .kpi-light {
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(10,10,10,0.08);
+        }
+        .section-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: rgba(10,10,10,0.4);
+        }
+        .integrity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .fade-up { animation: fadeUp 0.45s cubic-bezier(.4,0,.2,1) both; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .dropdown-panel {
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.80);
+            box-shadow: 0 16px 48px rgba(10,10,10,0.10);
+        }
+        select option { background: #fff; color: #0a0a0a; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .course-select-wrap select { color-scheme: light; }
+    </style>
+</head>
+<body>
+    {% set admin_active_page = 'analytics' %}
+    {% include 'partials/admin_header.html' %}
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- ── Header ── -->
+        <div class="fade-up">
+            <p class="section-title">Admin Console</p>
+            <h2 class="text-3xl font-bold tracking-tight mt-1">Platform Analytics</h2>
+            <p class="text-sm text-black/50 mt-1">Live platform-wide metrics, growth trends, integrity signals, and per-course drill-down.</p>
+        </div>
+
+        <!-- ── Platform KPIs ── -->
+        <div id="kpi-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 fade-up">
+            <div class="col-span-2 sm:col-span-4 lg:col-span-8 text-center py-6 text-black/40 text-sm">Loading platform data…</div>
+        </div>
+
+        <!-- ── Charts Row 1: Growth + Exam Status + Submission Outcomes ── -->
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+            <div class="glass-card rounded-2xl p-5 xl:col-span-3 fade-up">
+                <p class="section-title mb-1">30-Day Trend</p>
+                <h3 class="font-semibold text-lg mb-4">New User Growth</h3>
+                <canvas id="growthChart" height="120"></canvas>
+            </div>
+            <div class="glass-card rounded-2xl p-5 xl:col-span-2 fade-up">
+                <p class="section-title mb-1">Distribution</p>
+                <h3 class="font-semibold text-lg mb-4">Exam Status</h3>
+                <canvas id="examStatusChart" height="180"></canvas>
+            </div>
+        </div>
+
+        <!-- ── Charts Row 2: Top Courses + Violation Types + Submission Outcomes ── -->
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+            <div class="glass-card rounded-2xl p-5 xl:col-span-3 fade-up">
+                <p class="section-title mb-1">Enrollment</p>
+                <h3 class="font-semibold text-lg mb-4">Top Courses by Enrollment</h3>
+                <canvas id="topCoursesChart" height="160"></canvas>
+            </div>
+            <div class="glass-card rounded-2xl p-5 xl:col-span-2 fade-up">
+                <p class="section-title mb-1">Breakdown</p>
+                <h3 class="font-semibold text-lg mb-4">Submission Outcomes</h3>
+                <canvas id="outcomesChart" height="180"></canvas>
+            </div>
+        </div>
+
+        <!-- ── Integrity + Violation Types ── -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-6 fade-up">
+                <p class="section-title mb-1">Security</p>
+                <h3 class="font-semibold text-lg mb-5">Exam Integrity Signals</h3>
+                <div class="grid grid-cols-2 gap-4" id="integrity-grid">
+                    <div class="text-center text-black/40 text-sm col-span-2 py-4">Loading…</div>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 fade-up">
+                <p class="section-title mb-1">Violations</p>
+                <h3 class="font-semibold text-lg mb-4">Violation Type Breakdown</h3>
+                <canvas id="violationsChart" height="180"></canvas>
+            </div>
+        </div>
+
+        <!-- ── Exam Type Breakdown ── -->
+        <div class="glass-card rounded-2xl p-5 fade-up">
+            <p class="section-title mb-1">Assessment Mix</p>
+            <h3 class="font-semibold text-lg mb-4">Submissions by Exam Type</h3>
+            <canvas id="examTypeChart" height="80"></canvas>
+        </div>
+
+        <!-- ── Per-Course Drill-down ── -->
+        <div class="glass-card rounded-2xl p-6 fade-up">
+            <p class="section-title mb-1">Deep Dive</p>
+            <h3 class="font-semibold text-lg mb-2">Per-Course Analytics</h3>
+            <p class="text-sm text-black/50 mb-4">Select any course to inspect detailed exam performance, student insights, and reading engagement.</p>
+            <div class="course-select-wrap mb-6">
+                <label class="block text-sm font-medium text-black/60 mb-1">Choose course</label>
+                <select id="course-select" onchange="loadCourseAnalytics(this.value)"
+                        class="w-full max-w-xl bg-white border border-black/10 rounded-xl px-4 py-2.5 text-sm text-black focus:outline-none focus:border-black/40">
+                    <option value="">-- Select a course --</option>
+                </select>
+            </div>
+
+            <!-- Course KPIs -->
+            <div id="course-kpi-row" class="hidden grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6"></div>
+
+            <!-- Course Charts -->
+            <div id="course-charts" class="hidden grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+                <div class="glass-card rounded-xl p-4 xl:col-span-2">
+                    <h4 class="text-sm font-semibold mb-3">Class Performance Trend</h4>
+                    <canvas id="coursePerformanceChart" height="130"></canvas>
+                </div>
+                <div class="glass-card rounded-xl p-4">
+                    <h4 class="text-sm font-semibold mb-3">Student Trend Breakdown</h4>
+                    <canvas id="courseTrendChart" height="200"></canvas>
+                </div>
+                <div class="glass-card rounded-xl p-4 xl:col-span-3">
+                    <h4 class="text-sm font-semibold mb-3">Top Students by Study Time</h4>
+                    <canvas id="courseStudyChart" height="90"></canvas>
+                </div>
+            </div>
+
+            <!-- Course Tables -->
+            <div id="course-tables" class="hidden grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h4 class="text-sm font-semibold mb-3">Exam Statistics</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="text-black/40 border-b border-black/10">
+                                <tr>
+                                    <th class="text-left py-2 pr-4">Exam</th>
+                                    <th class="text-left py-2 pr-4">Submissions</th>
+                                    <th class="text-left py-2 pr-4">Avg Score</th>
+                                    <th class="text-left py-2">Pass Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="course-exam-body" class="divide-y divide-black/5"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold mb-3">Material Reading Summary</h4>
+                    <div id="course-reading-summary" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Student Insights Table -->
+            <div id="course-students-panel" class="hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-semibold">Student Deep Insights</h4>
+                    <span class="text-xs text-black/40">Click a row to see score history</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="text-black/40 border-b border-black/10">
+                            <tr>
+                                <th class="text-left py-2 pr-4">Student</th>
+                                <th class="text-left py-2 pr-4">Avg Score</th>
+                                <th class="text-left py-2 pr-4">Trend</th>
+                                <th class="text-left py-2 pr-4">Study Hrs</th>
+                                <th class="text-left py-2 pr-4">Read Rate</th>
+                                <th class="text-left py-2">Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody id="course-student-body" class="divide-y divide-black/5"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Student Detail Modal -->
+    <div id="student-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="max-w-2xl mx-auto mt-10 glass-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="student-modal-title" class="font-semibold text-lg">Student Detail</h3>
+                <button onclick="closeStudentModal()" class="text-black/40 hover:text-black text-2xl leading-none">&times;</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <h4 class="text-sm font-semibold mb-3">Score Trend</h4>
+                    <canvas id="studentTrendChart" height="200"></canvas>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold mb-3">Snapshot</h4>
+                    <div id="student-modal-stats" class="space-y-2 text-sm text-black/70"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ── Auth guard ──
+    const token = localStorage.getItem('access_token');
+    const user  = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; } })();
+    if (!token || user.role !== 'admin') { window.location.href = '/login'; }
+
+    // ── Populate nav user info ──
+    const nameEl = document.getElementById('user-name');
+    const avatarEl = document.getElementById('user-avatar');
+    const dropdownNameEl = document.getElementById('dropdown-name');
+    const dropdownEmailEl = document.getElementById('dropdown-email');
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    if (nameEl) nameEl.textContent = fullName;
+    if (dropdownNameEl) dropdownNameEl.textContent = fullName;
+    if (dropdownEmailEl) dropdownEmailEl.textContent = user.email || '';
+    if (avatarEl) {
+        if (user.profile_image) {
+            avatarEl.innerHTML = `<img src="/uploads/${user.profile_image}" class="w-full h-full object-cover rounded-full" alt="Avatar">`;
+        } else {
+            avatarEl.textContent = `${(user.first_name||'')[0]||''}${(user.last_name||'')[0]||''}`.toUpperCase() || 'AD';
+        }
+    }
+
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    }
+
+    function toggleDropdown(name) {
+        const dd = document.getElementById('dropdown-' + name);
+        if (!dd) return;
+        dd.classList.toggle('hidden');
+    }
+    document.addEventListener('click', e => {
+        const wrap = document.getElementById('user-dropdown-wrap');
+        if (wrap && !wrap.contains(e.target)) {
+            const dd = document.getElementById('dropdown-user');
+            if (dd) dd.classList.add('hidden');
+        }
+    });
+
+    // ── Chart instances ──
+    let growthChart = null, examStatusChart = null, outcomesChart = null,
+        topCoursesChart = null, violationsChart = null, examTypeChart = null,
+        coursePerformanceChart = null, courseTrendChart = null,
+        courseStudyChart = null, studentTrendChartInst = null;
+
+    let latestStudentRows = [];
+
+    // ══════════════════════════════════════════
+    //  PLATFORM ANALYTICS
+    // ══════════════════════════════════════════
+    async function loadPlatformAnalytics() {
+        const resp = await fetch('/api/admin/analytics', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!resp.ok) {
+            document.getElementById('kpi-grid').innerHTML = '<div class="col-span-8 text-center text-red-500 text-sm py-4">Failed to load platform analytics.</div>';
+            return;
+        }
+        const d = await resp.json();
+        renderPlatformKPIs(d.totals, d.integrity);
+        renderGrowthChart(d.growth_series || []);
+        renderExamStatusChart(d.exam_status || {});
+        renderOutcomesChart(d.submission_outcomes || {});
+        renderTopCoursesChart(d.top_courses || [], d.max_enroll || 1);
+        renderViolationsChart(d.violation_types || {});
+        renderExamTypeChart(d.exam_type_breakdown || []);
+        renderIntegrityPanel(d.integrity || {}, d.totals || {});
+    }
+
+    function renderPlatformKPIs(totals, integrity) {
+        const items = [
+            { label: 'Students',    value: totals.students,    dark: true },
+            { label: 'Lecturers',   value: totals.lecturers,   dark: false },
+            { label: 'Courses',     value: totals.courses,     dark: false },
+            { label: 'Exams',       value: totals.exams,       dark: false },
+            { label: 'Submissions', value: totals.submissions, dark: false },
+            { label: 'Enrollments', value: totals.enrollments, dark: false },
+            { label: 'Materials',   value: totals.materials,   dark: false },
+            { label: 'Flagged',     value: integrity.flagged,  dark: true  },
+        ];
+        document.getElementById('kpi-grid').innerHTML = items.map((item, i) => `
+            <div class="${item.dark ? 'kpi-dark' : 'kpi-light'} rounded-2xl p-4 fade-up" style="animation-delay:${i*50}ms">
+                <p class="text-[10px] uppercase tracking-[0.3em] ${item.dark ? 'text-white/50' : 'text-black/40'} mb-1">${item.label}</p>
+                <p class="text-2xl font-bold">${item.value ?? 0}</p>
+            </div>`).join('');
+    }
+
+    function renderGrowthChart(series) {
+        const ctx = document.getElementById('growthChart');
+        if (growthChart) growthChart.destroy();
+        growthChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: series.map(s => s.date.slice(5)),
+                datasets: [{
+                    label: 'New Users',
+                    data: series.map(s => s.count),
+                    borderColor: '#0a0a0a',
+                    backgroundColor: 'rgba(10,10,10,0.08)',
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 2,
+                }]
+            },
+            options: {
+                animation: { duration: 900, easing: 'easeOutQuart' },
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#64748b', maxTicksLimit: 8 }, grid: { color: 'rgba(10,10,10,0.05)' } },
+                    y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(10,10,10,0.08)' }, beginAtZero: true },
+                }
+            }
+        });
+    }
+
+    function renderExamStatusChart(status) {
+        const ctx = document.getElementById('examStatusChart');
+        if (examStatusChart) examStatusChart.destroy();
+        examStatusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active', 'Upcoming', 'Ended', 'Draft'],
+                datasets: [{
+                    data: [status.active||0, status.upcoming||0, status.ended||0, status.draft||0],
+                    backgroundColor: ['#0a0a0a', '#6b7280', '#d1d5db', '#e5e7eb'],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                animation: { animateScale: true, duration: 900 },
+                plugins: { legend: { labels: { color: '#374151' } } },
+                cutout: '62%',
+            }
+        });
+    }
+
+    function renderOutcomesChart(outcomes) {
+        const ctx = document.getElementById('outcomesChart');
+        if (outcomesChart) outcomesChart.destroy();
+        outcomesChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Failed'],
+                datasets: [{
+                    data: [outcomes.passed||0, outcomes.failed||0],
+                    backgroundColor: ['#0a0a0a', '#d1d5db'],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                animation: { animateScale: true, duration: 900 },
+                plugins: {
+                    legend: { labels: { color: '#374151' } },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const total = outcomes.total || 1;
+                                return ` ${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/total*100)}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '62%',
+            }
+        });
+    }
+
+    function renderTopCoursesChart(courses, maxEnroll) {
+        const ctx = document.getElementById('topCoursesChart');
+        if (topCoursesChart) topCoursesChart.destroy();
+        topCoursesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: courses.map(c => c.code || c.title.slice(0, 18)),
+                datasets: [{
+                    label: 'Enrollments',
+                    data: courses.map(c => c.enrollments),
+                    backgroundColor: 'rgba(10,10,10,0.80)',
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                animation: { duration: 1000, easing: 'easeOutCubic' },
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(10,10,10,0.06)' }, beginAtZero: true },
+                    y: { ticks: { color: '#374151' }, grid: { display: false } },
+                }
+            }
+        });
+    }
+
+    function renderViolationsChart(types) {
+        const labels = Object.keys(types);
+        const values = Object.values(types);
+        const ctx = document.getElementById('violationsChart');
+        if (violationsChart) violationsChart.destroy();
+        if (!labels.length) {
+            ctx.parentElement.innerHTML += '<p class="text-sm text-black/40 text-center mt-4">No violations recorded.</p>';
+            return;
+        }
+        const palette = ['#0a0a0a','#374151','#6b7280','#9ca3af','#d1d5db','#e5e7eb'];
+        violationsChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{ data: values, backgroundColor: palette.slice(0, labels.length), borderWidth: 0 }]
+            },
+            options: {
+                animation: { animateScale: true, duration: 900 },
+                plugins: { legend: { labels: { color: '#374151', font: { size: 11 } } } },
+                cutout: '55%',
+            }
+        });
+    }
+
+    function renderExamTypeChart(breakdown) {
+        const ctx = document.getElementById('examTypeChart');
+        if (examTypeChart) examTypeChart.destroy();
+        examTypeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: breakdown.map(b => b.type),
+                datasets: [{
+                    label: 'Submissions',
+                    data: breakdown.map(b => b.submissions),
+                    backgroundColor: 'rgba(10,10,10,0.75)',
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                animation: { duration: 900, easing: 'easeOutQuart' },
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#374151' }, grid: { color: 'rgba(10,10,10,0.05)' } },
+                    y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(10,10,10,0.08)' }, beginAtZero: true },
+                }
+            }
+        });
+    }
+
+    function renderIntegrityPanel(integrity, totals) {
+        const faceRate = integrity.face_rate ?? (totals.students > 0 ? Math.round((integrity.face_registered / totals.students) * 100) : 0);
+        const items = [
+            { label: 'Flagged Submissions', value: integrity.flagged ?? 0,        sub: 'Total',            dark: true },
+            { label: 'Flags Today',         value: integrity.flags_today ?? 0,    sub: 'Last 24 h',        dark: false },
+            { label: 'Avg Risk Score',       value: `${integrity.avg_risk_score ?? 0}%`, sub: 'All exams', dark: false },
+            { label: 'Face Registered',      value: `${faceRate}%`,               sub: `${integrity.face_registered ?? 0} students`, dark: false },
+        ];
+        document.getElementById('integrity-grid').innerHTML = items.map(item => `
+            <div class="${item.dark ? 'kpi-dark' : 'border border-black/8 bg-white/70'} rounded-xl p-4">
+                <p class="text-[10px] uppercase tracking-[0.3em] ${item.dark ? 'text-white/50' : 'text-black/40'} mb-1">${item.label}</p>
+                <p class="text-2xl font-bold">${item.value}</p>
+                <p class="text-xs mt-1 ${item.dark ? 'text-white/40' : 'text-black/40'}">${item.sub}</p>
+            </div>`).join('');
+    }
+
+    // ══════════════════════════════════════════
+    //  COURSE DRILL-DOWN
+    // ══════════════════════════════════════════
+    async function populateCourseSelect() {
+        const resp = await fetch('/api/admin/courses', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const select = document.getElementById('course-select');
+        (data.courses || []).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = `${c.code || '—'} — ${c.title}`;
+            select.appendChild(opt);
+        });
+    }
+
+    async function loadCourseAnalytics(courseId) {
+        if (!courseId) return;
+        ['course-kpi-row','course-charts','course-tables','course-students-panel'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById('course-kpi-row').innerHTML = '<div class="col-span-5 text-sm text-black/40 py-2">Loading…</div>';
+        document.getElementById('course-kpi-row').classList.remove('hidden');
+
+        const [courseResp, insightsResp, readingResp] = await Promise.all([
+            fetch(`/api/analytics/course/${courseId}`,                    { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`/api/analytics/course/${courseId}/student-insights`,   { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`/api/analytics/course/${courseId}/materials-reading`,  { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+
+        if (!courseResp.ok || !insightsResp.ok || !readingResp.ok) {
+            document.getElementById('course-kpi-row').innerHTML = '<div class="col-span-5 text-red-500 text-sm py-2">Failed to load course analytics.</div>';
+            return;
+        }
+
+        const courseData   = await courseResp.json();
+        const insightsData = await insightsResp.json();
+        const readingData  = await readingResp.json();
+        const summary      = insightsData.summary || {};
+
+        // KPIs
+        const kpiItems = [
+            { label: 'Students',    value: summary.total_students ?? 0 },
+            { label: 'Class Avg',   value: `${summary.class_average_score ?? 0}%` },
+            { label: 'Pass Rate',   value: `${summary.class_pass_rate ?? 0}%` },
+            { label: 'Avg Study',   value: `${summary.average_study_hours ?? 0}h` },
+            { label: 'At Risk',     value: summary.at_risk_students ?? 0 },
+        ];
+        document.getElementById('course-kpi-row').innerHTML = kpiItems.map((k, i) => `
+            <div class="kpi-light rounded-xl p-3 text-center fade-up" style="animation-delay:${i*50}ms">
+                <p class="text-[10px] uppercase tracking-[0.3em] text-black/40 mb-1">${k.label}</p>
+                <p class="text-xl font-bold">${k.value}</p>
+            </div>`).join('');
+
+        ['course-charts','course-tables','course-students-panel'].forEach(id => {
+            document.getElementById(id).classList.remove('hidden');
+        });
+
+        renderCoursePerformanceChart(courseData.exam_stats || []);
+        renderCourseTrendChart(insightsData.students || []);
+        renderCourseStudyChart(insightsData.students || []);
+        renderCourseExamTable(courseData.exam_stats || []);
+        renderCourseReadingSummary(readingData.summary || []);
+        renderCourseStudentRows(insightsData.students || []);
+    }
+
+    function renderCoursePerformanceChart(examStats) {
+        const ctx = document.getElementById('coursePerformanceChart');
+        if (coursePerformanceChart) coursePerformanceChart.destroy();
+        coursePerformanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: examStats.map(e => e.exam_title),
+                datasets: [
+                    { label: 'Avg Score %', data: examStats.map(e => e.average_score), backgroundColor: 'rgba(10,10,10,0.75)', borderRadius: 6 },
+                    { label: 'Pass Rate %', data: examStats.map(e => e.pass_rate), type: 'line', borderColor: '#6b7280', backgroundColor: 'rgba(107,114,128,0.15)', tension: 0.35 },
+                ]
+            },
+            options: {
+                animation: { duration: 800 },
+                responsive: true,
+                plugins: { legend: { labels: { color: '#374151' } } },
+                scales: {
+                    x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(10,10,10,0.05)' } },
+                    y: { ticks: { color: '#64748b', callback: v => v+'%' }, grid: { color: 'rgba(10,10,10,0.08)' }, beginAtZero: true, max: 100 },
+                }
+            }
+        });
+    }
+
+    function renderCourseTrendChart(students) {
+        const counts = { improving: 0, stable: 0, declining: 0 };
+        students.forEach(s => counts[s.trend] = (counts[s.trend]||0) + 1);
+        const ctx = document.getElementById('courseTrendChart');
+        if (courseTrendChart) courseTrendChart.destroy();
+        courseTrendChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Improving', 'Stable', 'Declining'],
+                datasets: [{ data: [counts.improving, counts.stable, counts.declining], backgroundColor: ['#0a0a0a','#6b7280','#d1d5db'], borderWidth: 0 }]
+            },
+            options: {
+                animation: { animateScale: true, duration: 800 },
+                plugins: { legend: { labels: { color: '#374151' } } },
+                cutout: '60%',
+            }
+        });
+    }
+
+    function renderCourseStudyChart(students) {
+        const top = [...students].sort((a,b) => b.study_hours - a.study_hours).slice(0, 8);
+        const ctx = document.getElementById('courseStudyChart');
+        if (courseStudyChart) courseStudyChart.destroy();
+        courseStudyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: top.map(s => s.student_name),
+                datasets: [{ label: 'Study Hours', data: top.map(s => s.study_hours), backgroundColor: 'rgba(107,114,128,0.7)', borderRadius: 6 }]
+            },
+            options: {
+                animation: { duration: 900 },
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#374151' }, grid: { color: 'rgba(10,10,10,0.05)' } },
+                    y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(10,10,10,0.08)' }, beginAtZero: true },
+                }
+            }
+        });
+    }
+
+    function renderCourseExamTable(examStats) {
+        const tbody = document.getElementById('course-exam-body');
+        if (!examStats.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-black/40 text-sm">No exam data yet.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = examStats.map(e => `
+            <tr class="hover:bg-black/[0.02] transition-colors">
+                <td class="py-2 pr-4">${e.exam_title}</td>
+                <td class="py-2 pr-4 text-black/60">${e.total_submissions}</td>
+                <td class="py-2 pr-4 text-black/60">${e.average_score}%</td>
+                <td class="py-2 text-black/60">${e.pass_rate}%</td>
+            </tr>`).join('');
+    }
+
+    function renderCourseReadingSummary(summary) {
+        const el = document.getElementById('course-reading-summary');
+        if (!summary.length) {
+            el.innerHTML = '<p class="text-sm text-black/40">No reading data yet.</p>';
+            return;
+        }
+        el.innerHTML = summary.map(item => `
+            <div class="border border-black/8 rounded-xl p-3 bg-white/60">
+                <p class="text-sm font-medium truncate" title="${item.material_title}">${item.material_title}</p>
+                <p class="text-xs text-black/50 mt-0.5">${item.students_read}/${item.students_total} students read &mdash; ${item.read_rate}%</p>
+                <div class="mt-2 h-1.5 bg-black/8 rounded-full overflow-hidden">
+                    <div class="h-full bg-black/70 rounded-full" style="width:${item.read_rate}%"></div>
+                </div>
+            </div>`).join('');
+    }
+
+    function renderCourseStudentRows(students) {
+        latestStudentRows = students;
+        const tbody = document.getElementById('course-student-body');
+        if (!students.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-black/40 text-sm">No student data yet.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = students.map(s => `
+            <tr class="hover:bg-black/[0.02] transition-colors cursor-pointer" onclick="openStudentModal(${s.student_id})">
+                <td class="py-2 pr-4 font-medium">${s.student_name}</td>
+                <td class="py-2 pr-4 text-black/60">${s.average_score}%</td>
+                <td class="py-2 pr-4">
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                        ${s.trend === 'improving' ? 'bg-black/90 text-white' :
+                          s.trend === 'declining' ? 'bg-black/10 text-black/70' :
+                          'border border-black/20 text-black/60'}">
+                        ${s.trend}
+                    </span>
+                </td>
+                <td class="py-2 pr-4 text-black/60">${s.study_hours}h</td>
+                <td class="py-2 pr-4 text-black/60">${s.read_rate}%</td>
+                <td class="py-2 text-black/60">${s.avg_material_progress}%</td>
+            </tr>`).join('');
+    }
+
+    // ── Student Modal ──
+    function openStudentModal(studentId) {
+        const s = latestStudentRows.find(r => r.student_id === studentId);
+        if (!s) return;
+        document.getElementById('student-modal-title').textContent = `${s.student_name} — Performance`;
+        document.getElementById('student-modal-stats').innerHTML = `
+            <div class="flex justify-between border-b border-black/5 pb-2"><span class="text-black/50">Average Score</span><span class="font-medium">${s.average_score}%</span></div>
+            <div class="flex justify-between border-b border-black/5 py-2"><span class="text-black/50">Exam Attempts</span><span class="font-medium">${s.exam_attempts}</span></div>
+            <div class="flex justify-between border-b border-black/5 py-2"><span class="text-black/50">Study Hours</span><span class="font-medium">${s.study_hours}h</span></div>
+            <div class="flex justify-between border-b border-black/5 py-2"><span class="text-black/50">Materials Read</span><span class="font-medium">${s.materials_read}/${s.materials_total}</span></div>
+            <div class="flex justify-between pt-2"><span class="text-black/50">Read Rate</span><span class="font-medium">${s.read_rate}%</span></div>`;
+
+        const ctx = document.getElementById('studentTrendChart');
+        if (studentTrendChartInst) studentTrendChartInst.destroy();
+        studentTrendChartInst = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: s.score_history.map(h => h.exam_title),
+                datasets: [{
+                    label: 'Score',
+                    data: s.score_history.map(h => h.score),
+                    borderColor: '#0a0a0a',
+                    backgroundColor: 'rgba(10,10,10,0.08)',
+                    tension: 0.35,
+                    fill: true,
+                }]
+            },
+            options: {
+                animation: { duration: 700 },
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(10,10,10,0.05)' } },
+                    y: { ticks: { color: '#64748b', callback: v => v+'%' }, grid: { color: 'rgba(10,10,10,0.08)' }, beginAtZero: true, max: 100 },
+                }
+            }
+        });
+        document.getElementById('student-modal').classList.remove('hidden');
+    }
+
+    function closeStudentModal() {
+        document.getElementById('student-modal').classList.add('hidden');
+    }
+    document.getElementById('student-modal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeStudentModal();
+    });
+
+    // ── Init ──
+    loadPlatformAnalytics();
+    populateCourseSelect();
+    </script>
+</body>
+</html>
