@@ -3776,28 +3776,20 @@ async function submitRescheduleAndPublish() {
     const origText = btn.textContent;
     btn.textContent = 'Updating...';
 
-    const scheduleResp = await AUTH.fetch(`/api/lecturer/exams/${rescheduleExamId}/schedule`, {
-        method: 'PUT',
+    const rescheduleResp = await AUTH.fetch(`/api/lecturer/exams/${rescheduleExamId}/reschedule`, {
+        method: 'POST',
         body: JSON.stringify({ start_time: start, end_time: end, duration_minutes: duration }),
     });
 
-    if (!scheduleResp.ok) {
-        const d = await scheduleResp.json().catch(() => ({}));
-        btn.disabled = false; btn.textContent = origText;
-        showNoticeModal({ title: 'Schedule Update Failed', message: d.error || 'Failed to update schedule.' });
-        return;
-    }
-
-    const publishResp = await AUTH.fetch(`/api/lecturer/exams/${rescheduleExamId}/publish`, { method: 'POST' });
     btn.disabled = false; btn.textContent = origText;
 
-    if (publishResp.ok) {
+    if (rescheduleResp.ok) {
         closeRescheduleModal();
         document.getElementById('review-modal').classList.add('hidden');
         loadExams();
     } else {
-        const d = await publishResp.json().catch(() => ({}));
-        showNoticeModal({ title: 'Publish Failed', message: d.error || 'Failed to publish exam.' });
+        const d = await rescheduleResp.json().catch(() => ({}));
+        showNoticeModal({ title: 'Reschedule Failed', message: d.error || 'Failed to reschedule exam.' });
     }
 }
 
