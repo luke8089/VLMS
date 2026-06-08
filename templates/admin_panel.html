@@ -978,13 +978,16 @@
         async function fetchProfile() {
             if (!token) return;
             try {
-                const response = await fetch('/api/auth/profile', {
+                const response = await fetch('/api/auth/me', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (!response.ok) return;
                 const data = await response.json();
-                const name = data.full_name || data.username || 'Admin';
-                const email = data.email || '';
+                const user = data.user || {};
+                const name = (user.first_name && user.last_name)
+                    ? `${user.first_name} ${user.last_name}`
+                    : (user.first_name || user.last_name || 'Admin');
+                const email = user.email || '';
                 const initials = name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase();
 
                 document.getElementById('user-name').textContent = name;
