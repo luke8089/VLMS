@@ -202,39 +202,27 @@ def process_proctor_frame(submission_id):
     created_violations = []
     for v in violations:
         severity = v.get('severity', 5)
+        screenshot = _save_screenshot(image_data, 'v', submission_id, current_app) if severity >= 20 else None
         violation = Violation(
             submission_id=submission_id,
             violation_type=v['type'],
             severity=severity,
             description=v.get('description', ''),
+            screenshot_path=screenshot,
         )
-
-        # Save screenshot for significant violations
-        if severity >= 20:
-            screenshot_dir = current_app.config.get('SCREENSHOT_FOLDER', 'screenshots')
-            os.makedirs(screenshot_dir, exist_ok=True)
-            filename = f"v_{submission_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.png"
-            filepath = os.path.join(screenshot_dir, filename)
-
-            # Decode and save the base64 image
-            img_bytes = base64.b64decode(image_data.split(',')[-1])
-            with open(filepath, 'wb') as f:
-                f.write(img_bytes)
-            violation.screenshot_path = filename
-
         db.session.add(violation)
-        submission.risk_score += severity
-        created_violations.append({'id': violation, 'type': v.get('type'), 'severity': severity})
+        submission.risk_score = (submission.risk_score or 0) + severity
+        created_violations.append({'vobj': violation, 'type': v.get('type'), 'severity': severity})
 
     # Check threshold
     exam = Exam.query.get(submission.exam_id)
-    if submission.risk_score >= (exam.risk_threshold or 100):
+    if (submission.risk_score or 0) >= (exam.risk_threshold or 100):
         submission.is_flagged = True
 
     db.session.commit()
 
     violations_payload = [
-        {'id': item['id'].id, 'type': item['type'], 'severity': item['severity']}
+        {'id': item['vobj'].id, 'type': item['type'], 'severity': item['severity']}
         for item in created_violations
     ]
 
@@ -394,10 +382,10 @@ def record_tab_switch(submission_id):
         description='Student switched browser tab/window',
     )
     db.session.add(violation)
-    submission.risk_score += 10
+    submission.risk_score = (submission.risk_score or 0) + 10
 
     exam = Exam.query.get(submission.exam_id)
-    if submission.risk_score >= (exam.risk_threshold or 100):
+    if (submission.risk_score or 0) >= (exam.risk_threshold or 100):
         submission.is_flagged = True
 
     db.session.commit()
@@ -421,10 +409,10 @@ def record_copy_attempt(submission_id):
         description='Student attempted to copy or cut exam content',
     )
     db.session.add(violation)
-    submission.risk_score += 5
+    submission.risk_score = (submission.risk_score or 0) + 5
 
     exam = Exam.query.get(submission.exam_id)
-    if submission.risk_score >= (exam.risk_threshold or 100):
+    if (submission.risk_score or 0) >= (exam.risk_threshold or 100):
         submission.is_flagged = True
 
     db.session.commit()

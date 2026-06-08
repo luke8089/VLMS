@@ -49,6 +49,12 @@ class FaceAuthenticator:
             self.face_cascade = cv2.CascadeClassifier(
                 cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
             )
+            self.face_cascade_alt = cv2.CascadeClassifier(
+                cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml'
+            )
+            self.profile_cascade = cv2.CascadeClassifier(
+                cv2.data.haarcascades + 'haarcascade_profileface.xml'
+            )
             self.eye_cascade = cv2.CascadeClassifier(
                 cv2.data.haarcascades + 'haarcascade_eye.xml'
             )
@@ -79,10 +85,33 @@ class FaceAuthenticator:
         else:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             gray = cv2.equalizeHist(gray)
+
+            # Try frontal cascade first
             faces = self.face_cascade.detectMultiScale(
-                gray, scaleFactor=1.1, minNeighbors=3, minSize=(60, 60)
+                gray, scaleFactor=1.1, minNeighbors=2, minSize=(self.MIN_FACE_SIZE, self.MIN_FACE_SIZE)
             )
-            return list(faces)
+            if len(faces) == 0:
+                faces = self.face_cascade_alt.detectMultiScale(
+                    gray, scaleFactor=1.1, minNeighbors=2, minSize=(self.MIN_FACE_SIZE, self.MIN_FACE_SIZE)
+                )
+
+            # Fall back to profile cascade for side-facing samples
+            if len(faces) == 0:
+                faces = self.profile_cascade.detectMultiScale(
+                    gray, scaleFactor=1.1, minNeighbors=2, minSize=(self.MIN_FACE_SIZE, self.MIN_FACE_SIZE)
+                )
+
+            # Try mirrored image to catch faces turned the other way
+            if len(faces) == 0:
+                gray_flip = cv2.flip(gray, 1)
+                faces_flip = self.profile_cascade.detectMultiScale(
+                    gray_flip, scaleFactor=1.1, minNeighbors=2, minSize=(self.MIN_FACE_SIZE, self.MIN_FACE_SIZE)
+                )
+                if len(faces_flip) > 0:
+                    img_w = gray.shape[1]
+                    faces = np.array([(img_w - x - w, y, w, h) for x, y, w, h in faces_flip])
+
+            return list(faces) if len(faces) > 0 else []
 
     def extract_face_encoding(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Extract face encoding from image. Returns 128-dimensional encoding or None."""

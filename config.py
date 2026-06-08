@@ -12,7 +12,7 @@ class Config:
     # MySQL via XAMPP (default: root with no password)
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
-        'mysql://root:@localhost/aura_edu'
+        'mysql+pymysql://root:@localhost/aura_edu'
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

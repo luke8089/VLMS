@@ -163,6 +163,7 @@ const checkMatch = document.getElementById('check-match');
 
 let faceDetectionInterval = null;
 let autoVerifyTimeout = null;
+let autoRedirectTimer = null;
 
 // Initialize camera on page load
 window.addEventListener('DOMContentLoaded', initializeCamera);
@@ -194,7 +195,9 @@ async function initializeCamera() {
 }
 
 function startAutoFaceDetection() {
-    // Check face every 200ms for fast response
+    // Always clear any previous interval before creating a new one
+    clearInterval(faceDetectionInterval);
+    faceDetectionInterval = null;
     faceDetectionInterval = setInterval(() => {
         if (!video.videoWidth || isVerifying) return;
         
@@ -279,8 +282,8 @@ function analyzeFrameForFace() {
         const lightingGood = brightness > 40 && brightness < 220;
         updateCheckBadge(checkLighting, lightingGood);
         
-        // Face detected if brightness and variance are in reasonable range
-        const hasFace = brightness > 35 && variance > 30;
+        // Require meaningful texture (variance) — prevents solid walls / darkness triggering
+        const hasFace = brightness > 40 && brightness < 220 && variance > 200;
         updateCheckBadge(checkFace, hasFace);
         
         return hasFace && lightingGood;
@@ -291,12 +294,9 @@ function analyzeFrameForFace() {
 }
 
 function updateCheckBadge(badge, passed) {
-    if (passed) {
-        badge.classList.add('passed');
-        badge.classList.remove('failed', 'processing');
-    } else {
-        badge.classList.remove('passed', 'processing');
-    }
+    badge.classList.toggle('passed', passed);
+    badge.classList.toggle('failed', !passed);
+    badge.classList.remove('processing');
 }
 
 // Fast automatic verification - like mobile phone unlock
@@ -321,12 +321,9 @@ async function performFastVerification() {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const imageData = canvas.toDataURL('image/jpeg', 0.95);
         
-        // Send fast verification request
-        const response = await fetch(`/api/exam/{{ submission_id }}/face-verify-enhanced`, {
+        // Send fast verification request (AUTH.fetch adds JWT + Content-Type)
+        const response = await AUTH.fetch(`/api/exam/{{ submission_id }}/face-verify-enhanced`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 image: imageData,
                 previous_frames: previousFrames.slice(-2)
@@ -388,11 +385,16 @@ function handleSuccess(result) {
             livenessEl.className = result.liveness.is_live ? 'result-detail-value success' : 'result-detail-value error';
         }
         
-        document.getElementById('result-action-btn').textContent = 'Start Exam';
+        const actionBtn = document.getElementById('result-action-btn');
+        actionBtn.textContent = 'Start Exam';
+        actionBtn.onclick = () => {
+            clearTimeout(autoRedirectTimer);
+            window.location.href = `/exam/{{ exam.id }}?submission={{ submission_id }}`;
+        };
         document.getElementById('result-modal').classList.add('visible');
-        
-        // Auto-redirect after 2 seconds
-        setTimeout(() => {
+
+        // Auto-redirect after 2 seconds unless user already clicked
+        autoRedirectTimer = setTimeout(() => {
             window.location.href = `/exam/{{ exam.id }}?submission={{ submission_id }}`;
         }, 2000);
     }, 500);
@@ -507,12 +509,7 @@ function showErrorModal(message, needsRegistration = false, isNotAuthorized = fa
 }
 
 function closeResultModal() {
-    const btn = document.getElementById('result-action-btn');
-    if (btn.onclick) {
-        btn.onclick();
-    } else {
-        window.location.href = `/exam/{{ exam.id }}?submission={{ submission_id }}`;
-    }
+    document.getElementById('result-action-btn').click();
 }
 
 function cancelVerification() {

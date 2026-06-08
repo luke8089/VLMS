@@ -653,16 +653,41 @@
                 <h3 id="violations-title" class="text-lg font-semibold text-black">Violation Log</h3>
                 <p class="text-sm text-black/40 mt-1">Captured flags and evidence from the proctoring system.</p>
             </div>
-            <button title="Close" onclick="document.getElementById('violations-modal').classList.add('hidden')"
+            <button title="Close" onclick="closeLightbox();document.getElementById('violations-modal').classList.add('hidden')"
                     class="w-8 h-8 rounded-lg bg-black/[0.04] hover:bg-black/[0.08] flex items-center justify-center text-black/30 hover:text-black transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
         </div>
         <div id="violations-content" class="p-6 overflow-y-auto flex-1">
             <div class="text-center text-black/30 py-8">Loading violations...</div>
         </div>
         <div class="p-4 border-t border-black/[0.06] flex justify-end items-center bg-black/[0.02]">
-            <button onclick="document.getElementById('violations-modal').classList.add('hidden')"
+            <button onclick="closeLightbox();document.getElementById('violations-modal').classList.add('hidden')"
                     class="px-4 py-2 text-sm text-black/40 hover:text-black font-medium transition-colors">Close</button>
         </div>
+    </div>
+</div>
+
+<!-- ── Media Lightbox ── -->
+<div id="media-lightbox"
+     class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-8"
+     style="background:rgba(0,0,0,0.93);backdrop-filter:blur(14px)"
+     onclick="if(event.target===this)closeLightbox()">
+    <div class="relative w-full max-w-5xl mx-auto flex flex-col gap-3">
+        <!-- Close bar -->
+        <div class="flex items-center justify-between">
+            <span id="lightbox-caption" class="text-sm text-white/50 truncate max-w-md"></span>
+            <button onclick="closeLightbox()"
+                    class="flex items-center gap-1.5 text-white/50 hover:text-white text-sm font-medium transition-colors ml-auto pl-4">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                Close
+            </button>
+        </div>
+        <!-- Media -->
+        <video id="lightbox-video" controls autoplay
+               class="hidden w-full rounded-2xl shadow-2xl bg-black outline-none"
+               style="max-height:78vh"></video>
+        <img  id="lightbox-img" src="" alt="Evidence"
+              class="hidden w-full rounded-2xl shadow-2xl object-contain"
+              style="max-height:78vh" />
     </div>
 </div>
 
@@ -2603,6 +2628,42 @@ function cancelExcelImport() {
     if (input) input.value = '';
 }
 
+// ── Media Lightbox ──────────────────────────────────────────────────────────
+function openLightbox(src, isVideo, caption) {
+    const lb    = document.getElementById('media-lightbox');
+    const video = document.getElementById('lightbox-video');
+    const img   = document.getElementById('lightbox-img');
+    document.getElementById('lightbox-caption').textContent = caption || '';
+
+    if (isVideo) {
+        video.src = src;
+        video.classList.remove('hidden');
+        img.classList.add('hidden');
+        img.src = '';
+        video.play().catch(() => {});
+    } else {
+        img.src = src;
+        img.classList.remove('hidden');
+        video.classList.add('hidden');
+        video.src = '';
+        video.pause();
+    }
+    lb.classList.remove('hidden');
+    document.addEventListener('keydown', _lightboxEsc);
+}
+
+function closeLightbox() {
+    const lb    = document.getElementById('media-lightbox');
+    const video = document.getElementById('lightbox-video');
+    video.pause();
+    video.src = '';
+    document.getElementById('lightbox-img').src = '';
+    lb.classList.add('hidden');
+    document.removeEventListener('keydown', _lightboxEsc);
+}
+
+function _lightboxEsc(e) { if (e.key === 'Escape') closeLightbox(); }
+
 async function openViolations(submissionId, studentName) {
     const modal = document.getElementById('violations-modal');
     const titleEl = document.getElementById('violations-title');
@@ -2659,36 +2720,70 @@ async function openViolations(submissionId, studentName) {
             ` : ''}
             ${violations.map(v => {
                 const label = labelMap[v.violation_type] || v.violation_type;
-                const time = v.timestamp ? new Date(v.timestamp).toLocaleString() : '—';
+                const time  = v.timestamp ? new Date(v.timestamp).toLocaleString() : '—';
                 const screenshot = v.screenshot_path ? `/screenshots/${v.screenshot_path}` : null;
-                const video = v.video_path ? `/recordings/${v.video_path}` : null;
+                const video      = v.video_path      ? `/recordings/${v.video_path}`      : null;
                 const isFaceMismatch = v.violation_type === 'face_mismatch';
-                return `
-                    <div class="border ${isFaceMismatch ? 'border-red-300/60 bg-red-50/40' : 'border-black/[0.06]'} rounded-xl p-4">
-                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                            <div>
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-xs px-2 py-0.5 rounded-full ${isFaceMismatch ? 'bg-red-100 text-red-700 font-semibold' : 'bg-black/[0.04] text-black/60 font-medium'}">${label}</span>
-                                    <span class="text-[11px] text-black/40">Severity ${v.severity || 0}</span>
-                                    ${isFaceMismatch ? (() => {
-                                        const m = (v.description || '').match(/Mismatch: (\d+)%/);
-                                        return m ? `<span class="text-[11px] font-bold text-red-600">${m[1]}% mismatch</span>` : '';
-                                    })() : ''}
+                const isNoise        = v.violation_type === 'noise_detected';
+                const sevColor = (v.severity||0) >= 40 ? '#ef4444' : (v.severity||0) >= 20 ? '#f59e0b' : '#6b7280';
+
+                // Evidence panel
+                let evidenceHtml;
+                if (video) {
+                    const badge = isNoise ? '🎙&nbsp;Audio + video recording' : '📹&nbsp;Recorded clip';
+                    evidenceHtml = `
+                        <div class="relative cursor-pointer group rounded-xl overflow-hidden border border-black/[0.07] bg-black select-none"
+                             onclick="openLightbox('${video}',true,'${label.replace(/'/g,"\\'")} — ${time}')">
+                            <div class="w-full aspect-video flex items-center justify-center bg-neutral-900 group-hover:bg-neutral-800 transition-colors">
+                                <div class="flex flex-col items-center gap-2 text-white/30 group-hover:text-white/70 transition-colors">
+                                    <svg class="w-14 h-14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="11" fill="rgba(255,255,255,.08)"/><path d="M10 8.5l6 3.5-6 3.5V8.5z"/></svg>
+                                    <span class="text-[11px] font-medium tracking-wide uppercase">Click to play</span>
                                 </div>
-                                <p class="text-xs text-black/45 mt-2">${v.description || 'No description provided.'}</p>
-                                <p class="text-[11px] text-black/30 mt-2">${time}</p>
                             </div>
-                            <div class="min-w-[140px]">
-                                ${video
-                                    ? `<video src="${video}" controls class="w-full h-28 object-cover rounded-lg border border-black/[0.06]"></video>
-                                       <span class="text-[11px] text-black/40 mt-1 block">${v.violation_type === 'noise_detected' ? '🎙 Audio+video recording' : 'Recorded clip'}</span>`
-                                    : screenshot
-                                    ? `<a href="${screenshot}" target="_blank" rel="noopener" class="block">
-                                            <img src="${screenshot}" alt="Violation screenshot" class="w-full h-24 object-cover rounded-lg border border-black/[0.06]" />
-                                            <span class="text-[11px] text-black/40 mt-1 block">View screenshot</span>
-                                       </a>`
-                                    : '<div class="text-xs text-black/30">No evidence available</div>'
-                                }
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-2">
+                                <span class="text-[11px] text-white/70">${badge}</span>
+                            </div>
+                        </div>`;
+                } else if (screenshot) {
+                    evidenceHtml = `
+                        <div class="relative cursor-pointer group rounded-xl overflow-hidden border border-black/[0.07] select-none"
+                             onclick="openLightbox('${screenshot}',false,'Screenshot — ${time}')">
+                            <img src="${screenshot}" alt="Violation screenshot"
+                                 class="w-full aspect-video object-cover block" loading="lazy" />
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 rounded-full p-2.5">
+                                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-1.5">
+                                <span class="text-[11px] text-white/70">🖼&nbsp;Violation screenshot</span>
+                            </div>
+                        </div>`;
+                } else {
+                    evidenceHtml = `<div class="aspect-video rounded-xl border border-dashed border-black/10 flex items-center justify-center text-xs text-black/25 italic">No evidence captured</div>`;
+                }
+
+                return `
+                    <div class="border ${isFaceMismatch ? 'border-red-200 bg-red-50/50' : 'border-black/[0.07] bg-white'} rounded-2xl overflow-hidden shadow-sm">
+                        <!-- Header row -->
+                        <div class="flex items-center gap-3 px-4 pt-4 pb-3 border-b ${isFaceMismatch ? 'border-red-100' : 'border-black/[0.05]'}">
+                            <span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:${sevColor}"></span>
+                            <span class="text-xs font-semibold ${isFaceMismatch ? 'text-red-700' : 'text-black/75'}">${label}</span>
+                            <span class="text-[11px] text-black/30 ml-1">Severity ${v.severity || 0}</span>
+                            ${isFaceMismatch ? (() => { const m=(v.description||'').match(/Mismatch: (\d+)%/); return m ? `<span class="ml-auto text-[11px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">${m[1]}% mismatch</span>` : ''; })() : ''}
+                            <span class="text-[11px] text-black/25 ml-auto">${time}</span>
+                        </div>
+                        <!-- Body -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+                            <!-- Left: description -->
+                            <div class="px-4 py-3 flex flex-col justify-center border-r border-black/[0.05]">
+                                <p class="text-sm text-black/60 leading-relaxed">${v.description || 'No description provided.'}</p>
+                            </div>
+                            <!-- Right: evidence -->
+                            <div class="p-3">
+                                ${evidenceHtml}
                             </div>
                         </div>
                     </div>

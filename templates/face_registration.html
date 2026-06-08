@@ -663,19 +663,25 @@ function startFaceDetection() {
         try {
             const px = ctx.getImageData(cx - 50, cy - 50, 100, 100).data;
             let brightness = 0;
-            for (let i = 0; i < px.length; i += 4)
-                brightness += (px[i] + px[i+1] + px[i+2]) / 3;
-            brightness /= px.length / 4;
-            updateChecks(brightness);
+            const values = [];
+            for (let i = 0; i < px.length; i += 4) {
+                const v = (px[i] + px[i+1] + px[i+2]) / 3;
+                brightness += v;
+                values.push(v);
+            }
+            brightness /= values.length;
+            const variance = values.reduce((s, v) => s + (v - brightness) ** 2, 0) / values.length;
+            updateChecks(brightness, variance);
         } catch (_) {}
     }, 500);
 }
 
-function updateChecks(brightness) {
+function updateChecks(brightness, variance) {
     const lightOk = brightness > 40 && brightness < 210;
     setBadge('check-lighting', lightOk);
 
-    faceDetected = brightness > 30;
+    // Require both adequate brightness AND image detail (variance) for face detection
+    faceDetected = lightOk && variance > 200;
     setBadge('check-face', faceDetected);
     faceOval.classList.toggle('detected', faceDetected);
 
@@ -700,9 +706,7 @@ function updateChecks(brightness) {
 function setBadge(id, ok) {
     const el = document.getElementById(id);
     el.classList.toggle('ok',   ok);
-    el.classList.toggle('fail', !ok && el.classList.contains('ok') === false);
-    if (ok)  el.classList.remove('fail');
-    if (!ok) el.classList.remove('ok');
+    el.classList.toggle('fail', !ok);
 }
 
 async function captureSample() {
@@ -714,16 +718,22 @@ async function captureSample() {
 
     isCapturing = true;
     captureBtn.disabled = true;
-    statusDot.classList.replace('on', 'proc');
+    statusDot.classList.remove('on', 'err');
+    statusDot.classList.add('proc');
     statusText.textContent = 'Capturing…';
-    camWrap.classList.remove('state-ready', 'state-active');
+    camWrap.classList.remove('state-ready', 'state-active', 'state-error');
     camWrap.classList.add('state-capture');
 
     await delay(500);
 
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    // Draw mirrored to match what the user sees in the preview
+    const ctx = canvas.getContext('2d');
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+    ctx.restore();
     samples.push(canvas.toDataURL('image/jpeg', 0.9));
 
     updateUI();
@@ -731,7 +741,8 @@ async function captureSample() {
     await delay(300);
     camWrap.classList.remove('state-capture');
     camWrap.classList.add('state-ready');
-    statusDot.classList.replace('proc', 'on');
+    statusDot.classList.remove('proc');
+    statusDot.classList.add('on');
     isCapturing = false;
 
     if (samples.length < REQUIRED_SAMPLES) {
@@ -779,15 +790,17 @@ function updateUI() {
 
 async function submitRegistration() {
     camWrap.classList.remove('state-ready', 'state-active');
-    captureBtn.textContent = 'Registering…';
+    camWrap.classList.add('state-capture');
+    captureBtn.disabled = true;
+    captureBtn.innerHTML = '<span style="opacity:.6">Registering…</span>';
     try {
-        const resp = await fetch('/api/auth/profile/face', {
+        const resp = await AUTH.fetch('/api/auth/profile/face', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ images: samples }),
         });
         const data = await resp.json();
         if (resp.ok) {
+            camWrap.classList.remove('state-capture');
             camWrap.classList.add('state-success');
             showModal(true, data.message || 'Face registered successfully!');
         } else {
@@ -800,11 +813,17 @@ async function submitRegistration() {
     }
 }
 
+const CAM_BTN_HTML = `<svg class="cam-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Capture Sample`;
+
 function resetCapture() {
     samples = [];
+    isCapturing = false;
     progFill.style.width = '0%';
     captureBtn.disabled = false;
-    captureBtn.innerHTML = `<svg class="cam-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Capture Sample`;
+    captureBtn.innerHTML = CAM_BTN_HTML;
+    statusDot.classList.remove('proc', 'err');
+    statusDot.classList.add('on');
+    statusText.textContent = 'Camera active';
     camWrap.classList.remove('state-capture', 'state-success', 'state-error');
     camWrap.classList.add('state-active');
     for (let i = 0; i < 3; i++) {
@@ -832,16 +851,16 @@ function flashError(msg) {
 function showModal(success, message) {
     const ring = document.getElementById('ring-fill');
     const icon = document.getElementById('ring-icon');
+    const btn  = document.getElementById('result-action-btn');
     ring.className = `ring-fill ${success ? 'success-ring' : 'error-ring'}`;
     icon.textContent = success ? '✓' : '✕';
     document.getElementById('result-title').textContent   = success ? 'Registered!' : 'Failed';
     document.getElementById('result-message').textContent = message;
-    document.getElementById('result-action-btn').textContent = success ? 'Continue to Profile' : 'Try Again';
-    if (!success) {
-        document.getElementById('result-action-btn').onclick = () => {
-            document.getElementById('result-modal').classList.remove('visible');
-        };
-    }
+    btn.textContent = success ? 'Continue to Profile' : 'Try Again';
+    // Always reset onclick so a success after a prior failure redirects correctly
+    btn.onclick = success
+        ? () => closeResultModal()
+        : () => { document.getElementById('result-modal').classList.remove('visible'); };
     setTimeout(() => document.getElementById('result-modal').classList.add('visible'), 50);
 }
 
