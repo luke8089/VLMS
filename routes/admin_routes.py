@@ -905,7 +905,7 @@ def get_face_verification_stats():
     dept_stats = db.session.query(
         User.department,
         func.count(User.id).label('total'),
-        func.sum(db.case([(User.face_encoding.isnot(None), 1)], else_=0)).label('registered')
+        func.sum(db.case((User.face_encoding.isnot(None), 1), else_=0)).label('registered')
     ).filter(User.role == 'student').group_by(User.department).all()
     
     department_breakdown = [
