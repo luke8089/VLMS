@@ -1,3 +1,4 @@
+import threading
 from flask import Blueprint, request, jsonify, render_template, current_app
 from flask_jwt_extended import jwt_required
 from database.models import (
@@ -68,7 +69,7 @@ def get_enrolled_courses():
     course_ids = [e.course_id for e in enrollment_list]
     if not course_ids:
         return jsonify({'items': [], 'total': 0, 'page': 1, 'pages': 0, 'has_next': False})
-    courses = Course.query.filter(Course.id.in_(course_ids), Course.is_published == True)
+    courses = Course.query.filter(Course.id.in_(course_ids), Course.is_published == True, Course.is_active == True)
     return jsonify(paginate_query(courses, page))
 
 
@@ -89,10 +90,11 @@ def get_available_courses():
     if student_department:
         query = Course.query.filter(
             Course.is_published == True,
+            Course.is_active == True,
             db.func.lower(Course.category) == db.func.lower(student_department)
         )
     else:
-        query = Course.query.filter(Course.is_published == True)
+        query = Course.query.filter(Course.is_published == True, Course.is_active == True)
     
     # Exclude already enrolled courses
     if enrolled_ids:
@@ -120,14 +122,16 @@ def get_all_courses():
     
     # Filter courses by student's department (or show all if no department set)
     if student_department:
-        # Use case-insensitive matching for department
         courses = Course.query.filter(
             Course.is_published == True,
+            Course.is_active == True,
             db.func.lower(Course.category) == db.func.lower(student_department)
         ).order_by(Course.title).all()
     else:
-        # If student hasn't set department, show all courses
-        courses = Course.query.filter(Course.is_published == True).order_by(Course.title).all()
+        courses = Course.query.filter(
+            Course.is_published == True,
+            Course.is_active == True,
+        ).order_by(Course.title).all()
     
     items = []
     for c in courses:
@@ -147,9 +151,9 @@ def enroll_in_course(course_id):
     student = User.query.get(identity['id'])
     course = Course.query.get(course_id)
     
-    if not course or not course.is_published:
+    if not course or not course.is_published or not course.is_active:
         return jsonify({'error': 'Course not found'}), 404
-    
+
     # Check department match (case-insensitive)
     if course.category and student.department:
         if course.category.strip().lower() != student.department.strip().lower():
@@ -176,6 +180,10 @@ def enroll_in_course(course_id):
 @role_required('student')
 def get_course_materials(course_id):
     identity = get_identity()
+    course = Course.query.get(course_id)
+    if not course or not course.is_active:
+        return jsonify({'error': 'Course not available'}), 404
+
     enrollment = Enrollment.query.filter_by(
         student_id=identity['id'], course_id=course_id, status='active'
     ).first()
@@ -191,13 +199,15 @@ def get_course_materials(course_id):
 @role_required('student')
 def get_course_lectures(course_id):
     identity = get_identity()
+    course = Course.query.get(course_id)
+    if not course or not course.is_active:
+        return jsonify({'error': 'Course not available'}), 404
+
     enrollment = Enrollment.query.filter_by(
         student_id=identity['id'], course_id=course_id, status='active'
     ).first()
     if not enrollment:
         return jsonify({'error': 'Not enrolled in this course'}), 403
-
-    course = Course.query.get(course_id)
     lectures = Lecture.query.filter_by(
         course_id=course_id, is_published=True
     ).order_by(Lecture.order_index).all()
@@ -333,29 +343,90 @@ def _submission_remaining_seconds(submission, exam):
 
 
 def _finalize_submission(submission):
+    """Mark submission as submitted immediately, then grade non-MCQ answers in background."""
     submission.submitted_at = datetime.utcnow()
     submission.status = 'submitted'
 
-    total_score = 0
-    all_graded = True
+    # Tally MCQ scores (already stored per-answer) so total_score is not zero
+    mcq_total = 0
+    has_open_questions = False
     answers = Answer.query.filter_by(submission_id=submission.id).all()
     for ans in answers:
         q = Question.query.get(ans.question_id)
         if not q:
             continue
         if q.question_type == 'mcq':
-            if ans.score is not None:
-                total_score += ans.score
+            mcq_total += ans.score or 0
         else:
-            all_graded = False
+            has_open_questions = True
 
-    submission.total_score = total_score
-    if all_graded:
+    submission.total_score = mcq_total
+    if not has_open_questions:
         submission.is_graded = True
         submission.status = 'graded'
 
     db.session.commit()
+
+    # Grade short_answer / essay in background so the HTTP response is instant
+    if has_open_questions:
+        app = current_app._get_current_object()
+        submission_id = submission.id
+        threading.Thread(
+            target=_background_grade,
+            args=(app, submission_id),
+            daemon=True,
+        ).start()
+
     return submission
+
+
+def _background_grade(app, submission_id):
+    """Grade open-ended answers with Gemini in a background thread."""
+    from ai_modules.gemini_service import grade_answer
+    with app.app_context():
+        try:
+            submission = Submission.query.get(submission_id)
+            if not submission:
+                return
+
+            answers = Answer.query.filter_by(submission_id=submission_id).all()
+            total_score = 0
+            all_graded = True
+
+            for ans in answers:
+                q = Question.query.get(ans.question_id)
+                if not q:
+                    continue
+                if q.question_type == 'mcq':
+                    total_score += ans.score or 0
+                    continue
+                try:
+                    score, feedback = grade_answer(
+                        question_text=q.question_text,
+                        question_type=q.question_type,
+                        student_answer=ans.answer_text or '',
+                        correct_answer=q.correct_answer or '',
+                        max_marks=q.marks,
+                    )
+                    ans.score = score
+                    ans.ai_feedback = feedback
+                    ans.is_correct = score >= (q.marks * 0.5)
+                    total_score += score
+                except Exception as exc:
+                    import logging
+                    logging.getLogger(__name__).error("Background grading error for answer %s: %s", ans.id, exc)
+                    all_graded = False
+
+            submission.total_score = total_score
+            if all_graded:
+                submission.is_graded = True
+                submission.status = 'graded'
+
+            db.session.commit()
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).error("Background grading thread error for submission %s: %s", submission_id, exc)
+            db.session.rollback()
 
 @student_bp.route('/api/student/exams', methods=['GET'])
 @jwt_required()
@@ -370,11 +441,18 @@ def get_available_exams():
     if not enrolled_ids:
         return jsonify({'exams': []})
 
+    # Only include exams from active courses
+    active_course_ids = [
+        c.id for c in Course.query.filter(
+            Course.id.in_(enrolled_ids), Course.is_active == True
+        ).all()
+    ]
+
     now = datetime.now()
 
-    # Return ALL published exams for enrolled courses (upcoming + open + closed)
+    # Return ALL published exams for enrolled active courses (upcoming + open + closed)
     exams = Exam.query.filter(
-        Exam.course_id.in_(enrolled_ids),
+        Exam.course_id.in_(active_course_ids),
         Exam.is_published == True,
     ).order_by(Exam.start_time.asc()).all()
 
@@ -421,6 +499,10 @@ def start_exam(exam_id):
     exam = Exam.query.get(exam_id)
     if not exam or not exam.is_published:
         return jsonify({'error': 'Exam not found'}), 404
+
+    course = Course.query.get(exam.course_id)
+    if not course or not course.is_active:
+        return jsonify({'error': 'This course is currently unavailable'}), 403
 
     # Verify enrollment
     enrollment = Enrollment.query.filter_by(

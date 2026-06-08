@@ -488,6 +488,10 @@
                             <p class="text-[11px] uppercase tracking-[0.3em] text-white/50">Enrollments</p>
                             <p class="text-3xl font-bold mt-1 text-white" id="c-enrollments">0</p>
                         </div>
+                        <div class="rounded-2xl p-4 bg-red-50 border border-red-200">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-red-400">Disabled</p>
+                            <p class="text-3xl font-bold mt-1 text-red-600" id="c-disabled">0</p>
+                        </div>
                     </div>
                     <!-- Filters -->
                     <div class="flex flex-wrap gap-3">
@@ -500,6 +504,7 @@
                             <option value="all">All Status</option>
                             <option value="published">Published</option>
                             <option value="unpublished">Unpublished</option>
+                            <option value="disabled">Disabled</option>
                         </select>
                         <button onclick="loadCoursesData()" class="px-5 py-2.5 bg-black text-white rounded-xl text-sm font-semibold hover:bg-black/80 transition">Refresh</button>
                     </div>
@@ -1505,13 +1510,17 @@
                 const data = await res.json();
                 allCourses = data.courses;
 
-                const published = allCourses.filter(c => c.is_published).length;
-                const draft = allCourses.length - published;
+                const active = allCourses.filter(c => c.is_active !== false);
+                const published = active.filter(c => c.is_published).length;
+                const draft = active.filter(c => !c.is_published).length;
+                const disabled = allCourses.filter(c => c.is_active === false).length;
                 const enrollments = allCourses.reduce((s, c) => s + (c.enrollment_count || 0), 0);
                 document.getElementById('c-total').textContent = data.total;
                 document.getElementById('c-published').textContent = published;
                 document.getElementById('c-draft').textContent = draft;
                 document.getElementById('c-enrollments').textContent = enrollments;
+                const disabledEl = document.getElementById('c-disabled');
+                if (disabledEl) disabledEl.textContent = disabled;
 
                 renderCoursesTable();
             } catch (e) {
@@ -1527,15 +1536,20 @@
                 return;
             }
             tbody.innerHTML = allCourses.map(c => {
-                const statusBadge = c.is_published
-                    ? '<span class="px-2.5 py-0.5 bg-black text-white rounded-full text-xs font-semibold">Published</span>'
-                    : '<span class="px-2.5 py-0.5 border border-black/15 text-black/40 rounded-full text-xs font-semibold">Draft</span>';
+                const isDisabled = c.is_active === false;
+                const statusBadge = isDisabled
+                    ? '<span class="px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-semibold">Disabled</span>'
+                    : c.is_published
+                        ? '<span class="px-2.5 py-0.5 bg-black text-white rounded-full text-xs font-semibold">Published</span>'
+                        : '<span class="px-2.5 py-0.5 border border-black/15 text-black/40 rounded-full text-xs font-semibold">Draft</span>';
                 const date = c.created_at ? new Date(c.created_at).toLocaleDateString() : '-';
+                const disabledSince = c.disabled_at ? `<div class="text-xs text-red-400 mt-0.5">Disabled ${new Date(c.disabled_at).toLocaleDateString()}</div>` : '';
                 return `
-                    <tr class="border-b border-black/5 hover:bg-black/[0.02] transition">
+                    <tr class="border-b border-black/5 hover:bg-black/[0.02] transition ${isDisabled ? 'bg-red-50/40' : ''}">
                         <td class="py-3.5 px-5">
-                            <div class="font-semibold">${c.title}</div>
+                            <div class="font-semibold ${isDisabled ? 'text-black/50' : ''}">${c.title}</div>
                             <div class="text-xs text-black/40 mt-0.5">${c.code || ''} ${c.category ? '· ' + c.category : ''}</div>
+                            ${disabledSince}
                         </td>
                         <td class="py-3.5 px-4 text-sm text-black/70">${c.lecturer_name}</td>
                         <td class="py-3.5 px-4 text-center font-semibold">${c.enrollment_count ?? 0}</td>
@@ -1543,13 +1557,19 @@
                         <td class="py-3.5 px-4 text-center">${statusBadge}</td>
                         <td class="py-3.5 px-4 text-sm text-black/50">${date}</td>
                         <td class="py-3.5 px-4">
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <button onclick="openCourseModal(${c.id})" class="text-sm font-medium text-black hover:underline">View</button>
+                                ${isDisabled ? `
+                                <button onclick="confirmRestoreCourse(${c.id}, '${c.title.replace(/'/g, "\\'")}')"
+                                    class="text-xs px-2.5 py-1 rounded-lg border border-emerald-300 text-emerald-700 hover:bg-emerald-50 transition font-medium">
+                                    Restore
+                                </button>` : `
                                 <button onclick="toggleCoursePublish(${c.id}, ${!c.is_published})"
                                     class="text-xs px-2.5 py-1 rounded-lg border border-black/15 text-black/55 hover:bg-black/5 transition">
                                     ${c.is_published ? 'Unpublish' : 'Publish'}
-                                </button>
-                                <button onclick="confirmDeleteCourse(${c.id})" class="text-xs px-2.5 py-1 rounded-lg border border-black/12 text-black/35 hover:border-black/25 hover:text-black/60 transition">Delete</button>
+                                </button>`}
+                                <button onclick="confirmDeleteCourse(${c.id}, '${c.title.replace(/'/g, "\\'")}')"
+                                    class="text-xs px-2.5 py-1 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition">Delete</button>
                             </div>
                         </td>
                     </tr>`;
@@ -1650,9 +1670,21 @@
             } catch (e) { alert('Failed to update course'); }
         }
 
-        async function confirmDeleteCourse(courseId) {
+        async function confirmRestoreCourse(courseId, title) {
+            if (!confirm(`Restore "${title}"?\n\nThe unit will become active again and students will regain access.`)) return;
+            try {
+                const res = await fetch(`/api/admin/courses/${courseId}/restore`, {
+                    method: 'POST', headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed');
+                loadCoursesData();
+            } catch (e) { alert('Failed to restore course'); }
+        }
+
+        async function confirmDeleteCourse(courseId, title) {
             const course = allCourses.find(c => c.id === courseId);
-            if (!confirm(`Delete "${course?.title}"?\n\nThis cannot be undone.`)) return;
+            const label = title || course?.title || 'this course';
+            if (!confirm(`Permanently delete "${label}"?\n\nAll materials, exams, enrollments and submissions will be deleted. This cannot be undone.`)) return;
             try {
                 const res = await fetch(`/api/admin/courses/${courseId}`, {
                     method: 'DELETE', headers: { Authorization: `Bearer ${token}` }

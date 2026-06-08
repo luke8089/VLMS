@@ -121,63 +121,71 @@ class QuizGenerator:
         sentences = re.split(r'(?<=[.!?])\s+', text.strip())
         return [s.strip() for s in sentences if len(s.split()) > 5]
 
-    def _generate_mcq(self, sentences, key_terms, difficulty):
-        """Generate multiple choice questions."""
-        questions = []
-        for sentence in sentences[:10]:
-            words = sentence.split()
-            if len(words) < 6:
-                continue
+    # Question stems for MCQ by difficulty
+    MCQ_STEMS = {
+        'remember': 'According to the material, which of the following correctly describes {}?',
+        'understand': 'Which statement best explains {}?',
+        'apply': 'Which of the following demonstrates how {} is applied?',
+        'analyze': 'Which option best analyzes the role of {}?',
+        'evaluate': 'Which statement best evaluates the importance of {}?',
+        'create': 'Which approach best describes how to work with {}?',
+    }
 
-            # Extract a key word/phrase to blank out
+    def _generate_mcq(self, sentences, key_terms, difficulty):
+        """Generate multiple choice questions using sentences as answer options."""
+        questions = []
+        stem = self.MCQ_STEMS.get(difficulty, self.MCQ_STEMS['understand'])
+
+        # Keep only sentences long enough to serve as answer options
+        usable = [s.strip() for s in sentences if len(s.split()) >= 6]
+
+        for i, sentence in enumerate(usable[:10]):
             target_word = None
             for term in key_terms:
                 if term.lower() in sentence.lower():
                     target_word = term
                     break
-
             if not target_word:
                 continue
 
-            # Create question by blanking the target word
-            question_text = sentence.replace(target_word, '_____', 1)
+            question_text = stem.format(target_word)
+            correct_answer = sentence
 
-            # Generate distractors from other key terms
-            distractors = [t for t in key_terms if t != target_word][:3]
-            if len(distractors) < 3:
-                distractors.extend(['None of the above'] * (3 - len(distractors)))
+            # Use other sentences as distractors so options are topical
+            distractors = [s for s in usable if s != sentence][:3]
+            while len(distractors) < 3:
+                distractors.append(f"None of the above statements about {target_word} are correct.")
 
-            options = distractors[:3] + [target_word]
+            options = distractors[:3] + [correct_answer]
             random.shuffle(options)
-            correct_index = options.index(target_word)
+            correct_index = options.index(correct_answer)
 
             questions.append({
-                'question_text': f"Fill in the blank: {question_text}",
+                'question_text': question_text,
                 'question_type': 'mcq',
                 'options': options,
                 'correct_answer': str(correct_index),
                 'marks': 2,
                 'difficulty': difficulty,
-                'explanation': sentence,
+                'explanation': f'From document: {correct_answer}',
             })
 
         return questions
 
     def _generate_short_answer(self, sentences, key_terms, difficulty):
-        """Generate short answer questions."""
+        """Generate short answer questions anchored to document sentences."""
         questions = []
         stems = self.BLOOM_STEMS.get(difficulty, self.BLOOM_STEMS['understand'])
 
         for term in key_terms[:5]:
+            # Find the richest sentence (most words) that mentions this term
+            matching = [s for s in sentences if term.lower() in s.lower()]
+            if not matching:
+                continue
+            best_sentence = max(matching, key=lambda s: len(s.split()))
+
             stem = random.choice(stems)
             question_text = stem.format(term)
-
-            # Find the sentence that best explains this term
-            best_sentence = ''
-            for s in sentences:
-                if term.lower() in s.lower():
-                    best_sentence = s
-                    break
 
             questions.append({
                 'question_text': question_text,

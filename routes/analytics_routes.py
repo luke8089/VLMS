@@ -423,6 +423,118 @@ def predict_performance(student_id, course_id):
     })
 
 
+# ──────────────── AI RECOMMENDATIONS ────────────────
+
+@analytics_bp.route('/api/analytics/student/<int:student_id>/ai-recommendations', methods=['GET'])
+@jwt_required()
+@role_required('student', 'lecturer', 'admin')
+def ai_recommendations(student_id):
+    """Use Gemini to generate personalised learning recommendations for a student."""
+    identity = get_identity()
+
+    # Students can only view their own recommendations
+    if identity['role'] == 'student' and identity['id'] != student_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    course_id = request.args.get('course_id', type=int)
+
+    student = User.query.get(student_id)
+    if not student:
+        return jsonify({'error': 'Student not found'}), 404
+
+    student_name = f"{student.first_name} {student.last_name}"
+
+    # Build submission + question performance data
+    submissions_q = Submission.query.filter_by(student_id=student_id, status='graded')
+    if course_id:
+        course = Course.query.get(course_id)
+        course_name = course.title if course else f"Course {course_id}"
+        exam_ids = [e.id for e in Exam.query.filter_by(course_id=course_id).all()]
+        submissions_q = submissions_q.filter(Submission.exam_id.in_(exam_ids)) if exam_ids else submissions_q.filter(False)
+    else:
+        course_name = "all enrolled courses"
+
+    submissions = submissions_q.all()
+
+    # Aggregate accuracy per Bloom's difficulty level
+    difficulty_stats = {}
+    total_score = 0
+    total_max = 0
+
+    for sub in submissions:
+        answers = Answer.query.filter_by(submission_id=sub.id).all()
+        for ans in answers:
+            question = Question.query.get(ans.question_id)
+            if not question:
+                continue
+            diff = question.difficulty or 'understand'
+            if diff not in difficulty_stats:
+                difficulty_stats[diff] = {'correct': 0, 'total': 0, 'marks_earned': 0, 'marks_max': 0}
+            difficulty_stats[diff]['total'] += 1
+            if ans.is_correct:
+                difficulty_stats[diff]['correct'] += 1
+            difficulty_stats[diff]['marks_earned'] += ans.score or 0
+            difficulty_stats[diff]['marks_max'] += question.marks or 0
+            total_score += ans.score or 0
+            total_max += question.marks or 0
+
+    weak_areas = []
+    for diff, stats in difficulty_stats.items():
+        accuracy = (stats['correct'] / stats['total'] * 100) if stats['total'] > 0 else 0
+        if accuracy < 70:
+            weak_areas.append({
+                'difficulty': diff,
+                'accuracy': round(accuracy, 1),
+                'attempts': stats['total'],
+                'marks_earned': stats['marks_earned'],
+                'marks_max': stats['marks_max'],
+            })
+
+    # Study pattern
+    material_ids = []
+    if course_id:
+        material_ids = [m.id for m in Material.query.filter_by(course_id=course_id).all()]
+    else:
+        enrolled = Enrollment.query.filter_by(student_id=student_id, status='active').all()
+        for enr in enrolled:
+            material_ids += [m.id for m in Material.query.filter_by(course_id=enr.course_id).all()]
+
+    progress_rows = LearningProgress.query.filter(
+        LearningProgress.student_id == student_id,
+        LearningProgress.material_id.in_(material_ids) if material_ids else False
+    ).all() if material_ids else []
+
+    completed_materials = sum(1 for p in progress_rows if (p.progress_percent or 0) >= 80)
+    total_time_hours = round(sum((p.time_spent_seconds or 0) for p in progress_rows) / 3600, 2)
+    avg_score_pct = round((total_score / total_max * 100), 1) if total_max > 0 else 0
+
+    study_pattern = {
+        'total_time_hours': total_time_hours,
+        'completed_materials': completed_materials,
+        'total_materials': len(material_ids),
+        'avg_score': avg_score_pct,
+    }
+
+    from ai_modules.gemini_service import generate_recommendations, gemini_available
+
+    recommendations_text = generate_recommendations(
+        weak_areas=weak_areas,
+        study_pattern=study_pattern,
+        student_name=student_name,
+        course_name=course_name,
+    )
+
+    return jsonify({
+        'student_id': student_id,
+        'student_name': student_name,
+        'course_name': course_name,
+        'weak_areas': weak_areas,
+        'study_pattern': study_pattern,
+        'recommendations': recommendations_text,
+        'ai_powered': gemini_available(),
+    })
+
+
 # ──────────────── ADMIN DASHBOARD STATS ────────────────
 
 @analytics_bp.route('/api/analytics/admin/overview', methods=['GET'])

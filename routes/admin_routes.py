@@ -177,9 +177,11 @@ def list_courses():
 
     query = Course.query
     if status_filter == 'published':
-        query = query.filter_by(is_published=True)
+        query = query.filter_by(is_published=True, is_active=True)
     elif status_filter == 'unpublished':
-        query = query.filter_by(is_published=False)
+        query = query.filter_by(is_published=False, is_active=True)
+    elif status_filter == 'disabled':
+        query = query.filter_by(is_active=False)
     if search:
         query = query.filter(
             db.or_(
@@ -221,6 +223,22 @@ def update_course(course_id):
     return jsonify({'message': 'Course updated', 'course': course.to_dict()})
 
 
+@admin_bp.route('/api/admin/courses/<int:course_id>/restore', methods=['POST'])
+@jwt_required()
+@role_required('admin')
+def restore_course(course_id):
+    from database.models import Course, db
+
+    course = Course.query.get_or_404(course_id)
+    if course.is_active:
+        return jsonify({'error': 'Course is not disabled'}), 400
+
+    course.is_active = True
+    course.disabled_at = None
+    db.session.commit()
+    return jsonify({'message': 'Course restored successfully', 'course': course.to_dict()})
+
+
 @admin_bp.route('/api/admin/courses/<int:course_id>', methods=['DELETE'])
 @jwt_required()
 @role_required('admin')
@@ -230,7 +248,7 @@ def delete_course(course_id):
     course = Course.query.get_or_404(course_id)
     db.session.delete(course)
     db.session.commit()
-    return jsonify({'message': 'Course deleted'})
+    return jsonify({'message': 'Course deleted permanently'})
 
 
 # ──────────────── EXAMS OVERVIEW ────────────────

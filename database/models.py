@@ -81,6 +81,8 @@ class Course(db.Model):
     lecturer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     category = db.Column(db.String(100), nullable=True)
     is_published = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+    disabled_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -99,6 +101,8 @@ class Course(db.Model):
             'lecturer_id': self.lecturer_id,
             'category': self.category,
             'is_published': self.is_published,
+            'is_active': self.is_active,
+            'disabled_at': self.disabled_at.isoformat() if self.disabled_at else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 

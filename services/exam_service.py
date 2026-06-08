@@ -26,25 +26,22 @@ class ExamService:
                 answer.score = question.marks if answer.is_correct else 0
                 total_score += answer.score
 
-            elif question.question_type == 'short_answer':
-                # Use NLP similarity for short answers
+            elif question.question_type in ('short_answer', 'essay'):
                 try:
-                    from ai_modules.assessment_ai.essay_grader import EssayGrader
-                    grader = EssayGrader()
-                    score, feedback = grader.grade_short_answer(
-                        answer.answer_text or '',
-                        question.correct_answer or '',
-                        question.marks
+                    from ai_modules.gemini_service import grade_answer
+                    score, feedback = grade_answer(
+                        question_text=question.question_text,
+                        question_type=question.question_type,
+                        student_answer=answer.answer_text or '',
+                        correct_answer=question.correct_answer or '',
+                        max_marks=question.marks,
                     )
                     answer.score = score
                     answer.ai_feedback = feedback
                     answer.is_correct = score >= (question.marks * 0.5)
                     total_score += score
-                except ImportError:
+                except Exception:
                     all_graded = False
-
-            elif question.question_type == 'essay':
-                all_graded = False  # Essays need manual review
 
         submission.total_score = total_score
         if all_graded:

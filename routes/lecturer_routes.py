@@ -298,6 +298,23 @@ def update_course(course_id):
     return jsonify({'message': 'Course updated', 'course': course.to_dict()})
 
 
+@lecturer_bp.route('/api/lecturer/courses/<int:course_id>/disable', methods=['POST'])
+@jwt_required()
+@role_required('lecturer')
+def disable_course(course_id):
+    identity = get_identity()
+    course = Course.query.filter_by(id=course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Course not found'}), 404
+    if not course.is_active:
+        return jsonify({'error': 'Course is already disabled'}), 400
+
+    course.is_active = False
+    course.disabled_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'message': 'Course disabled. Contact admin to restore or delete it.', 'course': course.to_dict()})
+
+
 @lecturer_bp.route('/api/lecturer/courses/<int:course_id>', methods=['DELETE'])
 @jwt_required()
 @role_required('lecturer')
@@ -306,6 +323,8 @@ def delete_course(course_id):
     course = Course.query.filter_by(id=course_id, lecturer_id=identity['id']).first()
     if not course:
         return jsonify({'error': 'Course not found'}), 404
+    if not course.is_active:
+        return jsonify({'error': 'Disabled courses can only be deleted by an admin.'}), 403
 
     db.session.delete(course)
     db.session.commit()
@@ -431,10 +450,10 @@ def upload_material(course_id):
         def _process_material():
             with app.app_context():
                 from utils.text_extractor import extract_text
-                from ai_modules.ollama_service import summarize_text
+                from ai_modules.gemini_service import summarize_text
                 text = extract_text(abs_path)
                 if text and len(text.strip()) >= 50:
-                    summary = summarize_text(text)
+                    summary = summarize_text(text, max_words=400)
                     mat = Material.query.get(mat_id)
                     if mat:
                         mat.ai_summary = summary
@@ -471,19 +490,11 @@ def summarize_material(material_id):
             'error': 'Could not extract text from this file. If this is a scanned PDF, OCR is required.'
         }), 400
 
-    from ai_modules.ollama_service import summarize_text, _ollama_available
-    if _ollama_available():
-        try:
-            summary = summarize_text(raw_text)
-        except Exception:
-            summary = ''
-    else:
-        summary = ''
+    from ai_modules.gemini_service import summarize_text
+    summary = summarize_text(raw_text, max_words=400)
 
     if not summary:
-        # Fallback: extractive summary using local TF-IDF summarizer
-        from ai_modules.learning_ai.summarizer import TextSummarizer
-        summary = TextSummarizer().summarize(raw_text, num_sentences=10)
+        return jsonify({'error': 'Failed to generate summary. Please try again.'}), 500
 
     material.ai_summary = summary
     db.session.commit()
@@ -1000,30 +1011,47 @@ def generate_exam_from_materials(course_id):
     else:
         lectures = Lecture.query.filter_by(course_id=course_id).all() if include_lectures else []
 
+    from utils.text_extractor import extract_text
+    upload_folder = current_app.config['UPLOAD_FOLDER']
     combined_text = ''
 
-    # 1) Use existing AI summaries
+    # 1) Collect text per material — prefer AI summary; fall back to raw extraction
     for mat in (materials or []):
-        if mat.ai_summary:
-            combined_text += mat.ai_summary + '\n\n'
-
-    # 2) If summaries are sparse, extract raw text from uploaded files
-    if len(combined_text.strip()) < 50:
-        from utils.text_extractor import extract_text
-        upload_folder = current_app.config['UPLOAD_FOLDER']
-        for mat in (materials or []):
+        section = ''
+        if mat.ai_summary and len(mat.ai_summary.strip()) >= 50:
+            section = mat.ai_summary
+        else:
             abs_path = os.path.join(upload_folder, mat.file_path)
             raw_text = extract_text(abs_path)
             if raw_text and len(raw_text.strip()) >= 30:
-                combined_text += raw_text + '\n\n'
-                # Backfill a lightweight summary without blocking exam generation
+                section = raw_text
+                # Async backfill: generate a real summary so next time we use it
                 if not mat.ai_summary:
-                    mat.ai_summary = raw_text[:2000]
-                    db.session.commit()
+                    try:
+                        import threading
+                        app = current_app._get_current_object()
+                        mat_id = mat.id
+                        raw_copy = raw_text
 
-    # 3) Also pull lecture content
+                        def _backfill():
+                            with app.app_context():
+                                from ai_modules.gemini_service import summarize_text
+                                from database.models import db, Material
+                                m = Material.query.get(mat_id)
+                                if m and not m.ai_summary:
+                                    m.ai_summary = summarize_text(raw_copy, max_words=400)
+                                    db.session.commit()
+
+                        threading.Thread(target=_backfill, daemon=True).start()
+                    except Exception:
+                        pass
+
+        if section:
+            combined_text += f"=== {mat.title} ===\n{section}\n\n"
+
+    # 2) Lecture notes
     for lec in (lectures or []):
-        if lec.content:
+        if lec.content and len(lec.content.strip()) > 20:
             combined_text += lec.content + '\n\n'
 
     if len(combined_text.strip()) < 50:
@@ -1032,13 +1060,10 @@ def generate_exam_from_materials(course_id):
                      'Upload PDFs or documents with readable text, or add lecture content.'
         }), 400
 
-    # Cap context size to keep generation responsive
-    combined_text = combined_text[:12000]
-
-    # Generate questions — try Ollama LLM first, fallback to rule-based
+    # Generate questions — try Gemini first, fallback to Ollama, then rule-based
     generated = []
     try:
-        from ai_modules.ollama_service import generate_questions_llm
+        from ai_modules.gemini_service import generate_questions_llm
         generated = generate_questions_llm(
             combined_text, num_questions, difficulty, question_types
         )
@@ -1243,6 +1268,116 @@ def grade_submission(submission_id):
     db.session.commit()
 
     return jsonify({'message': 'Submission graded', 'submission': submission.to_dict()})
+
+
+@lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/ai-grade', methods=['POST'])
+@jwt_required()
+@role_required('lecturer')
+def ai_grade_submission(submission_id):
+    """Use Gemini to auto-grade all short_answer and essay answers in a submission."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    exam = Exam.query.get(submission.exam_id)
+    course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    from ai_modules.gemini_service import grade_answer, gemini_available
+
+    answers = Answer.query.filter_by(submission_id=submission_id).all()
+    graded = []
+    skipped = []
+
+    for answer in answers:
+        question = Question.query.get(answer.question_id)
+        if not question:
+            continue
+
+        if question.question_type == 'mcq':
+            skipped.append(answer.id)
+            continue
+
+        student_text = answer.answer_text or ''
+        correct_text = question.correct_answer or ''
+
+        score, feedback = grade_answer(
+            question_text=question.question_text,
+            question_type=question.question_type,
+            student_answer=student_text,
+            correct_answer=correct_text,
+            max_marks=question.marks,
+        )
+
+        answer.score = score
+        answer.ai_feedback = feedback
+        answer.is_correct = score >= (question.marks * 0.5)
+        graded.append({'answer_id': answer.id, 'score': score, 'feedback': feedback})
+
+    submission.total_score = sum(a.score or 0 for a in answers)
+    submission.is_graded = True
+    submission.status = 'graded'
+    db.session.commit()
+
+    return jsonify({
+        'message': f'AI graded {len(graded)} answer(s). MCQ answers ({len(skipped)}) skipped.',
+        'graded': graded,
+        'total_score': submission.total_score,
+        'ai_powered': gemini_available(),
+    })
+
+
+@lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/violation-analysis', methods=['GET'])
+@jwt_required()
+@role_required('lecturer')
+def violation_analysis(submission_id):
+    """Use Gemini to generate a human-readable risk assessment for a submission's violations."""
+    identity = get_identity()
+    submission = Submission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    exam = Exam.query.get(submission.exam_id)
+    course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    student = User.query.get(submission.student_id)
+    student_name = f"{student.first_name} {student.last_name}" if student else 'Unknown'
+
+    violations = Violation.query.filter_by(submission_id=submission_id).all()
+    violations_data = [
+        {
+            'violation_type': v.violation_type,
+            'severity': v.severity,
+            'description': v.description,
+            'timestamp': v.timestamp.isoformat() if v.timestamp else None,
+        }
+        for v in violations
+    ]
+
+    from ai_modules.gemini_service import analyze_violations, gemini_available
+
+    report = analyze_violations(
+        violations=violations_data,
+        student_name=student_name,
+        exam_name=exam.title,
+        risk_score=submission.risk_score or 0,
+    )
+
+    return jsonify({
+        'submission_id': submission_id,
+        'student_name': student_name,
+        'exam_title': exam.title,
+        'risk_score': submission.risk_score or 0,
+        'is_flagged': submission.is_flagged,
+        'total_violations': len(violations),
+        'violations': violations_data,
+        'ai_analysis': report,
+        'ai_powered': gemini_available(),
+    })
 
 
 @lecturer_bp.route('/api/lecturer/submissions/<int:submission_id>/override-score', methods=['PUT'])

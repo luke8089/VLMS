@@ -40,10 +40,29 @@
             </div>
         </div>
 
-        {% if material_data.ai_summary and show_ai_summary %}
-        <div class="reader-card rounded-xl p-3 md:p-5">
-            <h2 class="text-sm font-semibold text-neutral-200 mb-2">AI Summary</h2>
-            <div class="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">{{ material_data.ai_summary }}</div>
+        {% if show_ai_summary %}
+        <div class="reader-card rounded-xl p-3 md:p-5" id="ai-summary-card">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm font-semibold text-neutral-200">AI Summary</h2>
+                <button id="gen-summary-btn" onclick="generateSummary()"
+                    class="reader-btn px-3 py-1.5 rounded-lg text-xs font-medium">
+                    {% if material_data.ai_summary %}Regenerate{% else %}Generate Summary{% endif %}
+                </button>
+            </div>
+            <div id="summary-content">
+                {% if material_data.ai_summary %}
+                <div class="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">{{ material_data.ai_summary }}</div>
+                {% else %}
+                <p class="text-sm text-neutral-500 italic">No summary yet. Click "Generate Summary" to have the AI read through the document and create one.</p>
+                {% endif %}
+            </div>
+            <div id="summary-loading" class="hidden items-center gap-2 text-sm text-neutral-400">
+                <svg class="animate-spin h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4z"></path>
+                </svg>
+                Reading document and generating summary — this may take a minute for longer files…
+            </div>
         </div>
         {% endif %}
 
@@ -169,5 +188,45 @@ document.getElementById('next-page').addEventListener('click', async () => {
         if (meta) meta.classList.add('hidden');
     }
 })();
+
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+async function generateSummary() {
+    const btn = document.getElementById('gen-summary-btn');
+    const loading = document.getElementById('summary-loading');
+    const content = document.getElementById('summary-content');
+    if (!btn || !loading || !content) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    content.classList.add('hidden');
+    loading.classList.remove('hidden');
+    loading.classList.add('flex');
+
+    try {
+        const resp = await AUTH.fetch(`/api/lecturer/materials/${MATERIAL.id}/summarize`, {
+            method: 'POST',
+        });
+        const data = await resp.json();
+        if (resp.ok && data.material && data.material.ai_summary) {
+            content.innerHTML = `<div class="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">${escapeHtml(data.material.ai_summary)}</div>`;
+            btn.textContent = 'Regenerate';
+        } else {
+            content.innerHTML = `<p class="text-sm text-red-400">${escapeHtml(data.error || 'Failed to generate summary.')}</p>`;
+            btn.textContent = 'Try Again';
+        }
+    } catch (e) {
+        content.innerHTML = '<p class="text-sm text-red-400">Network error. Please try again.</p>';
+        btn.textContent = 'Try Again';
+    } finally {
+        btn.disabled = false;
+        loading.classList.add('hidden');
+        loading.classList.remove('flex');
+        content.classList.remove('hidden');
+    }
+}
 </script>
 {% endblock %}
