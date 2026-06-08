@@ -28,16 +28,11 @@ Install the following before cloning the project:
 - Download: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 - Install workload: **Desktop development with C++**.
 
-### 1.5 Ollama (optional — for AI features)
-- Download: https://ollama.com/download
-- After install, pull a model:
-  ```powershell
-  ollama pull llama3.2:1b
-  ```
-- `llama3` or `mistral` also work (larger, higher quality):
-  ```powershell
-  ollama pull mistral
-  ```
+### 1.5 Google Gemini API Key (required for AI features)
+- Go to: https://aistudio.google.com/app/apikey
+- Click **Create API Key** and copy the key.
+- Free tier: 15 requests/min, 500 requests/day — sufficient for normal use.
+- Paste the key into your `.env` file (see Step 6).
 
 ### 1.6 Tesseract OCR (optional — for scanned PDFs)
 - Required to extract text from image-based PDFs.
@@ -52,6 +47,12 @@ Install the following before cloning the project:
 ```powershell
 git clone https://github.com/luke8089/VLMS.git
 cd VLMS
+```
+
+To use the latest feature branch instead of main:
+
+```powershell
+git checkout feature/gemini-ai-grading-and-course-disable
 ```
 
 ---
@@ -120,8 +121,12 @@ JWT_SECRET_KEY=change-this-jwt-secret
 DATABASE_URL=mysql://root:@localhost/aura_edu
 FLASK_ENV=development
 FLASK_DEBUG=1
-OLLAMA_MODEL=llama3.2:1b
-OLLAMA_TIMEOUT=15
+
+# Google Gemini AI (required for AI features)
+GEMINI_API_KEY=your-gemini-api-key-here
+GEMINI_MODEL=gemini-2.5-flash
+
+# OCR (optional)
 OCR_MAX_PAGES=5
 OCR_SCALE=1.5
 TESSERACT_CMD=C:\\Program Files\\Tesseract-OCR\\tesseract.exe
@@ -147,33 +152,66 @@ On first run the app will:
 
 ---
 
-## 8) Default Admin Login
+## 8) Database Migrations (existing installations only)
 
-| Role  | Email           | Password  |
-|-------|-----------------|-----------|
-| Admin | admin@gmail.com | 111Admin@ |
+If you are upgrading an existing `aura_edu` database, run these SQL statements to add the columns introduced in recent updates:
 
-> Change credentials after first login.
+```sql
+-- Course soft-disable feature
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS is_active TINYINT(1) NOT NULL DEFAULT 1;
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS disabled_at DATETIME NULL;
+
+-- Exam reschedule tracking
+ALTER TABLE exams ADD COLUMN IF NOT EXISTS rescheduled_at DATETIME NULL;
+```
+
+Run via XAMPP phpMyAdmin SQL tab, or via the MySQL CLI:
+
+```powershell
+C:\xampp\mysql\bin\mysql.exe -u root aura_edu -e "
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS is_active TINYINT(1) NOT NULL DEFAULT 1;
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS disabled_at DATETIME NULL;
+ALTER TABLE exams ADD COLUMN IF NOT EXISTS rescheduled_at DATETIME NULL;
+"
+```
+
+Fresh installs (no existing database) do **not** need this step — the tables are created correctly on first run.
 
 ---
 
-## 9) AI Features (Ollama)
+## 9) Default Accounts
 
-The app uses a locally-running Ollama instance for:
-- Document summarization when uploading course materials
-- Exam question generation from course content
-- AI response time is tracked and displayed in the Admin panel
+| Role     | Email                      | Password      |
+|----------|----------------------------|---------------|
+| Admin    | admin@gmail.com            | 111Admin@     |
+| Lecturer | lec@gmail.com              | 111Lec@@      |
 
-To use AI features:
-1. Start Ollama
-2. Confirm it's reachable at `http://localhost:11434`
-3. Ensure at least one model is pulled (recommended: `llama3.2:1b`)
-
-If Ollama is not running, the app continues to work — AI features fall back gracefully.
+> Change credentials after first login via the admin panel.
 
 ---
 
-## 10) Face Registration & Exam Proctoring
+## 10) AI Features (Google Gemini)
+
+The app uses Google Gemini 2.5 Flash for:
+
+- **Document summarization** — summaries when reading uploaded materials
+- **Exam question generation** — generates questions from course content
+- **Automated exam marking** — grades short-answer and essay questions
+- **Violation analysis** — AI narrative risk reports from proctoring data
+- **AI recommendations** — personalised study recommendations per student
+
+Grading runs in a **background thread** after submission so the student never waits. If Gemini is unavailable (rate limit or network error), the system falls back to NLP-based cosine-similarity grading automatically.
+
+### Free tier limits
+| Limit | Value |
+|-------|-------|
+| Requests per minute | 15 |
+| Tokens per minute | 1,000,000 |
+| Requests per day | 500 |
+
+---
+
+## 11) Face Registration & Exam Proctoring
 
 Students must register their face before sitting a proctored exam:
 
@@ -187,7 +225,36 @@ Proctoring captures:
 
 ---
 
-## 11) Daily Run Commands
+## 12) Feature Overview
+
+### Roles
+| Role | Access |
+|------|--------|
+| Admin | Full platform management, user management, course oversight |
+| Lecturer | Create and manage their own courses, exams, and materials |
+| Student | Enrol in courses, take exams, view grades and AI recommendations |
+
+### Course Management
+- Lecturers can **disable** a unit — students immediately lose access to all materials, exams, and content
+- Admins can **restore** a disabled unit or **permanently delete** it
+- Disabled courses are visible only in the admin panel with a restore option
+
+### Exam Reschedule
+- Admins and lecturers can **reschedule** any exam after its end time has passed
+- The Reschedule button only appears on exam cards once the exam window has closed
+- On reschedule: `in_progress` submissions (students who started but never submitted) are **automatically cleared** so those students get a fresh attempt
+- Students who already **submitted** are permanently locked out from rescheduled exams — they cannot retake it
+- Rescheduled exams show a blue **"Rescheduled"** badge on the student dashboard
+- Admins can additionally reset specific submitted students' attempts when rescheduling
+
+### Exam Proctoring & Violations
+- Live face verification, eye tracking, and tab-switch detection during exams
+- Violations are logged and scored in real time
+- Lecturers and admins can trigger AI-generated violation analysis reports per submission
+
+---
+
+## 13) Daily Run Commands
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -196,7 +263,7 @@ python app.py
 
 ---
 
-## 12) Troubleshooting
+## 14) Troubleshooting
 
 ### PowerShell blocks venv activation
 ```powershell
@@ -216,42 +283,49 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ### Port 5000 already in use
 - Stop the conflicting process or change the port in `app.py`.
 
-### AI features not working
-- Ensure Ollama is running and a model is pulled:
-  ```powershell
-  ollama pull llama3.2:1b
-  ```
+### AI features not working (Gemini 429 / rate limit)
+- The free tier allows 15 requests/minute. Heavy simultaneous use may briefly hit this.
+- Exam grading runs in the background — submissions still succeed even if Gemini is rate-limited.
+- The system automatically falls back to NLP grading when Gemini is unavailable.
+
+### AI features returning errors
+- Confirm `GEMINI_API_KEY` is set correctly in `.env`.
+- Confirm `GEMINI_MODEL=gemini-2.5-flash` is set.
+- Test your key at: https://aistudio.google.com/app/apikey
 
 ### OCR not working on scanned PDFs
 - Confirm Tesseract is installed.
 - Check `TESSERACT_CMD` path in `.env`.
 
+### Course delete fails with integrity error
+- This was a known issue (missing cascade on `learning_progress`). Fixed in the current version.
+- If still occurring on an old install, run: `pip install -r requirements.txt` to ensure the latest code is active.
+
 ---
 
-## 13) Setup Checklist
+## 15) Setup Checklist
 
 - [ ] Python 3.11 installed
 - [ ] `.venv` created and activated
 - [ ] `pip install -r requirements.txt` succeeded
 - [ ] XAMPP MySQL is running
 - [ ] Database `aura_edu` exists
-- [ ] `.env` file created in project root
+- [ ] `.env` file created with `GEMINI_API_KEY` set
 - [ ] `python app.py` starts without errors
 - [ ] Login works at `http://localhost:5000`
 - [ ] Face registration works at `http://localhost:5000/face-registration`
-- [ ] Ollama running (optional — for AI features)
+- [ ] DB migrations run (existing installs only — Step 8)
 - [ ] Tesseract installed (optional — for scanned PDFs)
 
 ---
 
-## 14) Project Structure
+## 16) Project Structure
 
 ```
 VLMS/
 ├── app.py                    # Flask entry point
 ├── config.py                 # App configuration
 ├── requirements.txt          # Python dependencies
-├── _migrate.py               # DB migration helper (existing installs)
 ├── .env                      # Environment variables (not committed)
 │
 ├── database/
@@ -260,34 +334,37 @@ VLMS/
 │
 ├── routes/
 │   ├── auth_routes.py        # Login, register, face registration
-│   ├── student_routes.py     # Student dashboard & portal
-│   ├── lecturer_routes.py    # Lecturer panel & content
-│   ├── exam_routes.py        # Exam creation & submission
-│   ├── admin_routes.py       # Admin management
-│   └── analytics_routes.py  # Analytics & reporting API
+│   ├── student_routes.py     # Student dashboard & exam portal
+│   ├── lecturer_routes.py    # Lecturer panel, exams, reschedule
+│   ├── exam_routes.py        # Exam submission handling
+│   ├── admin_routes.py       # Admin management, course delete, reschedule
+│   └── analytics_routes.py  # Analytics & AI recommendations API
 │
 ├── services/
 │   ├── authentication_service.py
 │   ├── analytics_service.py
-│   └── exam_service.py
+│   └── exam_service.py       # Gemini-powered auto-grading
 │
 ├── ai_modules/
-│   ├── ollama_service.py          # LLM integration (summarization, Q gen)
-│   ├── assessment_ai/             # Quiz generation, essay grading
+│   ├── gemini_service.py          # Google Gemini integration (primary AI)
+│   ├── assessment_ai/             # Quiz generation, NLP essay grading (fallback)
 │   ├── exam_proctoring/           # Face auth, risk scoring, eye tracking
 │   └── learning_ai/               # Flashcards, summarizer, adaptive learning
 │
 ├── templates/                # Jinja2 HTML templates
+│   ├── admin_panel.html      # Admin dashboard (modals, toasts, course/exam mgmt)
+│   ├── lecturer_panel.html   # Lecturer dashboard (exam reschedule)
+│   └── student_panel.html    # Student dashboard (rescheduled badge, lock-out)
+│
 ├── static/                   # Static JS assets
 │
 ├── landing/                  # Public landing page
 │   ├── index.html
 │   ├── style.css
 │   ├── script.js
-│   └── images/               # Landing page images
+│   └── images/
 │
 ├── mail/                     # Email service (OAuth mailer)
-├── migrations/               # SQL schema reference
 │
 ├── uploads/                  # User-uploaded files (not committed)
 │   ├── courses/
