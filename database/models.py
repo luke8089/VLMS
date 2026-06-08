@@ -220,6 +220,23 @@ class Exam(db.Model):
     questions = db.relationship('Question', backref='exam', lazy='dynamic', cascade='all, delete-orphan')
     submissions = db.relationship('Submission', backref='exam', lazy='dynamic', cascade='all, delete-orphan')
 
+    def _infer_assessment_type(self):
+        """Read the [assessment:xxx] marker embedded in description."""
+        desc = (self.description or '').strip()
+        marker = '[assessment:'
+        if desc.lower().startswith(marker):
+            end = desc.find(']')
+            if end != -1:
+                return desc[len(marker):end].lower()
+        # Fallback: derive from exam_type
+        fallback = {
+            'quiz': 'cat1',
+            'midterm': 'cat2',
+            'assignment': 'assignment',
+            'final': 'main_exam',
+        }
+        return fallback.get(self.exam_type or 'quiz', 'cat1')
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -227,6 +244,7 @@ class Exam(db.Model):
             'title': self.title,
             'description': self.description,
             'exam_type': self.exam_type,
+            'assessment_type': self._infer_assessment_type(),
             'duration_minutes': self.duration_minutes,
             'total_marks': self.total_marks,
             'passing_marks': self.passing_marks,
