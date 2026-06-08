@@ -243,9 +243,26 @@ def restore_course(course_id):
 @jwt_required()
 @role_required('admin')
 def delete_course(course_id):
-    from database.models import Course, db
+    from database.models import Course, Material, Exam, Submission, LearningProgress, db
+    from sqlalchemy import text
 
     course = Course.query.get_or_404(course_id)
+
+    # Collect IDs before deletion to clean up tables that lack cascade
+    material_ids = [m.id for m in Material.query.filter_by(course_id=course_id).all()]
+    exam_ids     = [e.id for e in Exam.query.filter_by(course_id=course_id).all()]
+    sub_ids      = [s.id for s in Submission.query.filter(Submission.exam_id.in_(exam_ids)).all()] if exam_ids else []
+
+    # Delete rows that MySQL won't cascade automatically
+    if material_ids:
+        LearningProgress.query.filter(LearningProgress.material_id.in_(material_ids)).delete(synchronize_session=False)
+
+    if sub_ids:
+        db.session.execute(text('DELETE FROM face_verification_logs WHERE submission_id IN :ids'), {'ids': tuple(sub_ids + [0])})
+
+    if exam_ids:
+        db.session.execute(text('DELETE FROM face_verification_logs WHERE exam_id IN :ids'), {'ids': tuple(exam_ids + [0])})
+
     db.session.delete(course)
     db.session.commit()
     return jsonify({'message': 'Course deleted permanently'})
@@ -364,6 +381,66 @@ def get_exam_detail(exam_id):
         'avg_score': avg_score,
         'exam_status': status,
         'submissions': sub_list,
+    })
+
+
+# ──────────────── EXAM RESCHEDULE ────────────────
+
+@admin_bp.route('/api/admin/exams/<int:exam_id>/reschedule', methods=['POST'])
+@jwt_required()
+@role_required('admin')
+def reschedule_exam(exam_id):
+    from database.models import Exam, Submission, Answer, Violation, db
+    exam = Exam.query.get_or_404(exam_id)
+
+    data = request.get_json() or {}
+    start_str = data.get('start_time')
+    end_str   = data.get('end_time')
+    reset_ids = data.get('reset_student_ids', [])  # list of student user IDs
+
+    if not start_str or not end_str:
+        return jsonify({'error': 'start_time and end_time are required'}), 400
+
+    try:
+        new_start = datetime.fromisoformat(start_str.replace('Z', '+00:00')).replace(tzinfo=None)
+        new_end   = datetime.fromisoformat(end_str.replace('Z', '+00:00')).replace(tzinfo=None)
+    except ValueError:
+        return jsonify({'error': 'Invalid datetime format. Use ISO 8601.'}), 400
+
+    if new_end <= new_start:
+        return jsonify({'error': 'end_time must be after start_time'}), 400
+
+    exam.start_time   = new_start
+    exam.end_time     = new_end
+    exam.is_published = True
+    exam.rescheduled_at = datetime.utcnow()
+
+    # Always clear in_progress submissions so those students get a fresh attempt
+    in_progress_subs = Submission.query.filter_by(exam_id=exam_id, status='in_progress').all()
+    auto_cleared = 0
+    for sub in in_progress_subs:
+        Answer.query.filter_by(submission_id=sub.id).delete()
+        Violation.query.filter_by(submission_id=sub.id).delete()
+        db.session.delete(sub)
+        auto_cleared += 1
+
+    # Also reset any explicitly requested submitted students
+    reset_count = 0
+    if reset_ids:
+        subs = Submission.query.filter(
+            Submission.exam_id == exam_id,
+            Submission.student_id.in_(reset_ids)
+        ).all()
+        for sub in subs:
+            Answer.query.filter_by(submission_id=sub.id).delete()
+            Violation.query.filter_by(submission_id=sub.id).delete()
+            db.session.delete(sub)
+            reset_count += 1
+
+    db.session.commit()
+    return jsonify({
+        'message': f'Exam rescheduled. {auto_cleared} in-progress attempt(s) cleared, {reset_count} submitted attempt(s) reset.',
+        'exam': exam.to_dict(),
     })
 
 

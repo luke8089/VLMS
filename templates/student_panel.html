@@ -1385,11 +1385,15 @@ function renderExamItem(e, index = 0) {
     const isClosed = e.availability === 'closed';
     const isOpen = e.availability === 'open';
 
+    const isRescheduled = !!e.rescheduled_at;
+
     let badge = '';
     if (isAwaitingRelease) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">Submitted · Awaiting Results</span>';
     else if (done && hasScore) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">Results Available</span>';
     else if (done) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white">Submitted</span>';
     else if (inProgress) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">In Progress</span>';
+    else if (isRescheduled && isUpcoming) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">Rescheduled</span>';
+    else if (isRescheduled && isOpen) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">Rescheduled · Open</span>';
     else if (isUpcoming) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400">Upcoming</span>';
     else if (isClosed) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400">Closed</span>';
     else badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/15 text-white">Open</span>';
@@ -1399,7 +1403,7 @@ function renderExamItem(e, index = 0) {
         timeInfo = `<span class="exam-countdown text-xs text-neutral-300 font-medium" data-start="${e.start_time}" data-examid="${e.id}"></span>`;
     } else if (isOpen && e.end_time && !hasSubmitted) {
         timeInfo = `<span class="text-xs text-neutral-400">Closes: ${new Date(e.end_time).toLocaleString()}</span>`;
-    } else if (isClosed && e.end_time) {
+    } else if (isClosed && e.end_time && !isRescheduled) {
         timeInfo = `<span class="text-xs text-neutral-500">Ended: ${new Date(e.end_time).toLocaleString()}</span>`;
     }
 
@@ -1414,8 +1418,7 @@ function renderExamItem(e, index = 0) {
     } else if (done) {
         btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
     } else if (inProgress && isClosed) {
-        // Time ran out while exam was in progress — auto-submitted
-        btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
+        btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">Time Up</span>';
     } else if (inProgress) {
         btn = `<button onclick="startExam(${e.id})" class="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200">Continue</button>`;
     } else if (isOpen) {
@@ -2346,11 +2349,14 @@ async function loadDashboard(silent = false) {
                 const isOpen = e.availability === 'open';
 
                 // Status badge
+                const isRescheduled2 = !!e.rescheduled_at;
                 let badge = '';
                 if (isAwaitingRelease) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">Submitted · Awaiting Results</span>';
                 else if (done && hasScore) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">Results Available</span>';
                 else if (done) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white">Submitted</span>';
                 else if (inProgress) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">In Progress</span>';
+                else if (isRescheduled2 && isUpcoming) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">Rescheduled</span>';
+                else if (isRescheduled2 && isOpen) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">Rescheduled · Open</span>';
                 else if (isUpcoming) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400">Upcoming</span>';
                 else if (isClosed) badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400">Closed</span>';
                 else badge = '<span class="text-xs px-2 py-0.5 rounded-full bg-white/15 text-white">Open</span>';
@@ -2361,7 +2367,7 @@ async function loadDashboard(silent = false) {
                     timeInfo = `<span class="exam-countdown text-xs text-neutral-400 font-medium" data-start="${e.start_time}" data-examid="${e.id}"></span>`;
                 } else if (isOpen && e.end_time && !hasSubmitted) {
                     timeInfo = `<span class="text-xs text-neutral-400">Closes: ${new Date(e.end_time).toLocaleString()}</span>`;
-                } else if (isClosed && e.end_time) {
+                } else if (isClosed && e.end_time && !isRescheduled2) {
                     timeInfo = `<span class="text-xs text-neutral-500">Ended: ${new Date(e.end_time).toLocaleString()}</span>`;
                 }
 
@@ -2374,8 +2380,7 @@ async function loadDashboard(silent = false) {
                 } else if (done) {
                     btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
                 } else if (inProgress && isClosed) {
-                    // Time ran out while exam was in progress — auto-submitted
-                    btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">✓ Submitted</span>';
+                    btn = '<span class="text-xs font-medium text-neutral-300 bg-white/5 border border-white/10 px-3 py-2 rounded-lg">Time Up</span>';
                 } else if (inProgress) {
                     btn = `<button onclick="startExam(${e.id})" class="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200">Continue</button>`;
                 } else if (isOpen) {

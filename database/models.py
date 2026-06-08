@@ -214,6 +214,7 @@ class Exam(db.Model):
     allow_review = db.Column(db.Boolean, default=False)
     risk_threshold = db.Column(db.Integer, default=100)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    rescheduled_at = db.Column(db.DateTime, nullable=True)
 
     # Relationships
     questions = db.relationship('Question', backref='exam', lazy='dynamic', cascade='all, delete-orphan')
@@ -235,6 +236,7 @@ class Exam(db.Model):
             'is_published': self.is_published,
             'grades_released': self.grades_released,
             'created_at': self.created_at.isoformat() if self.created_at else None,
+            'rescheduled_at': self.rescheduled_at.isoformat() if self.rescheduled_at else None,
         }
 
 

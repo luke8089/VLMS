@@ -794,6 +794,46 @@
         </div>
     </div>
 
+    <!-- Reschedule Exam Modal -->
+    <div id="reschedule-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[110] overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6">
+            <div class="modal-glass rounded-[28px] shadow-2xl max-w-lg w-full border border-white/60">
+                <div class="bg-black text-white px-5 sm:px-8 py-5 rounded-t-[28px] flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold">Reschedule Exam</h3>
+                        <p class="text-white/60 text-sm mt-0.5" id="rs-subtitle">Set new window and reset attempts</p>
+                    </div>
+                    <button onclick="closeRescheduleModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition ml-4 flex-shrink-0">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="p-5 sm:p-8 rounded-b-[28px] space-y-5">
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-black/40 mb-1.5">New Start Time</label>
+                            <input type="datetime-local" id="rs-start" class="w-full border border-black/15 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/20">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-black/40 mb-1.5">New End Time</label>
+                            <input type="datetime-local" id="rs-end" class="w-full border border-black/15 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/20">
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-black/40 mb-2">Reset Submissions (optional)</p>
+                        <p class="text-xs text-black/50 mb-3">Select students whose submissions should be deleted so they can retake the exam.</p>
+                        <div id="rs-students" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                            <p class="text-sm text-black/40 italic">Loading students…</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-1">
+                        <button onclick="closeRescheduleModal()" class="flex-1 py-2.5 rounded-xl border border-black/15 text-sm font-semibold text-black/50 hover:bg-black/5 transition">Cancel</button>
+                        <button onclick="submitReschedule()" class="flex-1 py-2.5 rounded-xl bg-black text-white text-sm font-semibold hover:bg-black/80 transition">Confirm Reschedule</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Exam Detail Modal -->
     <div id="exam-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[100] overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-3 sm:p-6" onclick="if(event.target===this)closeExamModal()">
@@ -812,8 +852,80 @@
         </div>
     </div>
 
+    <!-- Toast notifications -->
+    <div id="admin-toast-container" class="fixed top-5 right-5 z-[300] flex flex-col gap-2 pointer-events-none" style="min-width:280px;max-width:360px"></div>
+
+    <!-- Confirm modal -->
+    <div id="admin-confirm-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden z-[200] flex items-center justify-center p-4">
+        <div class="modal-glass rounded-[24px] shadow-2xl max-w-sm w-full border border-white/60 p-6">
+            <div class="flex items-start gap-3 mb-4">
+                <div id="acm-icon" class="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center"></div>
+                <div>
+                    <h3 class="font-bold text-black text-base" id="acm-title">Confirm</h3>
+                    <p class="text-sm text-black/55 mt-1 leading-relaxed" id="acm-message"></p>
+                </div>
+            </div>
+            <div class="flex gap-2 justify-end mt-5">
+                <button id="acm-cancel" class="px-4 py-2 rounded-xl text-sm font-semibold text-black/50 border border-black/10 hover:bg-black/5 transition">Cancel</button>
+                <button id="acm-confirm" class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const token = localStorage.getItem('token');
+
+        /* ─── Admin Confirm Modal ─────────────────────────────── */
+        let _acmResolve = null;
+        function adminConfirm({ title = 'Confirm', message = '', confirmText = 'Confirm', danger = false } = {}) {
+            return new Promise(resolve => {
+                _acmResolve = resolve;
+                document.getElementById('acm-title').textContent = title;
+                document.getElementById('acm-message').textContent = message;
+                const btn = document.getElementById('acm-confirm');
+                btn.textContent = confirmText;
+                btn.className = `px-4 py-2 rounded-xl text-sm font-semibold text-white transition ${danger ? 'bg-red-500 hover:bg-red-600' : 'bg-black hover:bg-black/80'}`;
+                const icon = document.getElementById('acm-icon');
+                icon.className = `flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${danger ? 'bg-red-100' : 'bg-black/8'}`;
+                icon.innerHTML = danger
+                    ? '<svg class="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>'
+                    : '<svg class="w-4 h-4 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>';
+                document.getElementById('admin-confirm-modal').classList.remove('hidden');
+            });
+        }
+        document.getElementById('acm-confirm').addEventListener('click', () => {
+            document.getElementById('admin-confirm-modal').classList.add('hidden');
+            if (_acmResolve) { _acmResolve(true); _acmResolve = null; }
+        });
+        document.getElementById('acm-cancel').addEventListener('click', () => {
+            document.getElementById('admin-confirm-modal').classList.add('hidden');
+            if (_acmResolve) { _acmResolve(false); _acmResolve = null; }
+        });
+
+        /* ─── Admin Toast Notifications ──────────────────────── */
+        function adminToast(message, type = 'info') {
+            const colors = {
+                success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+                error:   'bg-red-50 border-red-200 text-red-800',
+                warning: 'bg-amber-50 border-amber-200 text-amber-800',
+                info:    'bg-white border-black/10 text-black/80',
+            };
+            const icons = {
+                success: '<svg class="w-4 h-4 text-emerald-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
+                error:   '<svg class="w-4 h-4 text-red-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+                warning: '<svg class="w-4 h-4 text-amber-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>',
+                info:    '<svg class="w-4 h-4 text-black/40 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>',
+            };
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-start gap-2.5 px-4 py-3 rounded-2xl border shadow-lg text-sm font-medium ${colors[type] || colors.info} transition-all duration-300 opacity-0 translate-y-2`;
+            toast.innerHTML = `${icons[type] || icons.info}<span class="flex-1">${message}</span>`;
+            document.getElementById('admin-toast-container').appendChild(toast);
+            requestAnimationFrame(() => { toast.classList.remove('opacity-0', 'translate-y-2'); });
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
 
         function logout() {
             localStorage.removeItem('token');
@@ -1176,10 +1288,10 @@
             const isActive = document.getElementById('edit-status').value === 'true';
             
             if (!firstName || !lastName) {
-                alert('First name and last name are required');
+                adminToast('First name and last name are required', 'warning');
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/api/admin/users/${userId}`, {
                     method: 'PUT',
@@ -1195,81 +1307,86 @@
                         is_active: isActive
                     })
                 });
-                
+
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || 'Failed to update user');
                 }
-                
-                alert('User updated successfully');
+
+                adminToast('User updated successfully', 'success');
                 closeUserModal();
                 loadUsersData();
-                
+
             } catch (error) {
                 console.error('Error updating user:', error);
-                alert(error.message || 'Failed to update user');
+                adminToast(error.message || 'Failed to update user', 'error');
             }
         }
 
         async function confirmDeleteUser(userId) {
             const user = allUsers.find(u => u.id === userId);
             if (!user) return;
-            
-            const confirmed = confirm(`Are you sure you want to delete ${user.first_name} ${user.last_name}?\n\nThis action cannot be undone and will remove all associated data.`);
+
+            const confirmed = await adminConfirm({
+                title: 'Delete User',
+                message: `Delete ${user.first_name} ${user.last_name}? This cannot be undone and will remove all associated data.`,
+                confirmText: 'Delete User',
+                danger: true,
+            });
             if (!confirmed) return;
-            
+
             try {
                 const response = await fetch(`/api/admin/users/${userId}`, {
                     method: 'DELETE',
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || 'Failed to delete user');
                 }
-                
-                alert('User deleted successfully');
+
+                adminToast('User deleted successfully', 'success');
                 closeUserModal();
                 loadUsersData();
-                
+
             } catch (error) {
                 console.error('Error deleting user:', error);
-                alert(error.message || 'Failed to delete user');
+                adminToast(error.message || 'Failed to delete user', 'error');
             }
         }
 
         async function deleteFaceData(userId) {
             const user = allUsers.find(u => u.id === userId);
             if (!user) return;
-            
-            const confirmed = confirm(`Delete face registration for ${user.first_name} ${user.last_name}?\n\nThis will remove their biometric data and they will need to re-register.`);
+
+            const confirmed = await adminConfirm({
+                title: 'Delete Face Data',
+                message: `Remove biometric data for ${user.first_name} ${user.last_name}? They will need to re-register their face.`,
+                confirmText: 'Delete Face Data',
+                danger: true,
+            });
             if (!confirmed) return;
-            
+
             try {
                 const response = await fetch(`/api/admin/face-verification/${userId}/reset`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
-                    },
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                     body: JSON.stringify({ reason: 'Admin deleted face data' })
                 });
-                
+
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || 'Failed to delete face data');
                 }
-                
-                alert('Face data deleted successfully');
+
+                adminToast('Face data deleted successfully', 'success');
                 closeUserModal();
                 loadUsersData();
-                
+
             } catch (error) {
                 console.error('Error deleting face data:', error);
-                alert(error.message || 'Failed to delete face data');
+                adminToast(error.message || 'Failed to delete face data', 'error');
             }
         }
 
@@ -1428,37 +1545,38 @@
                 
             } catch (error) {
                 console.error('Error loading logs:', error);
-                alert('Failed to load verification logs');
+                adminToast('Failed to load verification logs', 'error');
             }
         }
 
         async function resetStudentFace(studentId) {
             const student = fvStudents.find(s => s.id === studentId);
-            const reason = prompt(`Reset face registration for ${student.first_name} ${student.last_name}?\n\nPlease provide a reason:`);
-            
-            if (!reason) return;
-            
+            const confirmed = await adminConfirm({
+                title: 'Reset Face Registration',
+                message: `Reset biometric data for ${student.first_name} ${student.last_name}? They will need to re-register their face.`,
+                confirmText: 'Reset',
+                danger: true,
+            });
+            if (!confirmed) return;
+
             try {
                 const response = await fetch(`/api/admin/face-verification/${studentId}/reset`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ reason })
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ reason: 'Admin reset' })
                 });
-                
+
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || 'Failed to reset');
                 }
-                
-                alert('Face registration reset successfully');
+
+                adminToast('Face registration reset successfully', 'success');
                 loadFaceVerificationData();
-                
+
             } catch (error) {
                 console.error('Error resetting face:', error);
-                alert(error.message || 'Failed to reset face registration');
+                adminToast(error.message || 'Failed to reset face registration', 'error');
             }
         }
 
@@ -1667,31 +1785,44 @@
                 });
                 if (!res.ok) throw new Error('Failed');
                 loadCoursesData();
-            } catch (e) { alert('Failed to update course'); }
+            } catch (e) { adminToast('Failed to update course', 'error'); }
         }
 
         async function confirmRestoreCourse(courseId, title) {
-            if (!confirm(`Restore "${title}"?\n\nThe unit will become active again and students will regain access.`)) return;
+            const confirmed = await adminConfirm({
+                title: 'Restore Unit',
+                message: `Restore "${title}"? The unit will become active again and students will regain access.`,
+                confirmText: 'Restore',
+            });
+            if (!confirmed) return;
             try {
                 const res = await fetch(`/api/admin/courses/${courseId}/restore`, {
                     method: 'POST', headers: { Authorization: `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Failed');
+                adminToast(`"${title}" restored successfully`, 'success');
                 loadCoursesData();
-            } catch (e) { alert('Failed to restore course'); }
+            } catch (e) { adminToast('Failed to restore unit', 'error'); }
         }
 
         async function confirmDeleteCourse(courseId, title) {
             const course = allCourses.find(c => c.id === courseId);
-            const label = title || course?.title || 'this course';
-            if (!confirm(`Permanently delete "${label}"?\n\nAll materials, exams, enrollments and submissions will be deleted. This cannot be undone.`)) return;
+            const label = title || course?.title || 'this unit';
+            const confirmed = await adminConfirm({
+                title: 'Delete Unit Permanently',
+                message: `Delete "${label}"? All materials, exams, enrollments and submissions will be permanently removed. This cannot be undone.`,
+                confirmText: 'Delete Permanently',
+                danger: true,
+            });
+            if (!confirmed) return;
             try {
                 const res = await fetch(`/api/admin/courses/${courseId}`, {
                     method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Failed');
+                adminToast(`"${label}" deleted permanently`, 'success');
                 loadCoursesData();
-            } catch (e) { alert('Failed to delete course'); }
+            } catch (e) { adminToast('Failed to delete unit', 'error'); }
         }
 
         document.getElementById('c-search')?.addEventListener('input', debounce(() => loadCoursesData(), 300));
@@ -1777,6 +1908,7 @@
                         <td class="py-3.5 px-4">
                             <div class="flex items-center gap-3">
                                 <button onclick="openExamModal(${e.id})" class="text-sm font-medium text-black hover:underline">View</button>
+                                <button onclick="openRescheduleModal(${e.id})" class="text-xs px-2.5 py-1 rounded-lg border border-black/12 text-black/60 hover:border-black/40 hover:text-black transition">Reschedule</button>
                                 <button onclick="confirmDeleteExam(${e.id})" class="text-xs px-2.5 py-1 rounded-lg border border-black/12 text-black/35 hover:border-black/25 hover:text-black/60 transition">Delete</button>
                             </div>
                         </td>
@@ -1874,14 +2006,120 @@
 
         async function confirmDeleteExam(examId) {
             const exam = allExams.find(e => e.id === examId);
-            if (!confirm(`Delete "${exam?.title}"?\n\nAll submissions and violations will be deleted too.`)) return;
+            const confirmed = await adminConfirm({
+                title: 'Delete Exam',
+                message: `Delete "${exam?.title}"? All submissions and violations will be removed permanently.`,
+                confirmText: 'Delete Exam',
+                danger: true,
+            });
+            if (!confirmed) return;
             try {
                 const res = await fetch(`/api/admin/exams/${examId}`, {
                     method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Failed');
+                adminToast('Exam deleted', 'success');
                 loadExamsData();
-            } catch (e) { alert('Failed to delete exam'); }
+            } catch (e) { adminToast('Failed to delete exam', 'error'); }
+        }
+
+        let _rescheduleExamId = null;
+
+        async function openRescheduleModal(examId) {
+            _rescheduleExamId = examId;
+            const exam = allExams.find(e => e.id === examId);
+            document.getElementById('rs-subtitle').textContent = exam ? exam.title : 'Loading…';
+
+            // Pre-fill times from current exam data
+            if (exam && exam.start_time) {
+                const st = new Date(exam.start_time);
+                document.getElementById('rs-start').value = toLocalDatetimeInput(st);
+            } else {
+                document.getElementById('rs-start').value = '';
+            }
+            if (exam && exam.end_time) {
+                const et = new Date(exam.end_time);
+                document.getElementById('rs-end').value = toLocalDatetimeInput(et);
+            } else {
+                document.getElementById('rs-end').value = '';
+            }
+
+            document.getElementById('rs-students').innerHTML = '<p class="text-sm text-black/40 italic">Loading…</p>';
+            document.getElementById('reschedule-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // Load submissions for this exam
+            try {
+                const res = await fetch(`/api/admin/exams/${examId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                const subs = data.submissions || [];
+                if (!subs.length) {
+                    document.getElementById('rs-students').innerHTML = '<p class="text-sm text-black/40 italic">No submissions yet — nothing to reset.</p>';
+                } else {
+                    document.getElementById('rs-students').innerHTML = subs.map(s => `
+                        <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-black/[0.03] cursor-pointer">
+                            <input type="checkbox" class="rs-student-cb w-4 h-4 accent-black" value="${s.student_id}">
+                            <span class="text-sm font-medium">${s.student_name}</span>
+                            <span class="text-xs text-black/40 ml-auto">${s.total_score !== null && s.total_score !== undefined ? 'Score: ' + s.total_score : 'Not graded'}</span>
+                        </label>`).join('');
+                }
+            } catch {
+                document.getElementById('rs-students').innerHTML = '<p class="text-sm text-black/40 italic">Could not load submissions.</p>';
+            }
+        }
+
+        function closeRescheduleModal() {
+            document.getElementById('reschedule-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            _rescheduleExamId = null;
+        }
+
+        function toLocalDatetimeInput(d) {
+            // Format Date as YYYY-MM-DDTHH:MM for datetime-local input (local time)
+            const pad = n => String(n).padStart(2, '0');
+            return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+                   'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+        }
+
+        async function submitReschedule() {
+            if (!_rescheduleExamId) return;
+            const startVal = document.getElementById('rs-start').value;
+            const endVal   = document.getElementById('rs-end').value;
+            if (!startVal || !endVal) { adminToast('Please set both start and end times.', 'warning'); return; }
+
+            const startISO = new Date(startVal).toISOString();
+            const endISO   = new Date(endVal).toISOString();
+            if (new Date(endISO) <= new Date(startISO)) {
+                adminToast('End time must be after start time.', 'warning');
+                return;
+            }
+
+            const checked = [...document.querySelectorAll('.rs-student-cb:checked')].map(cb => parseInt(cb.value));
+            const exam = allExams.find(e => e.id === _rescheduleExamId);
+            const resetNote = checked.length ? ` This will reset ${checked.length} student submission(s).` : '';
+
+            const confirmed = await adminConfirm({
+                title: 'Reschedule Exam',
+                message: `Reschedule "${exam?.title}" to the new window?${resetNote}`,
+                confirmText: 'Confirm Reschedule',
+            });
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`/api/admin/exams/${_rescheduleExamId}/reschedule`, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start_time: startISO, end_time: endISO, reset_student_ids: checked })
+                });
+                const result = await res.json();
+                if (!res.ok) { adminToast(result.error || 'Failed to reschedule', 'error'); return; }
+                closeRescheduleModal();
+                adminToast(result.message, 'success');
+                loadExamsData();
+            } catch { adminToast('Failed to reschedule exam', 'error'); }
         }
 
         document.getElementById('e-search')?.addEventListener('input', debounce(() => loadExamsData(), 300));

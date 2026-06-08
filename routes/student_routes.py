@@ -478,8 +478,13 @@ def get_available_exams():
         elif exam.end_time and now > exam.end_time:
             ed['availability'] = 'closed'
         else:
-            # Exam is open if within time window, regardless of submission status
             ed['availability'] = 'open'
+
+        # After a reschedule the window re-opens; students who actually submitted
+        # are locked out. In-progress submissions are cleared by the reschedule
+        # endpoint, so those students appear here with sub=None and get a fresh attempt.
+        if sub and sub.status in ('submitted', 'graded') and ed['availability'] in ('open', 'upcoming'):
+            ed['availability'] = 'closed'
 
         # Include course name for display
         course = Course.query.get(exam.course_id)

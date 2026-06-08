@@ -920,6 +920,60 @@ def release_submission_grades(submission_id):
     })
 
 
+@lecturer_bp.route('/api/lecturer/exams/<int:exam_id>/reschedule', methods=['POST'])
+@jwt_required()
+@role_required('lecturer')
+def reschedule_exam_lecturer(exam_id):
+    from database.models import Submission, Answer, Violation
+    identity = get_identity()
+    exam = Exam.query.get(exam_id)
+    if not exam:
+        return jsonify({'error': 'Exam not found'}), 404
+
+    course = Course.query.filter_by(id=exam.course_id, lecturer_id=identity['id']).first()
+    if not course:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    data = request.get_json() or {}
+    start_raw = data.get('start_time')
+    end_raw   = data.get('end_time')
+    reset_ids = data.get('reset_student_ids', [])
+
+    if not start_raw:
+        return jsonify({'error': 'start_time is required'}), 400
+
+    duration = int(data.get('duration_minutes') or exam.duration_minutes or 60)
+    new_start = datetime.fromisoformat(start_raw.replace('Z', '+00:00')).replace(tzinfo=None)
+    if end_raw:
+        new_end = datetime.fromisoformat(end_raw.replace('Z', '+00:00')).replace(tzinfo=None)
+    else:
+        new_end = new_start + timedelta(minutes=duration)
+
+    if new_end <= new_start:
+        new_end = new_start + timedelta(minutes=duration)
+
+    exam.start_time = new_start
+    exam.end_time = new_end
+    exam.duration_minutes = duration
+    exam.is_published = True
+    exam.rescheduled_at = datetime.utcnow()
+
+    # Always clear in_progress submissions so those students get a fresh attempt
+    in_progress_subs = Submission.query.filter_by(exam_id=exam_id, status='in_progress').all()
+    auto_cleared = 0
+    for sub in in_progress_subs:
+        Answer.query.filter_by(submission_id=sub.id).delete()
+        Violation.query.filter_by(submission_id=sub.id).delete()
+        db.session.delete(sub)
+        auto_cleared += 1
+
+    db.session.commit()
+    return jsonify({
+        'message': f'Exam rescheduled. {auto_cleared} in-progress attempt(s) cleared.',
+        'exam': exam.to_dict(),
+    })
+
+
 @lecturer_bp.route('/api/lecturer/exams/<int:exam_id>', methods=['DELETE'])
 @jwt_required()
 @role_required('lecturer')

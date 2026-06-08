@@ -588,13 +588,13 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
         <div class="p-6 border-b border-black/[0.06] flex justify-between items-center">
             <div>
-                <h3 class="text-lg font-semibold text-black">Reset Exam Schedule</h3>
-                <p class="text-sm text-black/40 mt-1">The scheduled end time has passed. Update the schedule to publish.</p>
+                <h3 class="text-lg font-semibold text-black" id="reschedule-title">Reset Exam Schedule</h3>
+                <p class="text-sm text-black/40 mt-1" id="reschedule-subtitle">The scheduled end time has passed. Update the schedule to publish.</p>
             </div>
             <button title="Close" onclick="closeRescheduleModal()"
                     class="w-8 h-8 rounded-lg bg-black/[0.04] hover:bg-black/[0.08] flex items-center justify-center text-black/30 hover:text-black transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
         </div>
-        <div class="p-6 space-y-4">
+        <div class="p-6 space-y-4 overflow-y-auto flex-1">
             <div>
                 <label class="block text-sm font-medium text-black/60 mb-1">Start Time</label>
                   <input type="datetime-local" id="reschedule-start" onchange="autoCalcRescheduleEndTime()"
@@ -610,6 +610,9 @@
                 <input type="datetime-local" id="reschedule-end" readonly
                        class="w-full px-4 py-2.5 border border-black/10 rounded-xl outline-none text-black/50 bg-black/[0.02] cursor-not-allowed">
             </div>
+            <p id="reschedule-note" class="hidden text-xs text-black/40 bg-black/[0.03] rounded-xl px-4 py-3">
+                Students who already submitted will <strong>not</strong> see this exam again after rescheduling. Only students who never attempted it will be able to take it.
+            </p>
         </div>
         <div class="p-4 border-t border-black/[0.06] flex justify-end items-center bg-black/[0.02] gap-3">
             <button onclick="closeRescheduleModal()"
@@ -1928,6 +1931,7 @@ async function loadExams() {
                         <button onclick="openReview(${ex.id}, '${ex.title.replace(/'/g, "\\'")}')" class="text-xs bg-black/5 text-black/70 px-3 py-1 rounded-lg hover:bg-black/10 font-medium">
                             ${ex.is_published ? 'View' : 'Review & Approve'}
                         </button>
+                        ${ex.end_time && new Date() > new Date(ex.end_time) ? `<button onclick="openRescheduleFromCard(${ex.id})" class="text-xs bg-black/5 text-black/60 px-3 py-1 rounded-lg hover:bg-black/10 font-medium">Reschedule</button>` : ''}
                         <button onclick="deleteExam(${ex.id})" class="text-xs bg-red-50 text-red-600 px-3 py-1 rounded-lg hover:bg-red-100 font-medium">
                             Delete
                         </button>
@@ -3694,20 +3698,47 @@ function isFutureDateTime(value) {
 
 function openRescheduleModal(exam) {
     rescheduleExamId = exam.id;
-    const durationEl = document.getElementById('reschedule-duration');
-    const startEl = document.getElementById('reschedule-start');
-    const endEl = document.getElementById('reschedule-end');
+    document.getElementById('reschedule-title').textContent = 'Reset Exam Schedule';
+    document.getElementById('reschedule-subtitle').textContent = 'The scheduled end time has passed. Update the schedule to publish.';
+    document.getElementById('reschedule-note').classList.add('hidden');
+    document.getElementById('reschedule-approve-btn').textContent = 'Update & Publish';
 
     const now = new Date();
     const startDate = exam.start_time ? new Date(exam.start_time) : new Date(now.getTime() + 30 * 60000);
     const duration = parseInt(exam.duration_minutes) || 60;
 
-    durationEl.value = duration;
-    startEl.value = toLocalInputValue(startDate);
-    endEl.value = '';
+    document.getElementById('reschedule-duration').value = duration;
+    document.getElementById('reschedule-start').value = toLocalInputValue(startDate);
+    document.getElementById('reschedule-end').value = '';
     setMinDateTime('reschedule-start');
     autoCalcRescheduleEndTime();
 
+    document.getElementById('reschedule-modal').classList.remove('hidden');
+}
+
+async function openRescheduleFromCard(examId) {
+    rescheduleExamId = examId;
+    document.getElementById('reschedule-title').textContent = 'Reschedule Exam';
+    document.getElementById('reschedule-subtitle').textContent = 'Set a new time window. Students who already submitted will be locked out automatically.';
+    document.getElementById('reschedule-note').classList.remove('hidden');
+    document.getElementById('reschedule-approve-btn').textContent = 'Reschedule & Publish';
+
+    // Pre-fill from current exam list
+    const now = new Date();
+    document.getElementById('reschedule-duration').value = 60;
+    document.getElementById('reschedule-start').value = toLocalInputValue(new Date(now.getTime() + 30 * 60000));
+    document.getElementById('reschedule-end').value = '';
+    const resp = await AUTH.fetch(`/api/lecturer/courses/${currentCourseId}/exams`);
+    if (resp.ok) {
+        const data = await resp.json();
+        const exam = (data.exams || []).find(e => e.id === examId);
+        if (exam) {
+            document.getElementById('reschedule-duration').value = parseInt(exam.duration_minutes) || 60;
+            // Start 30 min from now (past exams need a fresh future window)
+            document.getElementById('reschedule-start').value = toLocalInputValue(new Date(now.getTime() + 30 * 60000));
+        }
+    }
+    autoCalcRescheduleEndTime();
     document.getElementById('reschedule-modal').classList.remove('hidden');
 }
 
@@ -3741,7 +3772,9 @@ async function submitRescheduleAndPublish() {
     }
 
     const btn = document.getElementById('reschedule-approve-btn');
-    btn.disabled = true; btn.textContent = 'Updating...';
+    btn.disabled = true;
+    const origText = btn.textContent;
+    btn.textContent = 'Updating...';
 
     const scheduleResp = await AUTH.fetch(`/api/lecturer/exams/${rescheduleExamId}/schedule`, {
         method: 'PUT',
@@ -3750,13 +3783,13 @@ async function submitRescheduleAndPublish() {
 
     if (!scheduleResp.ok) {
         const d = await scheduleResp.json().catch(() => ({}));
-        btn.disabled = false; btn.textContent = 'Update & Publish';
+        btn.disabled = false; btn.textContent = origText;
         showNoticeModal({ title: 'Schedule Update Failed', message: d.error || 'Failed to update schedule.' });
         return;
     }
 
     const publishResp = await AUTH.fetch(`/api/lecturer/exams/${rescheduleExamId}/publish`, { method: 'POST' });
-    btn.disabled = false; btn.textContent = 'Update & Publish';
+    btn.disabled = false; btn.textContent = origText;
 
     if (publishResp.ok) {
         closeRescheduleModal();
